@@ -1,0 +1,9 @@
+### Đăng ký người dùng
+POST http://localhost:8081/auth/register
+Content-Type: application/json
+
+{
+  "username": "user123",
+  "password": "123456",
+  "email": "user123@example.com"
+}
