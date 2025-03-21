@@ -2,6 +2,8 @@ import { Sequelize, Dialect } from 'sequelize'
 import { config } from 'dotenv'
 import { env } from 'process'
 import { parseInt } from 'lodash'
+import { LogCustomize } from '~/utils/log'
+import { User } from '~/entities/user.entities'
 
 config()
 
@@ -11,7 +13,8 @@ const options = {
   username: env.DB_USERNAME,
   password: env.DB_PASSWORD,
   host: env.DB_HOST,
-  port: parseInt(env.DB_PORT as string)
+  port: parseInt(env.DB_PORT as string),
+  logging: LogCustomize.logDB
 }
 
 class DatabaseService {
@@ -23,10 +26,24 @@ class DatabaseService {
   async connect() {
     try {
       await this.sequelize.authenticate()
-      console.log('✅ Database connected successfully')
+      LogCustomize.logSuccess('Database connected successfully ✅')
     } catch (error) {
-      console.error('❌ Unable to connect to the database:', (error as Error).message)
+      LogCustomize.logError(`Unable to connect to the database: ${(error as Error).message}`)
     }
+  }
+
+  async syncDB() {
+    // init user
+    User.initModel(this.sequelize)
+
+    // update column
+    await this.sequelize.sync({ alter: true })
+    LogCustomize.logSuccess('Database synchronized (alter mode) 🔄')
+  }
+
+  async init() {
+    await this.connect()
+    await this.syncDB()
   }
 }
 

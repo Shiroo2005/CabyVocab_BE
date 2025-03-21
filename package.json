@@ -48,6 +48,7 @@
     "mongodb": "^6.13.0",
     "morgan": "^1.10.0",
     "mysql2": "^3.14.0",
-    "sequelize": "^6.37.6"
+    "sequelize": "^6.37.6",
+    "sql-formatter": "^15.5.1"
   }
 }

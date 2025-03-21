@@ -6,6 +6,7 @@ import { morganMiddleware } from './middlewares/morgan.middlewares'
 import helmet from 'helmet'
 import compression from 'compression'
 import { databaseService } from './services/database.service'
+import { User } from './entities/user.entities'
 const app = express()
 const port = 8081
 config()
@@ -22,9 +23,11 @@ app.use(compression())
 
 // convert request to json
 app.use(express.json())
+//////////////////////////////
 
+// DATABASE
 // init db
-databaseService.connect()
+databaseService.init()
 //////////////////////////////
 
 //ROUTES
