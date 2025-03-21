@@ -1,12 +1,13 @@
 import express from 'express'
-import authRouter from './routes/auth.routes'
+import authRouter from './routes/auth.route'
 import { config } from 'dotenv'
-import { errorHandler } from './utils/handler'
+import { errorHandler, notFoundHandler } from './utils/handler'
 import { morganMiddleware } from './middlewares/morgan.middlewares'
 import helmet from 'helmet'
 import compression from 'compression'
 import { databaseService } from './services/database.service'
-import { User } from './entities/user.entities'
+import router from './routes'
+import { NotFoundRequestError } from './core/error.response'
 const app = express()
 const port = 8081
 config()
@@ -31,10 +32,14 @@ databaseService.init()
 //////////////////////////////
 
 //ROUTES
-app.use('/auth', authRouter)
+app.use(router)
 //////////////////////////////
 
-//DEFAULT ERROR HANDLER
+//DEFAULT HANDLER
+//not found handler
+app.use(notFoundHandler)
+
+// error handler
 app.use(errorHandler)
 //////////////////////////////
 

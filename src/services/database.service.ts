@@ -3,7 +3,8 @@ import { config } from 'dotenv'
 import { env } from 'process'
 import { parseInt } from 'lodash'
 import { LogCustomize } from '~/utils/log'
-import { User } from '~/entities/user.entities'
+import { User } from '~/entities/user.entity'
+import { Role } from '~/entities/role.entitity'
 
 config()
 
@@ -33,12 +34,19 @@ class DatabaseService {
   }
 
   async syncDB() {
-    // init user
-    User.initModel(this.sequelize)
+    try {
+      // init user
+      User.initModel(this.sequelize)
 
-    // update column
-    await this.sequelize.sync({ alter: true })
-    LogCustomize.logSuccess('Database synchronized (alter mode) 🔄')
+      // init role
+      Role.initModel(this.sequelize)
+
+      // update column
+      await this.sequelize.sync({ alter: true })
+      LogCustomize.logSuccess('Database synchronized (alter mode) 🔄')
+    } catch (error) {
+      console.log((error as Error).message)
+    }
   }
 
   async init() {

@@ -1,9 +1,31 @@
-### Đăng ký người dùng
-POST http://localhost:8081/auth/register
+### Gửi yêu cầu POST để tạo role
+POST http://localhost:8081/roles/
 Content-Type: application/json
 
 {
-  "username": "user123",
-  "password": "123456",
-  "email": "user123@example.com"
+  "name": "ADMIN"
+}
+
+### Gửi yêu cầu GET để lấy danh sách role
+GET http://localhost:8081/roles/all
+
+### Get role by id
+GET http://localhost:8081/roles/
+
+
+### Gửi yêu cầu PUT để update role
+PUT http://localhost:8081/roles/csddc
+Content-Type: application/json
+
+{
+  "name": "ADMIN"
+}
+
+
+### Xoa yêu cầu POST để tạo role
+DELETE  http://localhost:8081/roles/9
+Content-Type: application/json
+
+{
+  "name": "ADMIN"
 }

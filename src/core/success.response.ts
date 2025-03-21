@@ -1,9 +1,7 @@
-'use strict'
-
 import { Response } from 'express'
 import status from 'http-status'
 
-class SuccessResponse {
+export class SuccessResponse {
   message: string
   statusCode: number
   metaData: object
@@ -13,9 +11,9 @@ class SuccessResponse {
     statusCode = status.OK,
     metaData = {}
   }: {
-    message: string
-    statusCode: number
-    metaData: object
+    message?: string
+    statusCode?: number
+    metaData?: object
   }) {
     this.message = message
     this.statusCode = statusCode
@@ -27,17 +25,19 @@ class SuccessResponse {
   }
 }
 
-class CREATED extends SuccessResponse {
-  constructor({ message = status['201_NAME'], metaData = {}, options = {} }) {
+export class CREATED extends SuccessResponse {
+  constructor({
+    message = status['201_NAME'],
+    metaData = {}
+  }: {
+    message?: string
+    metaData?: object
+    options?: object
+  }) {
     super({
       message,
       statusCode: status.CREATED,
       metaData
     })
   }
-}
-
-module.exports = {
-  CREATED,
-  SuccessResponse
 }

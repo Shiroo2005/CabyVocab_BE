@@ -1,6 +1,4 @@
 import express from 'express'
-import { registerController } from '~/controllers/user.controller'
-import { wrapRequestHandler } from '~/utils/handler'
 const authRouter = express.Router()
 
 // GET

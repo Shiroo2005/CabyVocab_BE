@@ -8,25 +8,28 @@ export class ErrorResponse extends Error {
 }
 
 export class BadRequestError extends ErrorResponse {
-  constructor(message = status[400], statusCode = status.BAD_REQUEST) {
+  constructor({
+    message = status[400],
+    statusCode = status.BAD_REQUEST
+  }: { message?: string; statusCode?: number } = {}) {
     super(message, statusCode)
   }
 }
 
 export class AuthRequestError extends ErrorResponse {
-  constructor(message = status[401], statusCode = status.UNAUTHORIZED) {
+  constructor(message: string = status[401], statusCode: number = status.UNAUTHORIZED) {
     super(message, statusCode)
   }
 }
 
 export class NotFoundRequestError extends ErrorResponse {
-  constructor(message = status[404], statusCode = status.NOT_FOUND) {
+  constructor(message: string = status[404], statusCode: number = status.NOT_FOUND) {
     super(message, statusCode)
   }
 }
 
 export class ForbiddenRequestError extends ErrorResponse {
-  constructor(message = status[403], statusCode = status.FORBIDDEN) {
+  constructor(message: string = status[403], statusCode: number = status.FORBIDDEN) {
     super(message, statusCode)
   }
 }

@@ -1,15 +1,18 @@
-import { DataTypes, Model, Sequelize } from 'sequelize'
+import { DataTypes, InferAttributes, InferCreationAttributes, Model, Sequelize } from 'sequelize'
 import { Regex } from '~/constants/regex'
 import { UserStatus } from '~/constants/userStatus'
 
-export class User extends Model {
-  id?: number
-  email!: string
-  username!: string
-  passwordd!: string
-  full_name!: string
-  avatar?: string
-  status?: UserStatus
+export class User extends Model<
+  InferAttributes<User>, //
+  InferCreationAttributes<User>
+> {
+  declare id?: number
+  declare email: string
+  declare username: string
+  declare password: string
+  declare full_name: string
+  declare avatar?: string
+  declare status?: UserStatus
 
   static initModel(sequelize: Sequelize) {
     User.init(
@@ -21,7 +24,7 @@ export class User extends Model {
         },
         email: {
           type: DataTypes.STRING,
-          unique: true,
+          allowNull: false,
           validate: {
             isEmailCheck(value: string) {
               if (!Regex.EMAIL.test(value)) {
@@ -32,12 +35,12 @@ export class User extends Model {
         },
         username: {
           type: DataTypes.STRING,
-          unique: true,
+          allowNull: false,
           validate: {
             len: [5, 20]
           }
         },
-        passwordd: {
+        password: {
           type: DataTypes.STRING,
           allowNull: false,
           validate: {
@@ -52,7 +55,7 @@ export class User extends Model {
           allowNull: false,
           validate: {
             is: {
-              args: Regex.FULL_NAME,
+              args: Regex.NAME,
               msg: 'Full name phải có ít nhất 6 ký tự và chứa ít nhất 1 chữ cái!'
             }
           }
@@ -71,7 +74,11 @@ export class User extends Model {
       {
         sequelize,
         modelName: 'User',
-        tableName: 'Users'
+        tableName: 'Users',
+        indexes: [
+          { fields: ['email'], unique: true },
+          { fields: ['username'], unique: true }
+        ]
       }
     )
   }
