@@ -6,6 +6,7 @@ const roleRouter = express.Router()
 
 // GET
 roleRouter.get('/all', wrapRequestHandler(roleController.getAllRoles))
+
 roleRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(roleController.getRole))
 
 // authenticate....

@@ -1,9 +1,5 @@
-import { isNumber, parseInt } from 'lodash'
-import { BadRequestError } from '~/core/error.response'
 import { CreateRoleBodyReq } from '~/dto/req/roles/createRoleBody.req'
 import { Role } from '~/entities/role.entitity'
-import { User } from '~/entities/user.entity'
-import { isValidNumber } from '~/utils'
 
 class RoleService {
   createRole = async ({ name, description }: CreateRoleBodyReq) => {
@@ -19,7 +15,8 @@ class RoleService {
         offset,
         where: {
           isDeleted: false
-        }
+        },
+        attributes: ['id', 'name', 'description']
       }),
       Role.count({
         where: {
@@ -39,7 +36,9 @@ class RoleService {
   getRoleById = async (id: string) => {
     console.log(id)
 
-    const foundRole = await Role.findByPk(id)
+    const foundRole = await Role.findByPk(id, {
+      attributes: ['id', 'name', 'description']
+    })
     if (!foundRole) return {}
     else return foundRole
   }

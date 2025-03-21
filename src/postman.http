@@ -14,11 +14,11 @@ GET http://localhost:8081/roles/
 
 
 ### Gửi yêu cầu PUT để update role
-PUT http://localhost:8081/roles/csddc
+PUT http://localhost:8081/roles/2
 Content-Type: application/json
 
 {
-  "name": "ADMIN"
+  # "name": 
 }
 
 

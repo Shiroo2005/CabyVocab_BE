@@ -1,0 +1,8 @@
+openapi: 3.0.0
+info:
+  title: Express API với Swagger
+  version: 1.0.0
+  description: Tài liệu API cho dự án Express.js TypeScript
+servers:
+  - url: http://localhost:8081
+    description: Local server
