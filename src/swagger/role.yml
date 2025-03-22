@@ -5,30 +5,90 @@ info:
   description: API quản lý vai trò (roles)
 
 paths:
-  /roles/all:
-    get:
-      summary: Lấy danh sách tất cả vai trò
+  /roles:
+    post:
+      summary: Tạo vai trò mới
       tags:
         - Roles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleCreate'
+            example:
+              name: 'Admin'
+              description: 'Vai trò quản trị'
       responses:
-        200:
-          description: Danh sách vai trò
+        201:
+          description: Vai trò được tạo thành công
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      example: '65abc123def456'
-                    name:
-                      type: string
-                      example: 'Admin'
-                    description:
-                      type: string
-                      example: 'Quản trị viên'
+                $ref: '#/components/schemas/Role'
+        400:
+          description: Dữ liệu đầu vào không hợp lệ
+
+  /roles/all:
+    get:
+      summary: Lấy danh sách tất cả vai trò (có phân trang)
+      tags:
+        - Roles
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            example: 1
+          description: Số trang hiện tại (mặc định là 1)
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            example: 10
+          description: Số lượng kết quả trên mỗi trang (mặc định là 10)
+      responses:
+        200:
+          description: Danh sách vai trò với thông tin phân trang
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Get all roles successful!'
+                  statusCode:
+                    type: integer
+                    example: 200
+                  metaData:
+                    type: object
+                    properties:
+                      foundRoles:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Role'
+                      page:
+                        type: integer
+                        example: 1
+                      limit:
+                        type: integer
+                        example: 10
+                      total:
+                        type: integer
+                        example: 7
+        500:
+          description: Lỗi máy chủ nội bộ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Internal server error'
 
   /roles/{id}:
     get:
@@ -50,15 +110,14 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
+                  message:
                     type: string
-                    example: '65abc123def456'
-                  name:
-                    type: string
-                    example: 'Admin'
-                  description:
-                    type: string
-                    example: 'Quản trị viên'
+                    example: 'Get role by id successful!'
+                  statusCode:
+                    type: integer
+                    example: 200
+                  metaData:
+                    $ref: '#/components/schemas/Role'
         404:
           description: Không tìm thấy vai trò
 
@@ -78,16 +137,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  example: 'Moderator'
-                  description: Tên mới của vai trò
-                description:
-                  type: string
-                  example: 'Quản lý nội dung'
-                  description: Mô tả vai trò
+              $ref: '#/components/schemas/RoleUpdate'
       responses:
         200:
           description: Vai trò được cập nhật thành công
@@ -96,15 +146,15 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
+                  message:
                     type: string
-                    example: '65abc123def456'
-                  name:
-                    type: string
-                    example: 'Moderator'
-                  description:
-                    type: string
-                    example: 'Quản lý nội dung'
+                    example: 'Get all roles successful!'
+                  statusCode:
+                    type: integer
+                    example: 200
+                  metaData:
+                    type: array
+                    example: [1]
         400:
           description: Dữ liệu đầu vào không hợp lệ
         404:
@@ -131,41 +181,51 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: 'Vai trò đã được xóa'
+                    example: 'Delete role by id successful!'
+                  statusCode:
+                    type: integer
+                    example: 200
+                  metaData:
+                    type: array
+                    example: [1]
         404:
           description: Không tìm thấy vai trò
 
-  /roles:
-    post:
-      summary: Tạo vai trò mới
-      tags:
-        - Roles
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - name
-              properties:
-                name:
-                  type: string
-                  example: 'Admin'
-                  description: Tên vai trò cần tạo
-      responses:
-        201:
-          description: Vai trò được tạo thành công
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    example: '65abc123def456'
-                  name:
-                    type: string
-                    example: 'Admin'
-        400:
-          description: Dữ liệu đầu vào không hợp lệ
+components:
+  schemas:
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 2
+        name:
+          type: string
+          example: 'ADMIN'
+        description:
+          type: string
+          example: 'N/A'
+
+    RoleCreate:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: 'Admin'
+        description:
+          type: string
+          example: 'Vai trò quản trị'
+
+    RoleUpdate:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: 'Admin'
+        description:
+          type: string
+          example: 'Vai trò quản trị'

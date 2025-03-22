@@ -8,10 +8,15 @@ class RoleService {
   }
 
   getAllRole = async ({ page = 1, limit = 10 }: { page?: number; limit?: number } = {}) => {
+    // parse
+    page = Number(page)
+    limit = Number(limit)
+
     const offset = (page - 1) * limit
+
     const [foundRoles, total] = await Promise.all([
       Role.findAll({
-        limit,
+        limit: limit,
         offset,
         where: {
           isDeleted: false
@@ -34,13 +39,11 @@ class RoleService {
   }
 
   getRoleById = async (id: string) => {
-    console.log(id)
-
     const foundRole = await Role.findByPk(id, {
       attributes: ['id', 'name', 'description']
     })
     if (!foundRole) return {}
-    else return foundRole
+    return foundRole
   }
 
   putRoleById = async ({ id, name, description }: { id: string; name: string; description?: string }) => {
@@ -52,10 +55,10 @@ class RoleService {
       {
         where: {
           id
-        }
+        },
+        returning: true
       }
     )
-
     return updatedRole
   }
 

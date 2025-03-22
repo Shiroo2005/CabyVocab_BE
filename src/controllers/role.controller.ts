@@ -16,7 +16,7 @@ class RoleController {
   getAllRoles = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     return new SuccessResponse({
       message: 'Get all roles successful!',
-      metaData: await roleService.getAllRole()
+      metaData: await roleService.getAllRole(req.query)
     }).send(res)
   }
 

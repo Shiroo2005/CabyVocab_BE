@@ -48,4 +48,5 @@ app.use(errorHandler)
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
+  console.log('📚 Swagger Docs: http://localhost:8081/api-docs')
 })
