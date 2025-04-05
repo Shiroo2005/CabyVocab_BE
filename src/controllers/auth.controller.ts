@@ -21,7 +21,7 @@ class AuthController {
       const result = await authService.login(req.body)
       return new SuccessResponse({
         message: 'Đăng nhập thành công',
-        metaData: result.user
+        metaData: result
       }).send(res)
     } catch (error) {
       next(error)

@@ -81,7 +81,7 @@ class AuthService {
     }
   }
 
-  refreshToken = async (refreshToken: string) => {
+  refreshToken = async ({ refreshToken }: { refreshToken: string }) => {
     //check if refreshToken is valid
     try {
       const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string) as { userId: number }
@@ -99,6 +99,7 @@ class AuthService {
       if (error instanceof jwt.TokenExpiredError) {
         throw new BadRequestError({ message: 'Refresh token đã hết hạn, vui lòng đăng nhập lại' })
       }
+      console.log(typeof (refreshToken))
       throw new BadRequestError({ message: 'Refresh token không hợp lệ' })
     }
   }
