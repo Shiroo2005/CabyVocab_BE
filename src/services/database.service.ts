@@ -1,52 +1,65 @@
-import { Sequelize, Dialect } from 'sequelize'
 import { config } from 'dotenv'
 import { env } from 'process'
 import { parseInt } from 'lodash'
-import { LogCustomize } from '~/utils/log'
+import * as mysql2 from 'mysql2'
+import { DataSource, ObjectLiteral, Repository } from 'typeorm'
 import { User } from '~/entities/user.entity'
 import { Role } from '~/entities/role.entitity'
+console.log('DatabaseService loaded')
 
 config()
 
-const options = {
-  dialect: 'mysql' as Dialect,
-  database: env.DB_NAME,
-  username: env.DB_USERNAME,
-  password: env.DB_PASSWORD,
-  host: env.DB_HOST,
-  port: parseInt(env.DB_PORT as string),
-  logging: LogCustomize.logDB
-}
-
-class DatabaseService {
-  sequelize: Sequelize
+export class DatabaseService {
+  public appDataSource
+  private static instance: DatabaseService
   constructor() {
-    this.sequelize = new Sequelize(options)
+    console.log('DatabaseService loaded')
+    this.appDataSource = new DataSource({
+      type: 'mysql',
+      driver: mysql2,
+      database: env.DB_NAME as string,
+      username: env.DB_USERNAME as string,
+      password: env.DB_PASSWORD as string,
+      host: env.DB_HOST as string,
+      port: parseInt(env.DB_PORT as string),
+      entities: [User, Role]
+      // logger: customLogger
+      // synchronize: true
+      // logger: LogCustomize
+    })
   }
 
   async connect() {
     try {
-      await this.sequelize.authenticate()
-      LogCustomize.logSuccess('Database connected successfully ✅')
+      await this.appDataSource.initialize()
+      console.log('info', 'Database connected successfully ✅')
     } catch (error) {
-      LogCustomize.logError(`Unable to connect to the database: ${(error as Error).message}`)
+      console.log(`Unable to connect to the database: ${(error as Error).message}`)
     }
+  }
+
+  async getRepository<T extends ObjectLiteral>(entity: { new (): T }): Promise<Repository<T>> {
+    if (!this.appDataSource.isInitialized) await this.connect()
+    return this.appDataSource.getRepository(entity)
   }
 
   async syncDB() {
     try {
-      // init user
-      User.initModel(this.sequelize)
+      await this.appDataSource.synchronize()
+      console.log('info', 'Database synchronized (alter mode) 🔄')
 
-      // init role
-      Role.initModel(this.sequelize)
-
-      // update column
-      await this.sequelize.sync({ alter: true })
-      LogCustomize.logSuccess('Database synchronized (alter mode) 🔄')
+      // seed data
+      // seedData()
     } catch (error) {
-      console.log((error as Error).message)
+      console.log((error as Error).message, (error as Error).stack)
     }
+  }
+
+  static getInstance(): DatabaseService {
+    if (!DatabaseService.instance) {
+      DatabaseService.instance = new DatabaseService()
+    }
+    return DatabaseService.instance
   }
 
   async init() {
@@ -54,5 +67,3 @@ class DatabaseService {
     await this.syncDB()
   }
 }
-
-export const databaseService = new DatabaseService()
