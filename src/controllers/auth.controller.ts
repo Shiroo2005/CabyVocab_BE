@@ -27,5 +27,16 @@ class AuthController {
       next(error)
     }
   }
+  refreshToken = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+    try {
+      const result = await authService.refreshToken(req.body)
+      return new SuccessResponse({
+        message: 'Refresh token thành công',
+        metaData: result
+      }).send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
 }
 export const authController = new AuthController()
