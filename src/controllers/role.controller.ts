@@ -4,6 +4,7 @@ import { CreateRoleBodyReq } from '~/dto/req/roles/createRoleBody.req'
 import { CREATED, SuccessResponse } from '../core/success.response'
 import { roleService } from '~/services/role.service'
 import { UpdateRoleBodyReq } from '~/dto/req/roles/updateRoleBody.req'
+import { toNumber } from 'lodash'
 
 class RoleController {
   createRole = async (req: Request<ParamsDictionary, any, CreateRoleBodyReq>, res: Response, next: NextFunction) => {
@@ -21,9 +22,11 @@ class RoleController {
   }
 
   getRole = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+    const id = req.params?.id as string
+
     return new SuccessResponse({
       message: 'Get role by id successful!',
-      metaData: await roleService.getRoleById(req.params?.id)
+      metaData: await roleService.getRoleById(toNumber(id))
     }).send(res)
   }
 
@@ -39,9 +42,11 @@ class RoleController {
     res: Response,
     next: NextFunction
   ) => {
+    const id = req.params?.id as string
+
     return new SuccessResponse({
       message: 'Delete role by id successful!',
-      metaData: await roleService.deleteRoleById({ id: req.params?.id })
+      metaData: await roleService.deleteRoleById({ id: toNumber(id) })
     }).send(res)
   }
 }
