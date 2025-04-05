@@ -64,6 +64,7 @@ export class User extends BaseEntity {
   updatedAt?: Date
 
   @BeforeInsert()
+  @BeforeUpdate()
   hashPassword?() {
     this.password = hashData(this.password)
   }

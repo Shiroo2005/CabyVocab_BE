@@ -1,6 +1,7 @@
 import { User } from '~/entities/user.entity'
 import bcrypt from 'bcrypt'
 import { BadRequestError } from '~/core/error.response'
+import { hashData } from '~/utils/jwt'
 class AuthService {
   register = async ({
     email,
@@ -33,15 +34,13 @@ class AuthService {
     }
 
     //create new user
-    const newUser = await User.save({
+    const newUser = User.create({
       email,
       username,
       password,
       fullName
     })
-    return {
-      user: newUser
-    }
+    return await newUser.save()
   }
 
   login = async ({ username, password }: { username: string; password: string }) => {
@@ -58,6 +57,7 @@ class AuthService {
     if (!user) {
       throw new BadRequestError({ message: 'Người dùng không tồn tại' })
     }
+
     //compare password
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) {
