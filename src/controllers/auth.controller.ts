@@ -9,7 +9,7 @@ class AuthController{
         try {
             const result = await authService.register(req.body);
             return new CREATED({
-                message: 'Register successful!',
+                message: 'Đăng kí tài khoản mới thành công',
                 metaData: result
             }).send(res)
         } catch (error) {
@@ -20,7 +20,7 @@ class AuthController{
         try {
             const result = await authService.login(req.body);
             return new SuccessResponse({
-                message: 'Login successful!',
+                message: 'Đăng nhập thành công',
                 metaData: result
             }).send(res)
         } catch (error) {

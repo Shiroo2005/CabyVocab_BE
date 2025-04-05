@@ -4,21 +4,21 @@ import { BadRequestError } from "~/core/error.response";
 import { Op } from "sequelize";
 class AuthService {
     register = async ({ email, username, password }: { email: string, username: string, password: string }) => {
-        if(!email||!username||!password) {
-            throw new BadRequestError({message: 'Missing required fields'})
+        if (!email || !username || !password) {
+            throw new BadRequestError({ message: 'Thiếu thông tin cần thiết' })
         }
-        
+
         //check if user exist by email or username
         const existingUser = await User.findOne({
             where: {
                 [Op.or]: [
-                    {email},
-                    {username} 
+                    { email },
+                    { username }
                 ]
             }
         })
         if (existingUser) {
-            throw new BadRequestError({message: 'User already exist'})
+            throw new BadRequestError({ message: 'Người dùng đã tồn tại' })
         }
         //hash password
         const salt = await bcrypt.genSalt(10)
@@ -33,39 +33,36 @@ class AuthService {
         }, {
             returning: true
         })
-        const { password: _,...newUserData } = newUser
+        const { password: _, ...newUserData } = newUser.toJSON()
         return {
-            newUserData
+            user: newUserData
         }
     }
 
-    login = async ({ email, password }: { email: string, password: string }) => {
-        if(!email||!password) {
-            throw new BadRequestError({message: 'Missing required fields'})
+    login = async ({ username, password }: { username: string, password: string }) => {
+        if (!username || !password) {
+            throw new BadRequestError({ message: 'Thiếu thông tin cần thiết' })
         }
 
-       //find user by email or username
-       const user = await User.findOne({
-        where: {
-            [Op.or]: [
-                {email},
-                {username: email}
-            ]
+        //find user by email or username
+        const user = await User.findOne({
+            where: {
+                username
+            }
+        })
+        if (!user) {
+            throw new BadRequestError({ message: 'Người dùng không tồn tại' })
         }
-       })
-       if (!user) {
-        throw new BadRequestError({message: 'User does not exist'})
-       }
-       //compare password
-       const isMatch = await bcrypt.compare(password, user.password)
-       if (!isMatch) {
-        throw new BadRequestError({message: 'Password is incorrect'})
-       }
-       //return user without password
-       const { password: _, ...userData } = user
-       return {
-        userData
-       }
+        //compare password
+        const isMatch = await bcrypt.compare(password, user.password)
+        if (!isMatch) {
+            throw new BadRequestError({ message: 'Mật khẩu sai' })
+        }
+        //return user without password
+        const { password: _, ...userData } = user.toJSON()
+        return {
+            user: userData
+        }
     }
 }
 
