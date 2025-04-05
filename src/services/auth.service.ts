@@ -1,16 +1,20 @@
 import { User } from "~/entities/user.entity";
 import bcrypt from "bcrypt"
 import { BadRequestError } from "~/core/error.response";
+import { Op } from "sequelize";
 class AuthService {
     register = async ({ email, username, password }: { email: string, username: string, password: string }) => {
         if(!email||!username||!password) {
             throw new BadRequestError({message: 'Missing required fields'})
         }
         
-        //check if user exist
+        //check if user exist by email or username
         const existingUser = await User.findOne({
             where: {
-                email
+                [Op.or]: [
+                    {email},
+                    {username} 
+                ]
             }
         })
         if (existingUser) {
@@ -29,10 +33,9 @@ class AuthService {
         }, {
             returning: true
         })
+        const { password: _,...newUserData } = newUser
         return {
-            success: true,
-            message: 'Register successful',
-            data: newUser 
+            newUserData
         }
     }
 
@@ -41,10 +44,13 @@ class AuthService {
             throw new BadRequestError({message: 'Missing required fields'})
         }
 
-       //find user by email
+       //find user by email or username
        const user = await User.findOne({
         where: {
-            email
+            [Op.or]: [
+                {email},
+                {username: email}
+            ]
         }
        })
        if (!user) {
@@ -58,9 +64,7 @@ class AuthService {
        //return user without password
        const { password: _, ...userData } = user
        return {
-        success: true,
-        message: 'Login successful',
-        data: userData
+        userData
        }
     }
 }
