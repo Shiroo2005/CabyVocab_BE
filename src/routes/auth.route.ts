@@ -2,7 +2,7 @@ import express from 'express'
 import { wrapRequestHandler } from '~/utils/handler'
 import { authController } from '~/controllers/auth.controller'
 import { validate } from '~/middlewares/validation.middlewares'
-import { loginValidation, registerValidation } from '~/utils/validate'
+import { loginValidation, registerValidation } from '~/validations/auth.validation'
 const authRouter = express.Router()
 
 // GET
