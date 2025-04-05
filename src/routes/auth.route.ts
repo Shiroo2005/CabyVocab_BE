@@ -11,6 +11,7 @@ const authRouter = express.Router()
 // POST
 authRouter.post('/register', validate(registerValidation), wrapRequestHandler(authController.register))
 authRouter.post('/login', validate(loginValidation), wrapRequestHandler(authController.login))
+authRouter.post('/refresh', wrapRequestHandler(authController.refreshToken))
 // PUT
 
 // DELETE
