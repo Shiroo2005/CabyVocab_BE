@@ -3,8 +3,8 @@ import bcrypt from "bcrypt"
 import { BadRequestError } from "~/core/error.response";
 import { Op } from "sequelize";
 class AuthService {
-    register = async ({ email, username, password }: { email: string, username: string, password: string }) => {
-        if (!email || !username || !password) {
+    register = async ({ email, username, password, full_name }: { email: string, username: string, password: string, full_name: string }) => {
+        if (!email || !username || !password || !full_name) {
             throw new BadRequestError({ message: 'Thiếu thông tin cần thiết' })
         }
 
@@ -29,7 +29,7 @@ class AuthService {
             email,
             username,
             password: hashedPassword,
-            full_name: username,
+            full_name,
         }, {
             returning: true
         })
