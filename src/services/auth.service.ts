@@ -1,10 +1,10 @@
 import { User } from '~/entities/user.entity'
 import bcrypt from 'bcrypt'
 import { BadRequestError } from '~/core/error.response'
-import { generateTokens, hashData } from '~/utils/jwt'
-import { Role } from '~/entities/role.entitity'
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
+import { signAccessToken, signRefreshToken } from '~/utils/jwt'
+import { TokenPayload } from '~/dto/common.dto'
 dotenv.config()
 
 class AuthService {
@@ -12,14 +12,12 @@ class AuthService {
     email,
     username,
     password,
-    fullName,
-    roleId
+    fullName
   }: {
     email: string
     username: string
     password: string
-    fullName: string,
-    roleId: number
+    fullName: string
   }) => {
     //check if user exist by email or username
     const existingUser = await User.findOne({
@@ -51,14 +49,18 @@ class AuthService {
       email,
       username,
       password,
-      fullName,
+      fullName
       ///role
     })
     const { password: _password, ...userWithoutPassword } = await newUser.save()
-    const tokens = generateTokens(userWithoutPassword.id!)
+    const [accessToken, refreshToken] = await Promise.all([
+      signAccessToken({ userId: newUser.id as number }),
+      signRefreshToken({ userId: newUser.id as number })
+    ])
     return {
       user: userWithoutPassword,
-      ...tokens
+      accessToken,
+      refreshToken
     }
   }
 
@@ -76,10 +78,14 @@ class AuthService {
     }
     //return user without password
     const { password: _password, ...userWithoutPassword } = user
-    const tokens = generateTokens(userWithoutPassword.id!)
+    const [accessToken, refreshToken] = await Promise.all([
+      signAccessToken({ userId: user.id as number }),
+      signRefreshToken({ userId: user.id as number })
+    ])
     return {
       user: userWithoutPassword,
-      ...tokens
+      accessToken,
+      refreshToken
     }
   }
 
@@ -93,15 +99,20 @@ class AuthService {
     if (!user) {
       throw new BadRequestError({ message: 'Người dùng không tồn tại' })
     }
-    const tokens = generateTokens(user.id!)
-    return tokens
+    const [new_accessToken, new_refreshToken] = await Promise.all([
+      signAccessToken({ userId: user.id as number }),
+      signRefreshToken({ userId: user.id as number })
+    ])
+    return {
+      accessToken: new_accessToken,
+      refreshToken: new_refreshToken
+    }
   }
 
-  getAccount = async ({ accessToken }: { accessToken: string }) => {
-    const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET as string) as { userId: number }
+  getAccount = async ({ userId }: TokenPayload) => {
     const user = await User.findOne({
       where: {
-        id: decoded.userId
+        id: userId
       },
       relations: ['role']
     })
