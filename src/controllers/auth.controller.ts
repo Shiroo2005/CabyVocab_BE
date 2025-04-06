@@ -38,5 +38,16 @@ class AuthController {
       next(error)
     }
   }
+  getAccount = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+    try {
+      const result = await authService.getAccount(req.body)
+      return new SuccessResponse({
+        message: 'Lấy thông tin tài khoản thành công',
+        metaData: result
+      }).send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
 }
 export const authController = new AuthController()

@@ -1,5 +1,6 @@
 import { body, checkSchema } from 'express-validator'
 import { Regex } from '~/constants/regex'
+import { BadRequestError } from '~/core/error.response'
 
 export const registerValidation = checkSchema({
     email: {
@@ -60,3 +61,23 @@ export const loginValidation = checkSchema({
         }
     }
 })
+
+export const refreshTokenValidation = checkSchema({
+    refreshToken: {
+        in: ['body'],
+        notEmpty: {
+            errorMessage: 'Refresh token không được để trống'
+        }
+    }
+})
+
+export const tokenValidation = checkSchema({
+    authorization: {
+        in: ['headers'],
+        notEmpty: {
+            errorMessage: 'Access token không được để trống'
+        }
+    }
+})
+
+

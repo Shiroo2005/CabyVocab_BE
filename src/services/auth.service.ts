@@ -4,6 +4,8 @@ import { BadRequestError } from '~/core/error.response'
 import { generateTokens, hashData } from '~/utils/jwt'
 import { Role } from '~/entities/role.entitity'
 import jwt from 'jsonwebtoken'
+import dotenv from 'dotenv'
+dotenv.config()
 
 class AuthService {
   register = async ({
@@ -82,25 +84,35 @@ class AuthService {
   }
 
   refreshToken = async ({ refreshToken }: { refreshToken: string }) => {
-    //check if refreshToken is valid
-    try {
-      const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string) as { userId: number }
-      const user = await User.findOne({
-        where: {
-          id: decoded.userId
-        }
-      })
-      if (!user) {
-        throw new BadRequestError({ message: 'Người dùng không tồn tại' })
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string) as { userId: number }
+    const user = await User.findOne({
+      where: {
+        id: decoded.userId
       }
-      const tokens = generateTokens(user.id!)
-      return tokens
-    } catch (error) {
-      if (error instanceof jwt.TokenExpiredError) {
-        throw new BadRequestError({ message: 'Refresh token đã hết hạn, vui lòng đăng nhập lại' })
-      }
-      console.log(typeof (refreshToken))
-      throw new BadRequestError({ message: 'Refresh token không hợp lệ' })
+    })
+    if (!user) {
+      throw new BadRequestError({ message: 'Người dùng không tồn tại' })
+    }
+    const tokens = generateTokens(user.id!)
+    return tokens
+  }
+
+  getAccount = async ({ accessToken }: { accessToken: string }) => {
+    const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET as string) as { userId: number }
+    const user = await User.findOne({
+      where: {
+        id: decoded.userId
+      },
+      relations: ['role']
+    })
+
+    if (!user) {
+      throw new BadRequestError({ message: 'Người dùng không tồn tại' })
+    }
+
+    const { password: _password, ...userWithoutPassword } = user
+    return {
+      user: userWithoutPassword
     }
   }
 }
