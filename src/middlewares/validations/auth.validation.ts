@@ -65,14 +65,40 @@ export const loginValidation = checkSchema({
   }
 })
 
-export const refreshTokenValidation = checkSchema({
-  refreshToken: {
-    in: ['body'],
-    notEmpty: {
-      errorMessage: 'Refresh token không được để trống'
-    }
-  }
-})
+export const refreshTokenValidation = validate(
+    checkSchema(
+        {
+            refreshToken: {
+                in: ['body'],
+                notEmpty: {
+                    errorMessage: 'Refresh token không được để trống'
+                },
+                custom: {
+                    options: async (value: string, { req }) => {
+                        if (value.length == 0) throw new AuthRequestError('Refresh token không hợp lệ')
+                        try {
+                            const decodedRefreshToken = (await verifyToken({
+                                token: value,
+                                secretKey: env.JWT_REFRESH_SECRET as string
+                            })) as TokenPayload 
+                            ;(req as Request).decodedRefreshToken = decodedRefreshToken
+                        } catch (error) {
+                            if (error instanceof jwt.TokenExpiredError) {
+                                throw new BadRequestError({
+                                    message: 'Refresh token hết hạn'
+                                })
+                            }
+                            throw new BadRequestError({
+                                message: 'Refresh token không hợp lệ' 
+                            })
+                        }
+                    } 
+                }
+            }
+        },
+        ['body']
+    )
+)
 
 export const accessTokenValidation = validate(
   checkSchema(
