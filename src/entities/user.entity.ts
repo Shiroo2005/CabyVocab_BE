@@ -16,6 +16,7 @@ import {
 import { UserStatus } from '~/constants/userStatus'
 import { Role } from './role.entitity'
 import { hashData } from '~/utils/jwt'
+import { Token } from './token.entity'
 
 @Entity()
 export class User extends BaseEntity {
@@ -62,6 +63,9 @@ export class User extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt?: Date
+
+  @OneToMany(() => Token, (token) => token.user)
+  tokens?: Token[]
 
   @BeforeInsert()
   @BeforeUpdate()
