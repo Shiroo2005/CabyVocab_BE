@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
 import { BadRequestError, ErrorResponse } from '~/core/error.response'
 import { CREATED, SuccessResponse } from '~/core/success.response'
+import { TokenPayload } from '~/dto/common.dto'
 import { authService } from '~/services/auth.service'
 
 class AuthController {
@@ -40,7 +41,7 @@ class AuthController {
   }
   getAccount = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     try {
-      const result = await authService.getAccount(req.body)
+      const result = await authService.getAccount(req.decodedAuthorization as TokenPayload)
       return new SuccessResponse({
         message: 'Lấy thông tin tài khoản thành công',
         metaData: result
