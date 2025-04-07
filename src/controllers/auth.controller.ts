@@ -3,6 +3,7 @@ import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
 import { BadRequestError, ErrorResponse } from '~/core/error.response'
 import { CREATED, SuccessResponse } from '~/core/success.response'
 import { TokenPayload } from '~/dto/common.dto'
+import { User } from '~/entities/user.entity'
 import { authService } from '~/services/auth.service'
 
 class AuthController {
@@ -19,7 +20,8 @@ class AuthController {
   }
   login = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     try {
-      const result = await authService.login(req.body)
+      const user = (req as any).user as User
+      const result = await authService.login(user)
       return new SuccessResponse({
         message: 'Đăng nhập thành công',
         metaData: result

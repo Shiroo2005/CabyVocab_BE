@@ -27,7 +27,7 @@ export class DatabaseService {
       entities: [User, Role, Token],
       logging: 'all',
       logger: customLogger,
-      synchronize: true
+      synchronize: false
       // logger: LogCustomize
     })
   }
