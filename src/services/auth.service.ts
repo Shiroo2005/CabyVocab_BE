@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import { signAccessToken, signRefreshToken } from '~/utils/jwt'
 import { TokenPayload } from '~/dto/common.dto'
+import { Token } from '~/entities/token.entity'
 dotenv.config()
 
 class AuthService {
@@ -57,6 +58,10 @@ class AuthService {
       signAccessToken({ userId: newUser.id as number }),
       signRefreshToken({ userId: newUser.id as number })
     ])
+
+    const newToken = Token.create({refreshToken, user: newUser})
+    await newToken.save()
+
     return {
       user: userWithoutPassword,
       accessToken,
@@ -82,6 +87,21 @@ class AuthService {
       signAccessToken({ userId: user.id as number }),
       signRefreshToken({ userId: user.id as number })
     ])
+
+    let userToken = await Token.findOne({
+      where: {
+        user: {
+          id: user.id
+        }
+      }
+    })
+    if (userToken) {
+      userToken.refreshToken = refreshToken
+    } else {
+      userToken = Token.create({refreshToken, user: user})
+    }
+    await userToken.save()
+
     return {
       user: userWithoutPassword,
       accessToken,
@@ -99,10 +119,23 @@ class AuthService {
     if (!user) {
       throw new BadRequestError({ message: 'Người dùng không tồn tại' })
     }
+    const existingToken = await Token.findOne({
+      where: {
+        user: {
+          id: user.id
+        },
+        refreshToken
+      } 
+    })
+    if (!existingToken) {
+      throw new BadRequestError({ message: 'Token không hợp lệ' }) 
+    }
     const [new_accessToken, new_refreshToken] = await Promise.all([
       signAccessToken({ userId: user.id as number }),
       signRefreshToken({ userId: user.id as number })
     ])
+    existingToken.refreshToken = new_refreshToken
+    await existingToken.save()
     return {
       accessToken: new_accessToken,
       refreshToken: new_refreshToken
