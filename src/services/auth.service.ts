@@ -59,7 +59,7 @@ class AuthService {
       signRefreshToken({ userId: newUser.id as number })
     ])
 
-    const newToken = Token.create({refreshToken, user: newUser})
+    const newToken = Token.create({ refreshToken, user: newUser })
     await newToken.save()
 
     return {
@@ -88,19 +88,8 @@ class AuthService {
       signRefreshToken({ userId: user.id as number })
     ])
 
-    let userToken = await Token.findOne({
-      where: {
-        user: {
-          id: user.id
-        }
-      }
-    })
-    if (userToken) {
-      userToken.refreshToken = refreshToken
-    } else {
-      userToken = Token.create({refreshToken, user: user})
-    }
-    await userToken.save()
+    // save token in db
+    await Token.save({ refreshToken, user: user })
 
     return {
       user: userWithoutPassword,
@@ -110,32 +99,31 @@ class AuthService {
   }
 
   refreshToken = async ({ refreshToken }: { refreshToken: string }) => {
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string) as { userId: number }
-    const user = await User.findOne({
-      where: {
-        id: decoded.userId
-      }
-    })
-    if (!user) {
-      throw new BadRequestError({ message: 'Người dùng không tồn tại' })
-    }
+    const decodedToken = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string) as { userId: number }
+    const userId = decodedToken.userId
+
+    // is refresh token valid
     const existingToken = await Token.findOne({
       where: {
         user: {
-          id: user.id
+          id: userId
         },
         refreshToken
-      } 
+      }
     })
     if (!existingToken) {
-      throw new BadRequestError({ message: 'Token không hợp lệ' }) 
+      throw new BadRequestError({ message: 'Token không hợp lệ' })
     }
+
+    // create new tokens
     const [new_accessToken, new_refreshToken] = await Promise.all([
-      signAccessToken({ userId: user.id as number }),
-      signRefreshToken({ userId: user.id as number })
+      signAccessToken({ userId }),
+      signRefreshToken({ userId })
     ])
-    existingToken.refreshToken = new_refreshToken
-    await existingToken.save()
+
+    //save refresh token into db
+    await Token.save({ refreshToken: new_refreshToken, user: { id: userId } as User })
+
     return {
       accessToken: new_accessToken,
       refreshToken: new_refreshToken

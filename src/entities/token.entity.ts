@@ -1,35 +1,35 @@
 import {
-    BaseEntity,
-    Column,
-    CreateDateColumn,
-    Entity,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-    ManyToOne
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  ManyToOne
 } from 'typeorm'
 import { User } from './user.entity'
 
 @Entity()
 export class Token extends BaseEntity {
-    @PrimaryGeneratedColumn()
-    id?: number
+  @PrimaryGeneratedColumn()
+  id?: number
 
-    @Column('varchar')
-    refreshToken!: string
+  @Column('varchar')
+  refreshToken!: string
 
-    @ManyToOne(() => User, (user) => user.tokens)
-    user!: User
+  @ManyToOne(() => User, (user) => user.tokens)
+  user!: User
 
-    @CreateDateColumn()
-    createdAt?: Date
+  @CreateDateColumn()
+  createdAt?: Date
 
-    @UpdateDateColumn()
-    updatedAt?: Date
+  @UpdateDateColumn()
+  updatedAt?: Date
 
-    static createToken = ({ refreshToken, user }: { refreshToken: string, user: User }) => {
-        const newToken = new Token()
-        newToken.refreshToken = refreshToken
-        newToken.user = user
-        return newToken
-    }
+  static createToken = ({ refreshToken, user }: { refreshToken: string; user: User }) => {
+    const newToken = new Token()
+    newToken.refreshToken = refreshToken
+    newToken.user = user
+    return newToken
+  }
 }
