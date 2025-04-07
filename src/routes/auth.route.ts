@@ -3,11 +3,11 @@ import { wrapRequestHandler } from '~/utils/handler'
 import { authController } from '~/controllers/auth.controller'
 import { validate } from '~/middlewares/validation.middlewares'
 import {
-    accessTokenValidation,
-    loginValidation,
-    refreshTokenValidation,
-    registerValidation
-} from '~/middlewares/validations/auth.validation'
+  accessTokenValidation,
+  loginValidation,
+  refreshTokenValidation,
+  registerValidation
+} from '~/middlewares/auth/auth.validation'
 const authRouter = express.Router()
 
 // GET
