@@ -3,6 +3,7 @@ import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
 import { BadRequestError, ErrorResponse } from '~/core/error.response'
 import { CREATED, SuccessResponse } from '~/core/success.response'
 import { TokenPayload } from '~/dto/common.dto'
+import { LogoutBodyReq } from '~/dto/req/auth/LogoutBody.req'
 import { User } from '~/entities/user.entity'
 import { authService } from '~/services/auth.service'
 
@@ -51,6 +52,15 @@ class AuthController {
     } catch (error) {
       next(error)
     }
+  }
+
+  logout = async (req: Request<ParamsDictionary, any, LogoutBodyReq>, res: Response) => {
+    const { refreshToken } = req.body
+
+    return new SuccessResponse({
+      message: 'Logout successful!',
+      metaData: await authService.logout({ refreshToken })
+    }).send(res)
   }
 }
 export const authController = new AuthController()

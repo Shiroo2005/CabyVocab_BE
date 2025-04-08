@@ -5,7 +5,8 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  ManyToOne
+  ManyToOne,
+  DeleteDateColumn
 } from 'typeorm'
 import { User } from './user.entity'
 
@@ -19,6 +20,9 @@ export class Token extends BaseEntity {
 
   @ManyToOne(() => User, (user) => user.tokens)
   user!: User
+
+  @DeleteDateColumn()
+  deletedAt?: Date
 
   @CreateDateColumn()
   createdAt?: Date

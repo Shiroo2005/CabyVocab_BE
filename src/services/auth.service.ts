@@ -4,7 +4,8 @@ import dotenv from 'dotenv'
 import { signAccessToken, signRefreshToken } from '~/utils/jwt'
 import { TokenPayload } from '~/dto/common.dto'
 import { Token } from '~/entities/token.entity'
-import { unGetSelectData } from '~/utils'
+import { unGetData } from '~/utils'
+import { LogoutBodyReq } from '~/dto/req/auth/LogoutBody.req'
 dotenv.config()
 
 class AuthService {
@@ -19,7 +20,6 @@ class AuthService {
     password: string
     fullName: string
   }) => {
-
     //create new user
     const newUser = User.create({
       email,
@@ -28,14 +28,13 @@ class AuthService {
       fullName
       ///role
     })
-    await newUser.save()
-    const userWithoutPassword = await User.findOne({
-      where: { id: newUser.id },
-      select: unGetSelectData(['password'])
-    })
+
+    //await save user
+    const createdUser = await User.save(newUser)
+
     const [accessToken, refreshToken] = await Promise.all([
-      signAccessToken({ userId: newUser.id as number }),
-      signRefreshToken({ userId: newUser.id as number })
+      signAccessToken({ userId: createdUser.id as number }),
+      signRefreshToken({ userId: createdUser.id as number })
     ])
 
     //save token in db
@@ -43,14 +42,12 @@ class AuthService {
     await newToken.save()
 
     return {
-      user: userWithoutPassword,
       accessToken,
       refreshToken
     }
   }
 
   login = async (user: User) => {
-
     const [accessToken, refreshToken] = await Promise.all([
       signAccessToken({ userId: user?.id as number }),
       signRefreshToken({ userId: user?.id as number })
@@ -60,7 +57,7 @@ class AuthService {
     await Token.save({ refreshToken, user: user })
 
     return {
-      user,
+      user: unGetData({ fields: ['password'], object: user }),
       accessToken,
       refreshToken
     }
@@ -88,10 +85,18 @@ class AuthService {
   getAccount = async ({ userId }: TokenPayload) => {
     const user = await User.findOne({
       where: { id: userId },
-      relations: ['role'],
-      select: unGetSelectData(['password'])
+      relations: ['role']
     })
-    return { user }
+
+    if (!user) return {}
+    return { user: unGetData({ fields: ['password'], object: user }) }
+  }
+
+  logout = async ({ refreshToken }: LogoutBodyReq) => {
+    // delete refresh token in db
+    const result = await Token.getRepository().softDelete({ refreshToken })
+
+    return result
   }
 }
 

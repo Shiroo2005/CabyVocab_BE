@@ -16,6 +16,8 @@ authRouter.get('/account', accessTokenValidation, wrapRequestHandler(authControl
 authRouter.post('/register', registerValidation, wrapRequestHandler(authController.register))
 authRouter.post('/login', loginValidation, wrapRequestHandler(authController.login))
 authRouter.post('/refresh', refreshTokenValidation, wrapRequestHandler(authController.refreshToken))
+authRouter.post('/logout', accessTokenValidation, refreshTokenValidation, wrapRequestHandler(authController.logout))
+
 // PUT
 
 // DELETE
