@@ -1,15 +1,14 @@
 export interface CreateUserBodyReq {
-    email: string
-    username: string
-    password: string
-    full_name?: string
+  email: string
+  username: string
+  password: string
+  fullName?: string
 }
-  
+
 export interface UpdateUserBodyReq {
-    email: string
-    username: string
-    full_name?: string
-    avatar: string
-    status: number
+  email: string
+  username: string
+  fullName?: string
+  avatar: string
+  status: number
 }
-  

@@ -1,12 +1,23 @@
-import { userController } from "~/controllers/user.controller";
+import { userController } from '~/controllers/user.controller'
 import express from 'express'
-import { checkIdParamMiddleware } from '~/middlewares/common.middlewares'
 import { wrapRequestHandler } from '~/utils/handler'
+import { createUserValidation } from '~/middlewares/user/createUser.middlewares'
+import { accessTokenValidation } from '~/middlewares/auth.middlewares'
 
-const userRoute = express.Router();
+const userRouter = express.Router()
 
-userRoute.post('/createUser', wrapRequestHandler(userController.createUser));
+// access token validation
+userRouter.use(accessTokenValidation)
 
-userRoute.get('/getByEmail', wrapRequestHandler(userController.getUserByEmail));
+//POST
+userRouter.post('/', createUserValidation, wrapRequestHandler(userController.createUser))
 
-export default userRoute
+//GET
+userRouter.get('/getByEmail', wrapRequestHandler(userController.getUserByEmail))
+
+//PUT
+
+//PATCH
+
+//DELETE
+export default userRouter
