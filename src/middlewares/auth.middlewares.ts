@@ -24,7 +24,7 @@ async function checkUserExistence(userId: number) {
   return user
 }
 
-async function checkRoleExistence(roleId: number) {
+export async function checkRoleExistence(roleId: number) {
   const roleRepostiory = await DatabaseService.getInstance().getRepository(Role)
   const role = await roleRepostiory.findOne({
     where: { id: roleId }

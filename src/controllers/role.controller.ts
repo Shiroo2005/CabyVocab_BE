@@ -8,12 +8,16 @@ import { toNumber } from 'lodash'
 
 class RoleController {
   createRole = async (req: Request<ParamsDictionary, any, CreateRoleBodyReq>, res: Response, next: NextFunction) => {
-    return new CREATED({
-      message: 'Create new role successful!',
-      metaData: await roleService.createRole(req.body)
-    }).send(res)
+    try {
+      const result = await roleService.createRole(req.body)
+      return new CREATED({
+        message: 'Create new role successful!',
+        metaData: result
+      }).send(res)
+    } catch (error) {
+      next(error)
+    }
   }
-
   getAllRoles = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     return new SuccessResponse({
       message: 'Get all roles successful!',
