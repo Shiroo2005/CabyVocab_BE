@@ -32,6 +32,7 @@
     "nodemon": "^3.1.9",
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
+    "swagger-ui-express": "^5.0.1",
     "tsc-alias": "^1.8.10",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
@@ -57,7 +58,6 @@
     "sequelize": "^6.37.6",
     "sql-formatter": "^15.5.1",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1",
     "yamljs": "^0.3.0"
   }
 }
