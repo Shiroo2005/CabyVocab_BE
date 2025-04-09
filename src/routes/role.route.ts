@@ -14,7 +14,7 @@ import {
 const roleRouter = express.Router()
 
 // GET
-roleRouter.get('/all', validatePagination, wrapRequestHandler(roleController.getAllRoles))
+roleRouter.get('/', validatePagination, wrapRequestHandler(roleController.getAllRoles))
 
 roleRouter.get('/:id', checkIdParamMiddleware, checkRoleExists, wrapRequestHandler(roleController.getRole))
 
