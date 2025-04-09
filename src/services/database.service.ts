@@ -5,6 +5,8 @@ import * as mysql2 from 'mysql2'
 import { DataSource, ObjectLiteral, Repository } from 'typeorm'
 import { User } from '~/entities/user.entity'
 import { Role } from '~/entities/role.entitity'
+import { Token } from '~/entities/token.entity'
+import { customLogger } from '~/utils/log'
 console.log('DatabaseService loaded')
 
 config()
@@ -22,9 +24,10 @@ export class DatabaseService {
       password: env.DB_PASSWORD as string,
       host: env.DB_HOST as string,
       port: parseInt(env.DB_PORT as string),
-      entities: [User, Role]
-      // logger: customLogger
-      // synchronize: true
+      entities: [User, Role, Token],
+      logging: 'all',
+      logger: customLogger,
+      synchronize: false
       // logger: LogCustomize
     })
   }
