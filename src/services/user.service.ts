@@ -21,8 +21,29 @@ class UserService{
         return resUser;
     }
 
-    updateUser = async() => {
-        
+    getAllUser = async() => {
+        return await User.findAll({attributes: ['id', 'email', 'username', 'full_name', 'status']});
+    }
+
+    getUserByFullName = async() => {
+
+    }
+
+    updateUser = async(userID: string, newData: Partial<User>) => {
+        const user = await User.findByPk(userID);
+        if (!user) {
+          throw new Error('Không tìm thấy User');
+        }
+        await user.update(newData);
+        return user;
+    }
+
+    deleteUserByEmail = async() => {
+
+    }
+
+    changeStatusForUser = async() => {
+
     }
 }
 

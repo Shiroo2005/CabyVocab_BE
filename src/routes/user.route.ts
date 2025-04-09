@@ -9,4 +9,8 @@ userRoute.post('/createUser', wrapRequestHandler(userController.createUser));
 
 userRoute.get('/getByEmail', wrapRequestHandler(userController.getUserByEmail));
 
+userRoute.get('/getAll', wrapRequestHandler(userController.getAllUsers));
+
+userRoute.put('/updateUser/:id', wrapRequestHandler(userController.updateUser));
+
 export default userRoute
