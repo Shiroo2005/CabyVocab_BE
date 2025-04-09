@@ -3,7 +3,7 @@ import { Role } from '~/entities/role.entitity'
 
 class RoleService {
   createRole = async ({ name, description }: CreateRoleBodyReq) => {
-    const createdRole = await Role.create({ name, description }, { returning: true })
+    const createdRole = await Role.save({ name, description })
     return createdRole
   }
 
@@ -14,21 +14,10 @@ class RoleService {
 
     const offset = (page - 1) * limit
 
-    const [foundRoles, total] = await Promise.all([
-      Role.findAll({
-        limit: limit,
-        offset,
-        where: {
-          isDeleted: false
-        },
-        attributes: ['id', 'name', 'description']
-      }),
-      Role.count({
-        where: {
-          isDeleted: false
-        }
-      })
-    ])
+    const [foundRoles, total] = await Role.findAndCount({
+      skip: offset,
+      take: limit
+    })
 
     return {
       foundRoles,
@@ -38,32 +27,33 @@ class RoleService {
     }
   }
 
-  getRoleById = async (id: string) => {
-    const foundRole = await Role.findByPk(id, {
-      attributes: ['id', 'name', 'description']
+  getRoleById = async (id: number) => {
+    const foundRole = await Role.findOne({
+      where: {
+        id
+      }
     })
     if (!foundRole) return {}
     return foundRole
   }
 
   putRoleById = async ({ id, name, description }: { id: string; name: string; description?: string }) => {
-    const updatedRole = await Role.update(
-      {
-        name,
-        description
-      },
-      {
-        where: {
-          id
-        },
-        returning: true
-      }
-    )
+    const roleToUpdate = await Role.findOne({ where: { id: Number(id) } })
+    if (!roleToUpdate) {
+      throw new Error('Role not found')
+    }
+    roleToUpdate.name = name
+    if (description !== undefined) {
+      roleToUpdate.description = description
+    }
+    const updatedRole = await Role.save(roleToUpdate)
     return updatedRole
   }
 
-  deleteRoleById = async ({ id }: { id: string }) => {
-    return await Role.update({ isDeleted: true }, { where: { id } })
+  deleteRoleById = async ({ id }: { id: number }) => {
+    return await Role.getRepository().softDelete({
+      id
+    })
   }
 }
 

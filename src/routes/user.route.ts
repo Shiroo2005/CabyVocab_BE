@@ -1,16 +1,35 @@
-import { userController } from "~/controllers/user.controller";
+import { userController } from '~/controllers/user.controller'
 import express from 'express'
-import { checkIdParamMiddleware } from '~/middlewares/common.middlewares'
 import { wrapRequestHandler } from '~/utils/handler'
+import { createUserValidation } from '~/middlewares/user/createUser.middlewares'
+import { accessTokenValidation } from '~/middlewares/auth.middlewares'
+import { checkIdParamMiddleware } from '~/middlewares/common.middlewares'
+import { searchEmailValidation } from '~/middlewares/user/searchUser.middleware'
 
-const userRoute = express.Router();
+const userRouter = express.Router()
 
-userRoute.post('/createUser', wrapRequestHandler(userController.createUser));
+// access token validation
+//userRouter.use(accessTokenValidation)
 
-userRoute.get('/getByEmail', wrapRequestHandler(userController.getUserByEmail));
+//POST
+userRouter.post('/', createUserValidation, wrapRequestHandler(userController.createUser))
 
-userRoute.get('/getAll', wrapRequestHandler(userController.getAllUsers));
+//GET
+userRouter.get('/all', wrapRequestHandler(userController.getAllUsers));
 
-userRoute.put('/updateUser/:id', wrapRequestHandler(userController.updateUser));
+userRouter.get('/search', searchEmailValidation, wrapRequestHandler(userController.getUserByEmail));
 
-export default userRoute
+userRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(userController.getUserById))
+
+//PUT
+//userRouter.put('/:id', wrapRequestHandler(userController.updateUser));
+//PATCH
+//??userRouter.patch('/restore', wrapRequestHandler(userController.<...........>));
+//only full_name, avatar, status
+userRouter.patch('/:id', wrapRequestHandler(userController.updateUser));
+
+//DELETE
+//deleteAt?, user_courses
+//userRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(userController.))
+
+export default userRouter

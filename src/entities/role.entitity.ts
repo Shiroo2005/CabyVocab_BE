@@ -1,46 +1,52 @@
-import { DataTypes, InferAttributes, InferCreationAttributes, Model, Sequelize } from 'sequelize'
-import { Regex } from '~/constants/regex'
+import { Matches } from 'class-validator'
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
+} from 'typeorm'
+import { User } from './user.entity'
 
-export class Role extends Model<InferAttributes<Role>, InferCreationAttributes<Role>> {
-  declare id?: number
-  declare name: string
-  declare description?: string
-  declare isDeleted?: boolean
-  static initModel(sequelize: Sequelize) {
-    Role.init(
-      {
-        id: {
-          type: DataTypes.INTEGER,
-          autoIncrement: true,
-          primaryKey: true
-        },
-        name: {
-          type: DataTypes.STRING,
-          allowNull: false,
-          validate: {
-            is: {
-              args: Regex.ONLY_LETTER_AND_NUMBER_AND_MUST_BE_1_LETTER,
-              msg: 'Name phải có ít nhất 6 ký tự và chứa ít nhất 1 chữ cái!'
-            },
-            notNull: {
-              msg: 'Name not be null!'
-            }
-          }
-        },
-        description: {
-          type: DataTypes.STRING,
-          defaultValue: 'N/A'
-        },
-        isDeleted: {
-          type: DataTypes.BOOLEAN,
-          defaultValue: false
-        }
-      },
-      {
-        sequelize,
-        modelName: 'Role',
-        tableName: 'Roles'
-      }
-    )
+@Entity()
+export class Role extends BaseEntity {
+  @PrimaryGeneratedColumn()
+  id?: number
+
+  @Column('nvarchar')
+  @Matches(/^(?=.*[a-zA-Z])[a-zA-Z0-9 ]{3,}$/, {
+    message: 'Name must contain at least 3 chars, 1 letter and only letter, number'
+  })
+  name!: string
+
+  @Column({ default: 'N/A', type: 'nvarchar' })
+  description?: string
+
+  @OneToMany(() => User, (user) => user.role)
+  users?: User[]
+
+  @DeleteDateColumn()
+  deletedAt?: Date
+
+  @CreateDateColumn()
+  createdAt?: Date
+
+  @UpdateDateColumn()
+  updatedAt?: Date
+
+  static createRole = ({ name, description, users, id }: Role) => {
+    const newRole = new Role()
+
+    newRole.id = id
+    newRole.name = name
+    newRole.description = description
+    newRole.users = users
+
+    return newRole
   }
 }

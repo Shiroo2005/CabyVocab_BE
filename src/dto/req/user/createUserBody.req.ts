@@ -1,8 +1,8 @@
 export interface CreateUserBodyReq {
-    email: string
-    username: string
-    password: string
-    full_name?: string
+  email: string
+  username: string
+  password: string
+  fullName?: string
 }
 //update email can xac thuc email
   
@@ -11,4 +11,3 @@ export interface UpdateUserBodyReq {
     avatar: string
     status: number
 }
-  
