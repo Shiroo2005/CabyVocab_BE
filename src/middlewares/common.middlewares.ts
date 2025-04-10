@@ -9,6 +9,12 @@ export const checkIdParamMiddleware = (req: Request<ParamsDictionary, any, any>,
   } else next()
 }
 
+export const checkIdQueryMiddleware = (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+  if (req.query.id && !isValidNumber(req.query.id as string)) {
+    throw new BadRequestError({ message: 'Id invalid!' })
+  } else next()
+}
+
 export const isRequired = (fieldName: string) => ({
   notEmpty: {
     errorMessage: `${fieldName} is required`

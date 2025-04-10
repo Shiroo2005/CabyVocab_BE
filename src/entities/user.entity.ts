@@ -91,15 +91,15 @@ export class User extends BaseEntity {
   static updateUser = (
     user: User,
     {
-      email,
       username,
+      email,
       fullName,
       avatar,
       status,
       role
     }: {
-      email?: string
       username?: string
+      email?: string
       fullName?: string
       avatar?: string
       status?: UserStatus
@@ -107,8 +107,8 @@ export class User extends BaseEntity {
       role?: Role
     }
   ) => {
-    if (email) user.email = email
     if (username) user.username = username
+    if (email) user.email = email
     if (fullName) user.fullName = fullName
     if (avatar) user.avatar = avatar
     if (status) user.status = status
@@ -117,4 +117,10 @@ export class User extends BaseEntity {
 
     return user
   }
+
+  static deleteUser = (user: User) => {
+    const res = User.softRemove(user);
+    return res;
+  }
+  
 }

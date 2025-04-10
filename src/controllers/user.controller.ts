@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
 import { values } from 'lodash'
+import { userInfo } from 'os'
 import { CREATED } from '~/core/success.response'
 import { CreateUserBodyReq, UpdateUserBodyReq } from '~/dto/req/user/createUserBody.req'
 import { userService } from '~/services/user.service'
@@ -39,12 +40,28 @@ class UserController {
   }
 
   updateUser = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+    const id = parseInt(req.params?.id)
     return new CREATED({
       message: 'Update successful',
-      metaData: await userService.updateUser
+      metaData: await userService.updateUserByID(id, req.body)
     }).send(res);
   }
 
+  restoreUser= async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+    const id = parseInt(req.query.id as string);
+    return new CREATED({
+      message: 'Restore user successful',
+      metaData: await userService.restoreUser(id)
+    }).send(res);
+  }
+
+  deleteUser = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+    const id = parseInt(req.params?.id)
+    return new CREATED({
+      message: 'Delete user successful',
+      metaData: await userService.deleteUserByID(id)
+    }).send(res);
+  }
 
 }
 

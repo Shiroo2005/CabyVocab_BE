@@ -1,6 +1,8 @@
 
 import { error } from 'console'
-import { CreateUserBodyReq } from '~/dto/req/user/createUserBody.req'
+import e from 'express'
+import { stat } from 'fs'
+import { CreateUserBodyReq, UpdateUserBodyReq } from '~/dto/req/user/createUserBody.req'
 import { User } from '~/entities/user.entity'
 import { unGetData } from '~/utils'
 
@@ -11,7 +13,6 @@ class UserService {
     return unGetData({ fields: ['password'], object: await User.save(createUser) })
   }
 
-  //typeORM
   getUserByEmail = async (email: string) => {
     const resUser = await User.findOne({
       where: {
@@ -20,7 +21,10 @@ class UserService {
       select: ['id', 'email', 'username', 'fullName', 'avatar', 'status']
     })
     console.log(resUser);
-    if (!resUser) return {}
+
+    if (!resUser)
+      throw new Error('Không tìm thấy user');
+
     return resUser
   }
 
@@ -46,27 +50,45 @@ class UserService {
       },
       select: ['id', 'username', 'email', 'fullName', 'avatar', 'status']
     })
-    if(!user) return {};
+    if(!user) 
+      throw new Error('Không tìm thấy user');
     return user;
   }
 
-    // loi do dung sequelizelize
-    updateUser = async(userID: string, newData: Partial<User>) => {
-        // const user = await User.findByPk(userID);
-        // if (!user) {
-        //   throw new Error('Không tìm thấy User');
-        // }
-        // await user.update(newData);
-        // return user;
-    }
+  updateUserByID = async(id: number, {username, email, fullName, avatar, status, roleId} : UpdateUserBodyReq) => {
+      const user = await User.findOne({
+        where:{
+          id,
+        }
+      });
+      if(!user) {
+        throw new Error('Không tìm thấy user')
+      }
+      
+      const resUser = User.updateUser(user, {username, email, fullName, avatar, status, roleId});
+      
+      await User.save(resUser);
+      return unGetData({ fields: ['password'], object: await User.save(resUser) });
+  }
 
-    deleteUserByEmail = async() => {
+  deleteUserByID = async(id: number) => {
+    // const user = await User.findOne({
+    //   where: {
+    //     id,
+    //   }
+    // })
+    // if(!user) {
+    //   throw new Error('Không tìm thấy user')
+    // }
+    // const res = await User.deleteUser(user);
+    // return unGetData({ fields: ['password'], object: await User.save(res) })
 
-    }
+    return await User.getRepository().softDelete(id);
+  }
 
-    changeStatusForUser = async() => {
-
-    }
+  restoreUser = async(id: number) => {
+    return User.getRepository().restore(id);
+  }
 }
 
 export const userService = new UserService()
