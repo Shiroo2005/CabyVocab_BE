@@ -48,7 +48,7 @@ class UserController {
   }
 
   restoreUser= async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
-    const id = parseInt(req.query.id as string);
+    const id = parseInt(req.params.id as string);
     return new CREATED({
       message: 'Restore user successful',
       metaData: await userService.restoreUser(id)

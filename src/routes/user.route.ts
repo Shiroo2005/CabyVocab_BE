@@ -3,7 +3,7 @@ import express from 'express'
 import { wrapRequestHandler } from '~/utils/handler'
 import { createUserValidation } from '~/middlewares/user/createUser.middlewares'
 import { accessTokenValidation } from '~/middlewares/auth.middlewares'
-import { checkIdParamMiddleware, checkIdQueryMiddleware } from '~/middlewares/common.middlewares'
+import { checkIdParamMiddleware } from '~/middlewares/common.middlewares'
 import { searchEmailValidation } from '~/middlewares/user/searchUser.middleware'
 import { UpdateUserBodyReq } from '~/dto/req/user/createUserBody.req'
 import { updateUserValidation } from '~/middlewares/user/updateUser.middleware'
@@ -27,7 +27,7 @@ userRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(userController
 
 
 //PATCH
-userRouter.patch('/restore', checkIdQueryMiddleware, wrapRequestHandler(userController.restoreUser));
+userRouter.patch('/:id/restore', checkIdParamMiddleware, wrapRequestHandler(userController.restoreUser));
 
 userRouter.patch('/:id', updateUserValidation, wrapRequestHandler(userController.updateUser));
 
