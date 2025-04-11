@@ -7,6 +7,7 @@ import { User } from '~/entities/user.entity'
 import { Role } from '~/entities/role.entitity'
 import { Token } from '~/entities/token.entity'
 import { customLogger } from '~/utils/log'
+import { seedInitialData } from '~/utils/seed'
 console.log('DatabaseService loaded')
 
 config()
@@ -27,7 +28,7 @@ export class DatabaseService {
       entities: [User, Role, Token],
       logging: 'all',
       logger: customLogger,
-      synchronize: false
+      synchronize: true
       // logger: LogCustomize
     })
   }
@@ -52,6 +53,7 @@ export class DatabaseService {
       console.log('info', 'Database synchronized (alter mode) 🔄')
 
       // seed data
+      await seedInitialData()
       // seedData()
     } catch (error) {
       console.log((error as Error).message, (error as Error).stack)

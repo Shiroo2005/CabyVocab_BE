@@ -2,21 +2,45 @@ import express from 'express'
 import { roleController } from '~/controllers/role.controller'
 import { checkIdParamMiddleware } from '~/middlewares/common.middlewares'
 import { wrapRequestHandler } from '~/utils/handler'
+import { accessTokenValidation } from '~/middlewares/auth.middlewares'
+import { 
+    validateCreateRole, 
+    validateUpdateRole, 
+    checkRoleExists, 
+    isAdmin,
+    validatePagination 
+  } from '~/middlewares/role.middlewares'
+
 const roleRouter = express.Router()
 
 // GET
-roleRouter.get('/all', wrapRequestHandler(roleController.getAllRoles))
+roleRouter.get('/', validatePagination, wrapRequestHandler(roleController.getAllRoles))
 
-roleRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(roleController.getRole))
+roleRouter.get('/:id', checkIdParamMiddleware, checkRoleExists, wrapRequestHandler(roleController.getRole))
 
-// authenticate....
+// POST - Create new role (admin only)
+roleRouter.post('/', 
+  accessTokenValidation,
+ // isAdmin,
+  validateCreateRole, 
+  wrapRequestHandler(roleController.createRole)
+)
 
-// POST
-roleRouter.post('/', wrapRequestHandler(roleController.createRole))
-// PUT
-roleRouter.put('/:id', checkIdParamMiddleware, wrapRequestHandler(roleController.putRole))
+// PUT - Update role (admin only)
+roleRouter.put('/:id', 
+  accessTokenValidation,
+ // isAdmin,
+  checkIdParamMiddleware, 
+  validateUpdateRole, 
+  wrapRequestHandler(roleController.putRole)
+)
 
-// DELETE
-roleRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(roleController.deleteRoleById))
-
+// DELETE - Delete role (admin only)
+roleRouter.delete('/:id', 
+  accessTokenValidation,
+ // isAdmin,
+  checkIdParamMiddleware, 
+  checkRoleExists, 
+  wrapRequestHandler(roleController.deleteRoleById)
+)
 export default roleRouter
