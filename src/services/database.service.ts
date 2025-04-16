@@ -4,7 +4,7 @@ import { parseInt } from 'lodash'
 import * as mysql2 from 'mysql2'
 import { DataSource, ObjectLiteral, Repository } from 'typeorm'
 import { User } from '~/entities/user.entity'
-import { Role } from '~/entities/role.entitity'
+import { Role } from '~/entities/role.entity'
 import { Token } from '~/entities/token.entity'
 import { customLogger } from '~/utils/log'
 import { seedInitialData } from '~/utils/seed'
@@ -25,7 +25,7 @@ export class DatabaseService {
       password: env.DB_PASSWORD as string,
       host: env.DB_HOST as string,
       port: parseInt(env.DB_PORT as string),
-      entities: [User, Role, Token],
+      entities: [__dirname + '/../entities/*entity.ts'],
       logging: 'all',
       logger: customLogger,
       synchronize: true

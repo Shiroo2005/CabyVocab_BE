@@ -10,7 +10,7 @@ import { TokenPayload } from '~/dto/common.dto'
 import { Request } from 'express'
 import { DatabaseService } from '~/services/database.service'
 import { User } from '~/entities/user.entity'
-import { Role } from '~/entities/role.entitity'
+import { Role } from '~/entities/role.entity'
 import { Token } from '~/entities/token.entity'
 
 async function checkUserExistence(userId: number) {

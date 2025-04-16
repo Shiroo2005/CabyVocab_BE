@@ -6,7 +6,7 @@ import { validate } from '../validation.middlewares'
 import { User } from '~/entities/user.entity'
 import { UserStatus } from '~/constants/userStatus'
 import { isIn } from 'class-validator'
-import { Role } from '~/entities/role.entitity'
+import { Role } from '~/entities/role.entity'
 
 export const updateUserValidation = validate (
   checkSchema({
