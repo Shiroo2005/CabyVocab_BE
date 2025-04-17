@@ -75,7 +75,6 @@ class TopicService {
     return updateTopic || {}
   }
 
-  //middleware ktr relations
   deleteTopic = async ({id}: {id: number}) => {
     return await Topic.getRepository().softDelete(id)
   }

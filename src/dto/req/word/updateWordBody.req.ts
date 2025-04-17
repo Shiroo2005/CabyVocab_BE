@@ -10,4 +10,5 @@ export interface UpdateWordBodyReq {
   rank?: WordRank
   example?: string
   translateExample?: string
+  topicIds: number[]
 }

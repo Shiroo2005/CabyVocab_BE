@@ -5,6 +5,7 @@ import { WordPosition, WordRank } from '~/constants/word'
 import { BadRequestError } from '~/core/error.response'
 import { validate } from '../validation.middlewares'
 import { Topic } from '~/entities/topic.entity'
+import { In } from 'typeorm'
 
 
 export const createWordValidation = validate(
@@ -67,16 +68,19 @@ export const createWordValidation = validate(
         ...isString('translate example'),
         ...isLength({ fieldName: 'translate example', min: 1, max: 255 })
       },
-      'words.*.topicId': {
+      'words.*.topicIds': {
         ...isRequired('topicId'),
-        isDecimal: true,
+        isArray: {
+          errorMessage: 'topicID không hợp lệ'
+        },
         custom: {
-          options: async (value) => {
-            const foundRole = await Topic.findOne({
-              where: {id: value}
-            })
-            if (!foundRole) {
-              throw new BadRequestError({message: 'Topic id invalid!'})
+          options: async (value: number[]) => {
+            const topics = await Topic.find({
+              where: { id: In(value)}
+            });
+            
+            if (topics.length !== value.length) {
+              throw new BadRequestError({ message: 'topicIDs không hợp lệ' });
             }
             return true
           }

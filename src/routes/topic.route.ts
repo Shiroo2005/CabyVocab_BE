@@ -3,6 +3,7 @@ import { topicController } from '~/controllers/topic.controller'
 import { accessTokenValidation } from '~/middlewares/auth.middlewares'
 import { checkIdParamMiddleware } from '~/middlewares/common.middlewares'
 import { create_updateTopicValidation } from '~/middlewares/Topic/createTopic.middlewares'
+import { checkIdDeleteTopicMiddleware } from '~/middlewares/Topic/deleteToipc.middlewares'
 import { wrapRequestHandler } from '~/utils/handler'
 
 const topicRouter = express.Router()
@@ -24,6 +25,6 @@ topicRouter.patch('/:id', checkIdParamMiddleware, create_updateTopicValidation, 
 //PUT
 
 //DELETE
-topicRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(topicController.deleteTopic))
+topicRouter.delete('/:id', checkIdDeleteTopicMiddleware, wrapRequestHandler(topicController.deleteTopic))
 
 export default topicRouter

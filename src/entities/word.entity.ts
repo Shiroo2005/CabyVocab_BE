@@ -5,6 +5,8 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  In,
+  JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -64,6 +66,7 @@ export class Word extends BaseEntity {
 
   //foreign key
   @ManyToMany(() => Topic, (topic) => topic.words)
+  @JoinTable({ name: 'word_topic' })
   topics?: Topic[]
 
   @OneToMany(() => WordProgress, (wordProgress) => wordProgress.word)
@@ -79,7 +82,6 @@ export class Word extends BaseEntity {
   updatedAt?: Date
 
   static createWord = ({
-    id,
     content,
     meaning,
     pronunciation,
@@ -91,8 +93,6 @@ export class Word extends BaseEntity {
     translateExample
   }: Word) => {
     const newWord = new Word()
-
-    newWord.id = id
     newWord.content = content
     newWord.position = position
     newWord.pronunciation = pronunciation
@@ -107,7 +107,7 @@ export class Word extends BaseEntity {
   }
 
   // dùng Partial
-  static updateWord = (
+  static updateWord = async (
     word: Word,
     {
       content,
@@ -118,7 +118,8 @@ export class Word extends BaseEntity {
       rank,
       position,
       example,
-      translateExample
+      translateExample,
+      topicIds
     }: {
       content?: string
       pronunciation?: string
@@ -129,6 +130,7 @@ export class Word extends BaseEntity {
       rank?: WordRank
       example?: string
       translateExample?: string
+      topicIds: number[]
     }
   ) => {
     if (content) word.content = content
@@ -141,6 +143,13 @@ export class Word extends BaseEntity {
     if (example) word.example = example
     if (translateExample) word.translateExample = translateExample
 
+    if (topicIds && topicIds.length > 0) {
+      const topics = await Topic.find({
+        where: { id: In(topicIds)} 
+      });
+      word.topics = topics;  // Associate the topics with the word
+    }
+    await word.save()
     return word
   }
 }

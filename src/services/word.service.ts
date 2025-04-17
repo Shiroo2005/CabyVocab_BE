@@ -1,17 +1,27 @@
+import { In } from 'typeorm'
 import { BadRequestError } from '~/core/error.response'
 import { WordBody } from '~/dto/req/word/createWordBody.req'
 import { UpdateWordBodyReq } from '~/dto/req/word/updateWordBody.req'
 import { wordQueryReq } from '~/dto/req/word/wordQuery.req'
 import { DataWithPagination } from '~/dto/res/pagination.res'
+import { Topic } from '~/entities/topic.entity'
 import { Word } from '~/entities/word.entity'
 //import { wordRepository } from '~/repositories/word.repository'
 //import { buildFilterLike } from './query.service'
 
 class WordService {
   createWords = async (words: WordBody[]) => {
-    if (!words || !Array.isArray(words)) 
-        throw new BadRequestError( {message: 'Request body invalid format!'})
-    const _words = words.map(word => Word.create({...word}))
+    const _words = await Promise.all(
+      words.map(async word => {
+      const newWord = Word.create({...word})
+      if (word.topicIds && Array.isArray(word.topicIds) && word.topicIds.length > 0) {
+        const topics = await Topic.find({
+            where: { id: In(word.topicIds)}
+          });
+        newWord.topics = topics;
+      }
+      return newWord;
+    }));
 
     const result = await Word.save(_words)
 
@@ -20,21 +30,16 @@ class WordService {
 
   updateWord = async (
     id: number,
-    { content, meaning, pronunciation, audio, example, image, position, rank, translateExample }: UpdateWordBodyReq
+    { content, meaning, pronunciation, audio, example, image, position, rank, translateExample, topicIds }: UpdateWordBodyReq
   ) => {
-    const updateWord = await Word.update(id, {
-      content,
-      meaning,
-      pronunciation,
-      audio,
-      example,
-      image,
-      position,
-      rank,
-      translateExample
-    })
+    const word = await Word.findOne({
+      where: { id },
+    });
 
-    return updateWord
+    if (word) 
+      Word.updateWord(word, {content, meaning, pronunciation, audio, example, image, position, rank, translateExample, topicIds});
+  
+    return word || {};
   }
 
   getWordById = async ({ id }: { id: number }) => {

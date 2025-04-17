@@ -19,7 +19,7 @@ wordRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(wordController
 //checkPermission?
 wordRouter.post('/', createWordValidation, wrapRequestHandler(wordController.createWord))
 
-//PATH
+//PATCH
 wordRouter.patch('/:id', checkIdParamMiddleware, createWordValidation, wrapRequestHandler(wordController.updateWord))
 wordRouter.patch('/:id/restore', checkIdParamMiddleware, wrapRequestHandler(wordController.restoreWord))
 
