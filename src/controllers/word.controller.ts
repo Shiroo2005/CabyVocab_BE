@@ -7,7 +7,7 @@ import { wordService } from '~/services/word.service'
 
 class WordController {
 
-  createWord = async (req: Request<ParamsDictionary, any, CreateWordBodyReq>, res: Response) => {
+  createWords = async (req: Request<ParamsDictionary, any, CreateWordBodyReq>, res: Response) => {
     return new CREATED({
     message: 'Create word successful!',
     metaData: await wordService.createWords(req.body.words)

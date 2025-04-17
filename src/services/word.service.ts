@@ -49,7 +49,7 @@ class WordService {
       }
     })
 
-    return foundWord || {}
+    return foundWord || {};
   }
 
   getAllWords = async ({

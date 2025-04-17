@@ -10,10 +10,10 @@ export interface CreateUserBodyReq {
 }
   
 export interface UpdateUserBodyReq {
-  username: string
-  email: string
-  fullName: string
-  avatar: string
-  status: UserStatus
-  roleId: number
+  username?: string
+  email?: string
+  fullName?: string
+  avatar?: string
+  status?: UserStatus
+  roleId?: number
 }

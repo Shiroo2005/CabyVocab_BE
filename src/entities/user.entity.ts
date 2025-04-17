@@ -42,13 +42,6 @@ export class User extends BaseEntity {
   @IsNotEmpty()
   password!: string
 
-  @Column('nvarchar')
-  @Matches(/^(?=(?:.*\p{L}){3})[\p{L}0-9 \-']+$/u, {
-    message: 'Full name must contain at least 3 letters and only letters, numbers, some symbols!'
-  })
-  @IsNotEmpty()
-  fullName!: string
-
   @Column('varchar', { default: 'N/A' })
   avatar?: string
 
@@ -86,13 +79,12 @@ export class User extends BaseEntity {
     this.password = hashData(this.password)
   }
 
-  static createUser = ({ id, email, username, fullName, password, avatar, status, role }: User) => {
+  static createUser = ({ id, email, username, password, avatar, status, role }: User) => {
     const newUser = new User()
 
     newUser.id = id
     newUser.email = email
     newUser.username = username
-    newUser.fullName = fullName
     newUser.password = password
     newUser.avatar = avatar
     newUser.status = status
@@ -106,14 +98,13 @@ export class User extends BaseEntity {
     {
       username,
       email,
-      fullName,
       avatar,
       status,
+      roleId,
       role
     }: {
       username?: string
       email?: string
-      fullName?: string
       avatar?: string
       status?: UserStatus
       roleId?: number
@@ -122,10 +113,9 @@ export class User extends BaseEntity {
   ) => {
     if (username) user.username = username
     if (email) user.email = email
-    if (fullName) user.fullName = fullName
     if (avatar) user.avatar = avatar
     if (status) user.status = status
-    if (role && role.id) user.role = role
+    if (role && role.id) user.role = role;
     //if (tokens && tokens.length == 0) user.tokens = tokens
 
     return user

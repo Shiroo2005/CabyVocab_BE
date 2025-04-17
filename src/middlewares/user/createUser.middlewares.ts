@@ -37,11 +37,6 @@ export const createUserValidation = validate(
         trim: true,
         ...isPassword
       },
-      fullName: {
-        trim: true,
-        ...isRequired('fullName'),
-        ...isLength({ fieldName: 'fullName' })
-      },
       roleId: {
         ...isRequired('roleId'),
         isDecimal: true,

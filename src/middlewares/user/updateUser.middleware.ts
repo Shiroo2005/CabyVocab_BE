@@ -8,18 +8,16 @@ import { UserStatus } from '~/constants/userStatus'
 import { isIn } from 'class-validator'
 import { Role } from '~/entities/role.entity'
 
-export const updateUserValidation = validate (
+export const updateUserByIdValidation = validate (
   checkSchema({
     username: {
       trim: true,
-      ...isRequired('Username'),
       ...isUsername,
       ...isLength({ fieldName: 'username' })
     },
 
     email: {
       trim: true,
-      ...isRequired('Email'),
       ...isEmail,
       custom: {
         options: async (value, { req }) => {
@@ -36,15 +34,8 @@ export const updateUserValidation = validate (
       }
     },
 
-    fullName: {
-      trim: true,
-      ...isRequired('fullName'),
-      ...isLength({ fieldName: 'fullName' })
-    },
-
     avatar: {
       trim: true,
-      ...isRequired('avatar'),
     },
 
     status: {

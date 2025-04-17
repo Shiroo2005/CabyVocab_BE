@@ -13,7 +13,7 @@ class UserService {
     if (!role) {
       throw new Error('Role not found!');
     }
-    const createUser = User.create({ email, username, password, fullName, role })
+    const createUser = User.create({ email, username, password, role })
     return unGetData({ fields: ['password'], object: await User.save(createUser) }) 
   }
 
@@ -22,14 +22,12 @@ class UserService {
       where: {
         email
       },
-      select: ['id', 'email', 'username', 'fullName', 'avatar', 'status']
+      relations: ['role'],
+      select: ['id', 'email', 'username', 'avatar', 'status', 'role']
     })
     console.log(resUser);
 
-    if (!resUser)
-      throw new Error('Không tìm thấy user');
-
-    return resUser 
+    return resUser || {}
   }
 
   getAllUser = async(page: number, limit: number) => {
@@ -37,7 +35,8 @@ class UserService {
     const [users, total] = await User.findAndCount({
       skip,
       take: limit,
-      select: ['id', 'username', 'email', 'fullName', 'avatar', 'status']
+      relations: ['role'],
+      select: ['id', 'username', 'email', 'avatar', 'status', 'role']
     });
     return {
       users,
@@ -52,27 +51,40 @@ class UserService {
       where: {
         id,
       },
-      select: ['id', 'username', 'email', 'fullName', 'avatar', 'status']
+      relations: ['role'],
+      select: ['id', 'username', 'email', 'avatar', 'status']
     })
-    if(!user) 
-      throw new Error('Không tìm thấy user');
-    return user;
+
+    return user ||{};
   }
 
   updateUserByID = async(id: number, {username, email, fullName, avatar, status, roleId} : UpdateUserBodyReq) => {
-      const user = await User.findOne({
-        where:{
-          id,
-        }
-      });
-      if(!user) {
-        throw new Error('Không tìm thấy user')
-      }
-      
-      const resUser = User.updateUser(user, {username, email, fullName, avatar, status, roleId});
-      
-      await User.save(resUser);
-      return unGetData({ fields: ['password'], object: await User.save(resUser) });
+    const user = await User.findOne({
+      where: { id },
+      relations: ['role']
+    });
+  
+    if (!user) {
+      throw new Error('Không tìm thấy user');
+    }
+  
+    let role
+  
+    if (roleId) {
+      const userRole = await Role.findOne({ where: { id: roleId } });
+      role = userRole != null ? userRole : undefined
+    }
+  
+    const updatedUser = User.updateUser(user, {
+      username,
+      email,
+      avatar,
+      status,
+      roleId,
+      role
+    });
+
+    return unGetData({ fields: ['password'], object: updatedUser });
   }
 
   deleteUserByID = async(id: number) => {
