@@ -40,9 +40,6 @@ export class Course extends BaseEntity {
   @Length(1, 255, { message: 'Description must be between 1 and 255 chars long!' })
   description?: string
 
-  @ManyToOne(() => Topic, (topic) => topic.courses)
-  topic: Topic
-
   @OneToMany(() => CourseProgress, (courseProgress) => courseProgress.course)
   courseProgresses: CourseProgress[]
 

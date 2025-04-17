@@ -16,7 +16,7 @@ class UserService {
       throw new Error('Role not found!');
     }
     const createUser = User.create({ email, username, password, fullName, role })
-    return unGetData({ fields: ['password'], object: await User.save(createUser) })
+    return unGetData({ fields: ['password'], object: await User.save(createUser) }) 
   }
 
   getUserByEmail = async (email: string) => {
@@ -31,7 +31,7 @@ class UserService {
     if (!resUser)
       throw new Error('Không tìm thấy user');
 
-    return resUser
+    return resUser 
   }
 
   getAllUser = async(page: number, limit: number) => {

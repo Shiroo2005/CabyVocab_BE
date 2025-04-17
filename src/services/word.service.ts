@@ -48,8 +48,8 @@ class WordService {
   }
 
   getAllWords = async ({
-    page = 1,
-    limit = 10,
+    page,
+    limit,
     content,
     example,
     meaning,

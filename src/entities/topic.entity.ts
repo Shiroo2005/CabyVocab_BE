@@ -47,10 +47,6 @@ export class Topic extends BaseEntity{
   @JoinTable({ name: 'word_topic' })
   words?: Word[]
 
-
-  @OneToMany(() => Course, (course) => course.topic)   
-  courses: Course[]
-
   @OneToMany(() => CompletedTopic, (completed_topic) => completed_topic.topic)
   completed_topics: CompletedTopic[]
 

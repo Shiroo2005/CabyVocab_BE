@@ -29,7 +29,7 @@ userRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(userController
 //PATCH
 userRouter.patch('/:id/restore', checkIdParamMiddleware, wrapRequestHandler(userController.restoreUser));
 
-userRouter.patch('/:id', updateUserValidation, wrapRequestHandler(userController.updateUser));
+userRouter.patch('/:id', checkIdParamMiddleware, updateUserValidation, wrapRequestHandler(userController.updateUser));
 
 //DELETE
 userRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(userController.deleteUser))

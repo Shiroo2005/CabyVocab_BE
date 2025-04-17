@@ -13,8 +13,8 @@ router.use('/roles', roleRouter)
 router.use('/auth', authRouter)
 router.use('/users', userRouter)
 
-router.use('/topic', topicRouter)
-router.use('/word', wordRouter)
-router.use('/course', courseRouter)
+router.use('/topics', topicRouter)
+router.use('/words', wordRouter)
+router.use('/courses', courseRouter)
 
 export default router

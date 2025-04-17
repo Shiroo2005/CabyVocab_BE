@@ -1,10 +1,7 @@
 import { TopicType } from "~/constants/topic";
+import { Topic } from "~/entities/topic.entity";
 
-export interface CreateTopicBodyReq {
-  topics: TopicBody[]
-}
-
-export interface TopicBody {
+export interface UpdateTopicBodyReq {
   title: string,
   description: string,
   thumbnail?: string,

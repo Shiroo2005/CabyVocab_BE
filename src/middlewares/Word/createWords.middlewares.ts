@@ -1,9 +1,10 @@
-import { isLength, isRequired, isString } from '../common.middlewares'
+import { isLength, isRequired, isString, isEnum } from '../common.middlewares'
 import { isValidEnumValue } from '~/utils'
 import { checkSchema } from 'express-validator'
 import { WordPosition, WordRank } from '~/constants/word'
 import { BadRequestError } from '~/core/error.response'
 import { validate } from '../validation.middlewares'
+import { Topic } from '~/entities/topic.entity'
 
 
 export const createWordValidation = validate(
@@ -52,12 +53,7 @@ export const createWordValidation = validate(
       },
       'words.*.rank': {
         optional: true,
-        custom: {
-          options: (value) => {
-            if (!isValidEnumValue(value, WordRank)) throw new BadRequestError({message: 'rank must be in enum WORD Rank!'})
-            return true
-          }
-        }
+        ...isEnum(WordRank, 'wordRank')
       },
       'words.*.example': {
         trim: true,
@@ -70,6 +66,21 @@ export const createWordValidation = validate(
         optional: true,
         ...isString('translate example'),
         ...isLength({ fieldName: 'translate example', min: 1, max: 255 })
+      },
+      'words.*.topicId': {
+        ...isRequired('topicId'),
+        isDecimal: true,
+        custom: {
+          options: async (value) => {
+            const foundRole = await Topic.findOne({
+              where: {id: value}
+            })
+            if (!foundRole) {
+              throw new BadRequestError({message: 'Topic id invalid!'})
+            }
+            return true
+          }
+        }        
       }
     },
     ['body']

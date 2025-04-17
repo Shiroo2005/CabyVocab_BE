@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { ParamsDictionary } from 'express-serve-static-core'
+import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
 import { CREATED, SuccessResponse } from '~/core/success.response'
 import { CreateWordBodyReq } from '~/dto/req/word/createWordBody.req'
 import { UpdateWordBodyReq } from '~/dto/req/word/updateWordBody.req'
@@ -23,9 +23,8 @@ class WordController {
     }).send(res)
   }
 
-  getWord = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+  getWordById = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     const id = parseInt(req.params?.id)
-    
     return new SuccessResponse({
       message: 'Get word by id successful!',
       metaData: await wordService.getWordById({ id })
@@ -33,16 +32,11 @@ class WordController {
   }
 
   getAllWords = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
-    
-    const queryParams = {
-      ...req.query,
-      ...req.parseQueryPagination,
-      sort: req.sortParsed
-    }
+    //middleware: check if page, limit is exists?
 
     return new SuccessResponse({
       message: 'Get all words successfully',
-      metaData: await wordService.getAllWords(queryParams)
+      metaData: await wordService.getAllWords({...req.query, ...req.parseQueryPagination, sort: req.sortParsed})
     }).send(res)
   }
 
@@ -55,7 +49,7 @@ class WordController {
     }).send(res)
   }
 
-  restoreWordById = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+  restoreWord = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
     const id = parseInt(req.params?.id)
 
     return new SuccessResponse({

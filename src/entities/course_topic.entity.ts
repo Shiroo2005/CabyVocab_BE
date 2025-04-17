@@ -16,7 +16,7 @@ import { Course } from './courses.entity'
 
 
 @Entity()
-export class CourseTopic {
+export class CourseTopic extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

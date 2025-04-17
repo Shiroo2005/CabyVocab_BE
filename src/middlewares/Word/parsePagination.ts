@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { FindOptionsOrder } from 'typeorm'
+import { Topic } from '~/entities/topic.entity';
 import { Word } from '~/entities/word.entity';
 
 // export const parsePagination = (req: Request, res: Response, next: NextFunction) => {
@@ -16,8 +17,8 @@ import { Word } from '~/entities/word.entity';
 declare global {
   namespace Express {
     interface Request {
-      parseQueryPagination?: { page: number; limit: number };
-      sortParsed?: FindOptionsOrder<Word>;
+      parseQueryPagination: { page: number; limit: number };
+      sortParsed?: FindOptionsOrder<Word | Topic>;
     }
   }
 }
