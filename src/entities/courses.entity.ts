@@ -12,7 +12,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
-import internal from 'stream'
 import { Topic } from './topic.entity'
 import { WordRank } from '~/constants/word'
 import { CourseProgress } from './course_progress.entity'
@@ -31,7 +30,6 @@ export class Course extends BaseEntity {
   @Column('varchar')
   @IsNotEmpty({message: 'courses level must be not empty'})
   @IsEnum(WordRank, { message: 'Topic level must be in enum rank' })
-  @IsOptional()
   level!: WordRank
 
   @Column('varchar')
@@ -59,4 +57,5 @@ export class Course extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt?: Date
+
 }

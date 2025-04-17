@@ -12,6 +12,11 @@ export const getSelectData = (select = []) => {
 export const unGetData = ({ fields = [], object = {} }: { fields?: Array<string>; object?: object }) => {
   return _.omit(object, fields)
 }
+
+export const isValidEnumValue = <T extends object>(value: string, enumObj: T): boolean => {
+  return Object.values(enumObj).includes(value as T[keyof T])
+}
+
 // // export const unGetSelectData = (select = []) => {
 // //   return Object.fromEntries(select.map((el) => [el, 0]))
 // // }

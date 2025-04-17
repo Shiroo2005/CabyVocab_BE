@@ -5,7 +5,7 @@ import { createUserValidation } from '~/middlewares/user/createUser.middlewares'
 import { accessTokenValidation } from '~/middlewares/auth.middlewares'
 import { checkIdParamMiddleware } from '~/middlewares/common.middlewares'
 import { searchEmailValidation } from '~/middlewares/user/searchUser.middleware'
-import { UpdateUserBodyReq } from '~/dto/req/user/createUserBody.req'
+import { UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
 import { updateUserValidation } from '~/middlewares/user/updateUser.middleware'
 
 const userRouter = express.Router()

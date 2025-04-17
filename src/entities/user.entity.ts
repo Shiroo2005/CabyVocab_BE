@@ -126,7 +126,7 @@ export class User extends BaseEntity {
     if (avatar) user.avatar = avatar
     if (status) user.status = status
     if (role && role.id) user.role = role
-    // if (tokens && tokens.length == 0) user.tokens = tokens
+    //if (tokens && tokens.length == 0) user.tokens = tokens
 
     return user
   }

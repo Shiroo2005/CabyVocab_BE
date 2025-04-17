@@ -1,15 +1,21 @@
-
 import { error } from 'console'
-import e from 'express'
 import { stat } from 'fs'
-import { CreateUserBodyReq, UpdateUserBodyReq } from '~/dto/req/user/createUserBody.req'
+import { CreateUserBodyReq, UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
+import { Role } from '~/entities/role.entity'
 import { User } from '~/entities/user.entity'
 import { unGetData } from '~/utils'
 
 
 class UserService {
-  createUser = async ({ email, username, password, fullName }: CreateUserBodyReq) => {
-    const createUser = User.create({ email, username, password, fullName })
+  createUser = async ({ email, username, password, fullName, roleId }: CreateUserBodyReq) => {
+    const role = await Role.findOne({
+      where: {id: roleId}
+    });
+
+    if (!role) {
+      throw new Error('Role not found!');
+    }
+    const createUser = User.create({ email, username, password, fullName, role })
     return unGetData({ fields: ['password'], object: await User.save(createUser) })
   }
 
@@ -72,17 +78,6 @@ class UserService {
   }
 
   deleteUserByID = async(id: number) => {
-    // const user = await User.findOne({
-    //   where: {
-    //     id,
-    //   }
-    // })
-    // if(!user) {
-    //   throw new Error('Không tìm thấy user')
-    // }
-    // const res = await User.deleteUser(user);
-    // return unGetData({ fields: ['password'], object: await User.save(res) })
-
     return await User.getRepository().softDelete(id);
   }
 

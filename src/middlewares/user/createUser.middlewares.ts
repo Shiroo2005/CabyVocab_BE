@@ -4,6 +4,7 @@ import { BadRequestError } from '~/core/error.response'
 import { roleService } from '~/services/role.service'
 import { validate } from '../validation.middlewares'
 import { User } from '~/entities/user.entity'
+import { Role } from '~/entities/role.entity'
 // Validate create user
 export const createUserValidation = validate(
   checkSchema(
@@ -40,20 +41,22 @@ export const createUserValidation = validate(
         trim: true,
         ...isRequired('fullName'),
         ...isLength({ fieldName: 'fullName' })
+      },
+      roleId: {
+        ...isRequired('roleId'),
+        isDecimal: true,
+        custom: {
+          options: async (value) => {
+            const foundRole = await Role.findOne({
+              where: {id: value}
+            })
+            if (!foundRole) {
+              throw new BadRequestError({message: 'Role id invalid!'})
+            }
+            return true
+          }
+        }
       }
-      //   roleId: {
-      //     ...isRequired('roleId'),
-      //     isDecimal: true,
-      //     custom: {
-      //       options: async (value) => {
-      //         const foundRole = await roleService.isExistRoleId(value)
-      //         if (!foundRole) {
-      //           throw new BadRequestError('Role id invalid!')
-      //         }
-      //         return true
-      //       }
-      //     }
-      //   }
     },
     ['body']
   )
