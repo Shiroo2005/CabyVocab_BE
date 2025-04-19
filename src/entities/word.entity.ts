@@ -145,11 +145,22 @@ export class Word extends BaseEntity {
 
     if (topicIds && topicIds.length > 0) {
       const topics = await Topic.find({
-        where: { id: In(topicIds)} 
-      });
-      word.topics = topics;  // Associate the topics with the word
+        where: { id: In(topicIds) }
+      })
+      word.topics = topics // Associate the topics with the word
     }
     await word.save()
     return word
   }
+
+  static allowSortList = [
+    'id',
+    'content',
+    'pronunciation',
+    'position',
+    'meaning',
+    'rank',
+    'example',
+    'translateExample'
+  ]
 }

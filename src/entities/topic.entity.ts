@@ -1,11 +1,10 @@
-import { IsEnum, isEnum, IsNotEmpty, isNotEmpty, IsOptional, Length, Matches } from 'class-validator'
+import { IsEnum, IsNotEmpty, IsOptional, Length } from 'class-validator'
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
   JoinTable,
   ManyToMany,
   OneToMany,
@@ -14,12 +13,11 @@ import {
 } from 'typeorm'
 import { TopicType } from '~/constants/topic'
 import { Word } from './word.entity'
-import { Course } from './courses.entity'
 import { CompletedTopic } from './completed_topic.entity'
 import { CourseTopic } from './course_topic.entity'
 
 @Entity()
-export class Topic extends BaseEntity{
+export class Topic extends BaseEntity {
   @PrimaryGeneratedColumn()
   id?: number
 
@@ -62,7 +60,7 @@ export class Topic extends BaseEntity{
   @UpdateDateColumn()
   updatedAt?: Date
 
-  static createTopic = ({ id, title, description, thumbnail, type, words}: Topic) => {
+  static createTopic = ({ id, title, description, thumbnail, type, words }: Topic) => {
     const newTopic = new Topic()
     newTopic.id = id
     newTopic.title = title
@@ -73,14 +71,13 @@ export class Topic extends BaseEntity{
     return newTopic
   }
 
-
   static updateTopic = (
     topic: Topic,
     {
       title,
       description,
       thumbnail,
-      type,
+      type
       //words
     }: {
       title?: string
@@ -98,4 +95,6 @@ export class Topic extends BaseEntity{
 
     return topic
   }
+
+  static allowSortList = ['id', 'title', 'description', 'type']
 }

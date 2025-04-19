@@ -1,7 +1,8 @@
 import { Request, Response } from 'express'
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
+import { isEmpty } from 'lodash'
 import { BadRequestError } from '~/core/error.response'
-import { isValidNumber } from '~/utils'
+import { isValidNumber, toNumberWithDefaultValue } from '~/utils'
 
 export const checkIdParamMiddleware = (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
   if (req.params?.id && !isValidNumber(req.params?.id)) {
@@ -9,6 +10,48 @@ export const checkIdParamMiddleware = (req: Request<ParamsDictionary, any, any>,
   } else next()
 }
 
+export const checkQueryMiddleware = ({
+  requiredFields,
+  numbericFields = ['limit', 'page'],
+  defaultLimit = 10,
+  defaultPage = 1,
+  maxLimit = 30
+}: {
+  requiredFields?: string[]
+  numbericFields?: string[]
+  defaultLimit?: number
+  defaultPage?: number
+  maxLimit?: number
+} = {}) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    // Kiểm tra xem có query nào không nằm trong fields không
+    if (requiredFields) {
+      const invalidFields = requiredFields.filter((field) => !req.query[field])
+
+      if (invalidFields.length > 0) {
+        throw new BadRequestError({ message: `${requiredFields.join(', ')} is required on query!` })
+      }
+    }
+
+    // check is number field
+    if (numbericFields) {
+      numbericFields.forEach((field) => {
+        if (req.query[field] && !isValidNumber(req.query[field] as string)) {
+          throw new BadRequestError({ message: `${field} must be a numberic string` })
+        }
+      })
+    }
+    //parse limit, page
+    req.parseQueryPagination = {
+      limit: toNumberWithDefaultValue(req.query.limit, defaultLimit),
+      page: toNumberWithDefaultValue(req.query.page, defaultPage)
+    }
+
+    //check max limit & max page
+    if ((req.parseQueryPagination.limit as number) > maxLimit) req.parseQueryPagination.limit = defaultLimit
+    next()
+  }
+}
 
 export const isRequired = (fieldName: string) => ({
   notEmpty: {
@@ -68,11 +111,37 @@ export const isString = (fieldName: string) => {
 export const isEnum = <Enum extends Record<string, string | number>>(enumObj: Enum, fieldName = 'Value') => ({
   custom: {
     options: (value: any) => {
-      const enumValues = Object.values(enumObj);
+      const enumValues = Object.values(enumObj)
       if (!enumValues.includes(value)) {
-        throw new Error(`${fieldName} must be one of: ${enumValues.join(', ')}`);
+        throw new Error(`${fieldName} must be one of: ${enumValues.join(', ')}`)
       }
-      return true;
+      return true
     }
   }
-});
+})
+
+//pagination
+//parse sort
+export const parseSort = ({ allowSortList }: { allowSortList: string[] }) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    //convert sort to sort statement in typeorm
+    // sort like sort =-id,+name
+
+    const sort = req.query.sort as string | null
+
+    const orderStatement: Record<string, 'ASC' | 'DESC'> = {}
+    if (sort && !isEmpty(sort)) {
+      const sortFields = sort.split(',')
+      sortFields.forEach((sortField) => {
+        const orderSort = sortField[0],
+          fieldSort = sortField.substring(1)
+        if (fieldSort && orderSort && allowSortList.includes(fieldSort)) {
+          // Ensure the sort order is either ASC or DESC
+          orderStatement[fieldSort] = orderSort === '-' ? 'DESC' : 'ASC'
+        }
+      })
+      req.sortParsed = orderStatement
+    }
+    next()
+  }
+}

@@ -1,7 +1,8 @@
 import express from 'express'
 import { topicController } from '~/controllers/topic.controller'
+import { Topic } from '~/entities/topic.entity'
 import { accessTokenValidation } from '~/middlewares/auth.middlewares'
-import { checkIdParamMiddleware } from '~/middlewares/common.middlewares'
+import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '~/middlewares/common.middlewares'
 import { create_updateTopicValidation } from '~/middlewares/topic/createTopic.middlewares'
 import { wrapRequestHandler } from '~/utils/handler'
 
@@ -11,7 +12,12 @@ const topicRouter = express.Router()
 topicRouter.use(accessTokenValidation)
 
 //GET
-topicRouter.get('/', wrapRequestHandler(topicController.getAllTopics))
+topicRouter.get(
+  '/',
+  checkQueryMiddleware(),
+  wrapRequestHandler(parseSort({ allowSortList: Topic.allowSortList })),
+  wrapRequestHandler(topicController.getAllTopics)
+)
 topicRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(topicController.getTopicById))
 
 //POST

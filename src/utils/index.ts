@@ -1,6 +1,16 @@
-import _, { parseInt } from 'lodash'
+import _, { parseInt, toNumber } from 'lodash'
 
 export const isValidNumber = (num: string) => !Number.isNaN(parseInt(num))
+export const toNumberWithDefaultValue = (num: any, defaultValue: number) => {
+  if (!num) return defaultValue
+  try {
+    const value = toNumber(num)
+    if (isNaN(value)) throw new Error('Fail to convert')
+    return value
+  } catch (error) {
+    return defaultValue
+  }
+}
 
 export const getInfoData = ({ fields = [], object = {} }) => {
   return _.pick(object, fields)
