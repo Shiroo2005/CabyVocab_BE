@@ -3,7 +3,7 @@ import { config } from 'dotenv'
 import jwt, { SignOptions } from 'jsonwebtoken'
 import { env } from 'process'
 import { v4 as uuidv4 } from 'uuid'
-import { TokenType } from '~/constants/tokenType'
+import { TokenType } from '~/constants/token'
 
 config()
 
