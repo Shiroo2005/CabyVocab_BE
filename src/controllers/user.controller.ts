@@ -3,7 +3,7 @@ import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
 import { values } from 'lodash'
 import { userInfo } from 'os'
 import { CREATED } from '~/core/success.response'
-import { CreateUserBodyReq, UpdateUserBodyReq } from '~/dto/req/user/createUserBody.req'
+import { CreateUserBodyReq, UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
 import { userService } from '~/services/user.service'
 
 class UserController {

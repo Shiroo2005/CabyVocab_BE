@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { body, param, validationResult } from 'express-validator'
-import { Role } from '~/entities/role.entitity'
+import { Role } from '~/entities/role.entity'
 import { BadRequestError } from '~/core/error.response'
 import { UserStatus } from '~/constants/userStatus'
 import { User } from '~/entities/user.entity'

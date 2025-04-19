@@ -64,3 +64,15 @@ export const isString = (fieldName: string) => {
     }
   }
 }
+
+export const isEnum = <Enum extends Record<string, string | number>>(enumObj: Enum, fieldName = 'Value') => ({
+  custom: {
+    options: (value: any) => {
+      const enumValues = Object.values(enumObj);
+      if (!enumValues.includes(value)) {
+        throw new Error(`${fieldName} must be one of: ${enumValues.join(', ')}`);
+      }
+      return true;
+    }
+  }
+});

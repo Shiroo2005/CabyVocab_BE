@@ -12,8 +12,7 @@ class AuthService {
   register = async ({
     email,
     username,
-    password,
-    fullName
+    password
   }: {
     email: string
     username: string
@@ -24,8 +23,7 @@ class AuthService {
     const newUser = User.create({
       email,
       username,
-      password,
-      fullName
+      password
       ///role
     })
 

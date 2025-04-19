@@ -1,15 +1,18 @@
-
-import { error } from 'console'
-import e from 'express'
-import { stat } from 'fs'
-import { CreateUserBodyReq, UpdateUserBodyReq } from '~/dto/req/user/createUserBody.req'
+import { CreateUserBodyReq, UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
+import { Role } from '~/entities/role.entity'
 import { User } from '~/entities/user.entity'
 import { unGetData } from '~/utils'
 
-
 class UserService {
-  createUser = async ({ email, username, password, fullName }: CreateUserBodyReq) => {
-    const createUser = User.create({ email, username, password, fullName })
+  createUser = async ({ email, username, password, roleId }: CreateUserBodyReq) => {
+    const role = await Role.findOne({
+      where: { id: roleId }
+    })
+
+    if (!role) {
+      throw new Error('Role not found!')
+    }
+    const createUser = User.create({ email, username, password, role })
     return unGetData({ fields: ['password'], object: await User.save(createUser) })
   }
 
@@ -18,76 +21,76 @@ class UserService {
       where: {
         email
       },
-      select: ['id', 'email', 'username', 'fullName', 'avatar', 'status']
+      relations: ['role'],
+      select: ['id', 'email', 'username', 'avatar', 'status', 'role']
     })
-    console.log(resUser);
+    console.log(resUser)
 
-    if (!resUser)
-      throw new Error('Không tìm thấy user');
-
-    return resUser
+    return resUser || {}
   }
 
-  getAllUser = async(page: number, limit: number) => {
-    const skip = (page - 1) * limit;
+  getAllUser = async (page: number, limit: number) => {
+    const skip = (page - 1) * limit
     const [users, total] = await User.findAndCount({
       skip,
       take: limit,
-      select: ['id', 'username', 'email', 'fullName', 'avatar', 'status']
-    });
+      relations: ['role'],
+      select: ['id', 'username', 'email', 'avatar', 'status', 'role']
+    })
     return {
       users,
       total,
       currentPage: page,
       totalPages: Math.ceil(total / limit)
-    };
+    }
   }
 
   getUserByID = async (id: number) => {
     const user = await User.findOne({
       where: {
-        id,
+        id
       },
-      select: ['id', 'username', 'email', 'fullName', 'avatar', 'status']
+      relations: ['role'],
+      select: ['id', 'username', 'email', 'avatar', 'status']
     })
-    if(!user) 
-      throw new Error('Không tìm thấy user');
-    return user;
+
+    return user || {}
   }
 
-  updateUserByID = async(id: number, {username, email, fullName, avatar, status, roleId} : UpdateUserBodyReq) => {
-      const user = await User.findOne({
-        where:{
-          id,
-        }
-      });
-      if(!user) {
-        throw new Error('Không tìm thấy user')
-      }
-      
-      const resUser = User.updateUser(user, {username, email, fullName, avatar, status, roleId});
-      
-      await User.save(resUser);
-      return unGetData({ fields: ['password'], object: await User.save(resUser) });
+  updateUserByID = async (id: number, { username, email, avatar, status, roleId }: UpdateUserBodyReq) => {
+    const user = await User.findOne({
+      where: { id },
+      relations: ['role']
+    })
+
+    if (!user) {
+      throw new Error('Không tìm thấy user')
+    }
+
+    let role
+
+    if (roleId) {
+      const userRole = await Role.findOne({ where: { id: roleId } })
+      role = userRole != null ? userRole : undefined
+    }
+
+    const updatedUser = User.updateUser(user, {
+      username,
+      email,
+      avatar,
+      status,
+      role
+    })
+
+    return unGetData({ fields: ['password'], object: updatedUser })
   }
 
-  deleteUserByID = async(id: number) => {
-    // const user = await User.findOne({
-    //   where: {
-    //     id,
-    //   }
-    // })
-    // if(!user) {
-    //   throw new Error('Không tìm thấy user')
-    // }
-    // const res = await User.deleteUser(user);
-    // return unGetData({ fields: ['password'], object: await User.save(res) })
-
-    return await User.getRepository().softDelete(id);
+  deleteUserByID = async (id: number) => {
+    return await User.getRepository().softDelete(id)
   }
 
-  restoreUser = async(id: number) => {
-    return User.getRepository().restore(id);
+  restoreUser = async (id: number) => {
+    return User.getRepository().restore(id)
   }
 }
 

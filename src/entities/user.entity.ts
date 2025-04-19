@@ -14,9 +14,12 @@ import {
   UpdateDateColumn
 } from 'typeorm'
 import { UserStatus } from '~/constants/userStatus'
-import { Role } from './role.entitity'
+import { Role } from './role.entity'
 import { hashData } from '~/utils/jwt'
 import { Token } from './token.entity'
+import { CompletedTopic } from './completed_topic.entity'
+import { WordProgress } from './word_progress.entity'
+import { CourseProgress } from './course_progress.entity'
 
 @Entity()
 export class User extends BaseEntity {
@@ -39,13 +42,6 @@ export class User extends BaseEntity {
   @IsNotEmpty()
   password!: string
 
-  @Column('nvarchar')
-  @Matches(/^(?=(?:.*\p{L}){3})[\p{L}0-9 \-']+$/u, {
-    message: 'Full name must contain at least 3 letters and only letters, numbers, some symbols!'
-  })
-  @IsNotEmpty()
-  fullName!: string
-
   @Column('varchar', { default: 'N/A' })
   avatar?: string
 
@@ -67,19 +63,27 @@ export class User extends BaseEntity {
   @OneToMany(() => Token, (token) => token.user)
   tokens?: Token[]
 
+  @OneToMany(() => CompletedTopic, (completedTopic) => completedTopic.user)
+  completedTopics: CompletedTopic[]
+
+  @OneToMany(() => WordProgress, (wordProgress) => wordProgress.user)
+  wordProgresses: WordProgress[]
+
+  @OneToMany(() => CourseProgress, (courseProgress) => courseProgress.user)
+  courseProgresses: CourseProgress[]
+
   @BeforeInsert()
   @BeforeUpdate()
   hashPassword?() {
     this.password = hashData(this.password)
   }
 
-  static createUser = ({ id, email, username, fullName, password, avatar, status, role }: User) => {
+  static createUser = ({ id, email, username, password, avatar, status, role }: User) => {
     const newUser = new User()
 
     newUser.id = id
     newUser.email = email
     newUser.username = username
-    newUser.fullName = fullName
     newUser.password = password
     newUser.avatar = avatar
     newUser.status = status
@@ -93,14 +97,12 @@ export class User extends BaseEntity {
     {
       username,
       email,
-      fullName,
       avatar,
       status,
       role
     }: {
       username?: string
       email?: string
-      fullName?: string
       avatar?: string
       status?: UserStatus
       roleId?: number
@@ -109,18 +111,16 @@ export class User extends BaseEntity {
   ) => {
     if (username) user.username = username
     if (email) user.email = email
-    if (fullName) user.fullName = fullName
     if (avatar) user.avatar = avatar
     if (status) user.status = status
     if (role && role.id) user.role = role
-    // if (tokens && tokens.length == 0) user.tokens = tokens
+    //if (tokens && tokens.length == 0) user.tokens = tokens
 
     return user
   }
 
   static deleteUser = (user: User) => {
-    const res = User.softRemove(user);
-    return res;
+    const res = User.softRemove(user)
+    return res
   }
-  
 }

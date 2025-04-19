@@ -1,5 +1,5 @@
 import { CreateRoleBodyReq } from '~/dto/req/roles/createRoleBody.req'
-import { Role } from '~/entities/role.entitity'
+import { Role } from '~/entities/role.entity'
 
 class RoleService {
   createRole = async ({ name, description }: CreateRoleBodyReq) => {
