@@ -73,25 +73,25 @@ export const createWordValidation = validate(
         optional: true,
         ...isString('translate example'),
         ...isLength({ fieldName: 'translate example', min: 1, max: 255 })
-      },
-      'words.*.topicIds': {
-        ...isRequired('topicId'),
-        isArray: {
-          errorMessage: 'topicID không hợp lệ'
-        },
-        custom: {
-          options: async (value: number[]) => {
-            const topics = await Topic.find({
-              where: { id: In(value) }
-            })
-
-            if (topics.length !== value.length) {
-              throw new BadRequestError({ message: 'topicIDs không hợp lệ' })
-            }
-            return true
-          }
-        }
       }
+      // 'words.*.topicIds': {
+      //   ...isRequired('topicId'),
+      //   isArray: {
+      //     errorMessage: 'topicID không hợp lệ'
+      //   },
+      //   custom: {
+      //     options: async (value: number[]) => {
+      //       const topics = await Topic.find({
+      //         where: { id: In(value) }
+      //       })
+
+      //       if (topics.length !== value.length) {
+      //         throw new BadRequestError({ message: 'topicIDs không hợp lệ' })
+      //       }
+      //       return true
+      //     }
+      //   }
+      // }
     },
     ['body']
   )
