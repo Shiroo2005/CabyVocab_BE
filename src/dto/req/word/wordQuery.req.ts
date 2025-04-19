@@ -3,8 +3,8 @@ import { WordPosition, WordRank } from '~/constants/word'
 import { Word } from '~/entities/word.entity'
 
 export interface wordQueryReq {
-  page: number
-  limit: number
+  page?: number
+  limit?: number
   content?: string
   pronunciation?: string
   meaning?: string

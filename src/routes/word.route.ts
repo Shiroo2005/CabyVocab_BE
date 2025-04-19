@@ -2,8 +2,9 @@ import express from 'express'
 import { accessTokenValidation } from '~/middlewares/auth.middlewares'
 import { wrapRequestHandler } from '~/utils/handler'
 import { wordController } from '~/controllers/word.controller'
-import { createWordValidation } from '~/middlewares/Word/createWords.middlewares'
+import { createWordValidation } from '~/middlewares/word/createWords.middlewares'
 import { checkIdParamMiddleware } from '~/middlewares/common.middlewares'
+import { updateWordValidation } from '~/middlewares/word/updateWord.middleware'
 
 const wordRouter = express.Router()
 
@@ -20,7 +21,7 @@ wordRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(wordController
 wordRouter.post('/', createWordValidation, wrapRequestHandler(wordController.createWords))
 
 //PATCH
-wordRouter.patch('/:id', checkIdParamMiddleware, createWordValidation, wrapRequestHandler(wordController.updateWord))
+wordRouter.patch('/:id', checkIdParamMiddleware, updateWordValidation, wrapRequestHandler(wordController.updateWord))
 wordRouter.patch('/:id/restore', checkIdParamMiddleware, wrapRequestHandler(wordController.restoreWord))
 
 //PUT

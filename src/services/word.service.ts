@@ -1,28 +1,18 @@
-import { In } from 'typeorm'
-import { BadRequestError } from '~/core/error.response'
+import { validate } from 'class-validator'
 import { WordBody } from '~/dto/req/word/createWordBody.req'
 import { UpdateWordBodyReq } from '~/dto/req/word/updateWordBody.req'
 import { wordQueryReq } from '~/dto/req/word/wordQuery.req'
-import { DataWithPagination } from '~/dto/res/pagination.res'
-import { Topic } from '~/entities/topic.entity'
 import { Word } from '~/entities/word.entity'
-//import { wordRepository } from '~/repositories/word.repository'
-//import { buildFilterLike } from './query.service'
 
 class WordService {
   createWords = async (words: WordBody[]) => {
-    const _words = await Promise.all(
-      words.map(async word => {
-      const newWord = Word.create({...word})
-      if (word.topicIds && Array.isArray(word.topicIds) && word.topicIds.length > 0) {
-        const topics = await Topic.find({
-            where: { id: In(word.topicIds)}
-          });
-        newWord.topics = topics;
-      }
-      return newWord;
-    }));
+    // create object word
+    const _words = words.map((word) => Word.create({ ...word }))
 
+    //validate before save
+    await validate(_words)
+
+    //save in db
     const result = await Word.save(_words)
 
     return result
@@ -30,16 +20,38 @@ class WordService {
 
   updateWord = async (
     id: number,
-    { content, meaning, pronunciation, audio, example, image, position, rank, translateExample, topicIds }: UpdateWordBodyReq
+    {
+      content,
+      meaning,
+      pronunciation,
+      audio,
+      example,
+      image,
+      position,
+      rank,
+      translateExample,
+      topicIds
+    }: UpdateWordBodyReq
   ) => {
     const word = await Word.findOne({
-      where: { id },
-    });
+      where: { id }
+    })
 
-    if (word) 
-      Word.updateWord(word, {content, meaning, pronunciation, audio, example, image, position, rank, translateExample, topicIds});
-  
-    return word || {};
+    if (word)
+      Word.updateWord(word, {
+        content,
+        meaning,
+        pronunciation,
+        audio,
+        example,
+        image,
+        position,
+        rank,
+        translateExample,
+        topicIds
+      })
+
+    return word || {}
   }
 
   getWordById = async ({ id }: { id: number }) => {
@@ -49,12 +61,12 @@ class WordService {
       }
     })
 
-    return foundWord || {};
+    return foundWord || {}
   }
 
   getAllWords = async ({
-    page,
-    limit,
+    page = 1,
+    limit = 10,
     content,
     example,
     meaning,
@@ -65,41 +77,40 @@ class WordService {
     sort
   }: wordQueryReq) => {
     //build where condition
-    const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit
 
     const [words, total] = await Word.findAndCount({
-        skip,
-        take: limit, 
-        where:{
-            content,
-            example,
-            meaning,
-            position,
-            pronunciation,
-            rank,
-            translateExample
-        },
-        order: sort,
-        select: {
-            id: true,
-            audio: true,
-            content: true,
-            example: true,
-            image: true,
-            meaning: true,
-            position: true,
-            pronunciation: true,
-            rank: true,
-            translateExample: true
-        }
+      skip,
+      take: limit,
+      where: {
+        content,
+        example,
+        meaning,
+        position,
+        pronunciation,
+        rank,
+        translateExample
+      },
+      order: sort,
+      select: {
+        id: true,
+        audio: true,
+        content: true,
+        example: true,
+        image: true,
+        meaning: true,
+        position: true,
+        pronunciation: true,
+        rank: true,
+        translateExample: true
+      }
     })
 
-
     return {
-        words,
-        total,
-        currentPage: page,
-        totalPages: Math.ceil(total / limit)   
+      words,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit)
     }
   }
 

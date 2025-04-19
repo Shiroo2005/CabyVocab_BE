@@ -7,11 +7,17 @@ import { validate } from '../validation.middlewares'
 import { Topic } from '~/entities/topic.entity'
 import { In } from 'typeorm'
 
-
 export const createWordValidation = validate(
   checkSchema(
     {
-      words: {},
+      words: {
+        custom: {
+          options: (words) => {
+            if (!words || !Array.isArray(words)) throw new BadRequestError({ message: 'Request body invalid format!' })
+            return true
+          }
+        }
+      },
       'words.*.content': {
         trim: true,
         ...isRequired('content'),
@@ -29,7 +35,7 @@ export const createWordValidation = validate(
         custom: {
           options: (value) => {
             if (!isValidEnumValue(value, WordPosition))
-              throw new BadRequestError({message: 'position must be in enum WORD POSITION!'})
+              throw new BadRequestError({ message: 'position must be in enum WORD POSITION!' })
             return true
           }
         }
@@ -76,15 +82,15 @@ export const createWordValidation = validate(
         custom: {
           options: async (value: number[]) => {
             const topics = await Topic.find({
-              where: { id: In(value)}
-            });
-            
+              where: { id: In(value) }
+            })
+
             if (topics.length !== value.length) {
-              throw new BadRequestError({ message: 'topicIDs không hợp lệ' });
+              throw new BadRequestError({ message: 'topicIDs không hợp lệ' })
             }
             return true
           }
-        }        
+        }
       }
     },
     ['body']

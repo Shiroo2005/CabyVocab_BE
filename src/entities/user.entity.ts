@@ -72,7 +72,6 @@ export class User extends BaseEntity {
   @OneToMany(() => CourseProgress, (courseProgress) => courseProgress.user)
   courseProgresses: CourseProgress[]
 
-
   @BeforeInsert()
   @BeforeUpdate()
   hashPassword?() {
@@ -100,7 +99,6 @@ export class User extends BaseEntity {
       email,
       avatar,
       status,
-      roleId,
       role
     }: {
       username?: string
@@ -115,15 +113,14 @@ export class User extends BaseEntity {
     if (email) user.email = email
     if (avatar) user.avatar = avatar
     if (status) user.status = status
-    if (role && role.id) user.role = role;
+    if (role && role.id) user.role = role
     //if (tokens && tokens.length == 0) user.tokens = tokens
 
     return user
   }
 
   static deleteUser = (user: User) => {
-    const res = User.softRemove(user);
-    return res;
+    const res = User.softRemove(user)
+    return res
   }
-  
 }

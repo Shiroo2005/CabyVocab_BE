@@ -14,5 +14,4 @@ export interface WordBody {
   rank?: WordRank
   example?: string
   translateExample?: string
-  topicIds: number[]
 }

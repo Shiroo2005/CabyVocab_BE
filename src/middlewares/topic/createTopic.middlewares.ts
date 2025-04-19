@@ -1,17 +1,27 @@
 import { validate } from '../validation.middlewares'
 import { checkSchema } from 'express-validator'
-import { isRequired, isLength, isString, isEnum} from "../common.middlewares";
-import { TopicType } from '~/constants/topic';
+import { isRequired, isLength, isString, isEnum } from '../common.middlewares'
+import { TopicType } from '~/constants/topic'
+import { BadRequestError } from '~/core/error.response'
 
 export const create_updateTopicValidation = validate(
-  checkSchema (
+  checkSchema(
     {
-      topics: {},
+      topics: {
+        custom: {
+          options: (value) => {
+            if (!Array.isArray(value) || value.length === 0) {
+              throw new BadRequestError({ message: 'topics must contain at least 1 item' })
+            }
+            return true
+          }
+        }
+      },
       'topics.*.title': {
         trim: true,
         ...isString('Topic title'),
-        ...isLength({fieldName: 'Topic title', min: 1, max: 100}),
-        ...isRequired('Title'),
+        ...isLength({ fieldName: 'Topic title', min: 1, max: 100 }),
+        ...isRequired('Title')
       },
       'topic.*.description': {
         trim: true,
