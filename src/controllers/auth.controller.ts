@@ -44,5 +44,27 @@ class AuthController {
       metaData: await authService.logout({ refreshToken })
     }).send(res)
   }
+
+  sendVerificationEmail = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    const user = req.user as User
+    await authService
+      .sendVerifyEmail({ email: user.email, name: user.username, userId: user.id as number })
+      .catch((err) => console.error('Error when send verify email', err))
+      .then((res) => {
+        console.log(`Send verification email successful with url = ${res}`)
+        return
+      })
+
+    return new SuccessResponse({ message: 'Send verification email successful!' }).send(res)
+  }
+
+  verifyEmailTokenController = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    const user = req.user as User
+
+    return new SuccessResponse({
+      message: 'Verify email!',
+      metaData: await authService.verifyEmail({ userId: user.id as number })
+    }).send(res)
+  }
 }
 export const authController = new AuthController()

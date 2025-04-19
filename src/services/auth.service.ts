@@ -6,6 +6,9 @@ import { TokenPayload } from '~/dto/common.dto'
 import { Token } from '~/entities/token.entity'
 import { unGetData } from '~/utils'
 import { LogoutBodyReq } from '~/dto/req/auth/LogoutBody.req'
+import { sendVerifyEmail } from './email.service'
+import { EmailVerificationToken } from '~/entities/emailVerificationToken.entity'
+import { UserStatus } from '~/constants/userStatus'
 dotenv.config()
 
 class AuthService {
@@ -80,7 +83,7 @@ class AuthService {
     }
   }
 
-  getAccount = async ({ userId }: TokenPayload) => {
+  getAccount = async ({ userId }: { userId: number }) => {
     const user = await User.findOne({
       where: { id: userId },
       relations: ['role']
@@ -95,6 +98,28 @@ class AuthService {
     const result = await Token.getRepository().softDelete({ refreshToken })
 
     return result
+  }
+
+  sendVerifyEmail = async ({ email, userId, name }: { email: string; userId: number; name: string }) => {
+    //delete all code for user previously
+    await EmailVerificationToken.getRepository().softDelete({ user: { id: userId } })
+
+    //send email
+    const code = await sendVerifyEmail({ to: email, template: 'welcome', body: { name, userId } })
+
+    //save email token
+    const emailToken = EmailVerificationToken.create({ code, user: { id: userId } })
+    await EmailVerificationToken.save(emailToken)
+
+    return code
+  }
+
+  verifyEmail = async ({ userId }: { userId: number }) => {
+    //set status user in db
+    await User.update(userId, { status: UserStatus.VERIFIED })
+
+    //return info user before update
+    return this.getAccount({ userId: userId })
   }
 }
 

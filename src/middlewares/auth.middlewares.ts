@@ -14,6 +14,8 @@ import { Role } from '~/entities/role.entity'
 import { Token } from '~/entities/token.entity'
 import { Permission, Query } from 'accesscontrol'
 import { ac } from '~/config/access.config'
+import { isRequired } from './common.middlewares'
+import { EmailVerificationToken } from '~/entities/emailVerificationToken.entity'
 
 async function checkUserExistence(userId: number) {
   const userRepository = await DatabaseService.getInstance().getRepository(User)
@@ -245,3 +247,28 @@ export const checkPermission = (action: keyof Query, resource: string) => {
     return next()
   }
 }
+
+export const verifyEmailTokenValidation = validate(
+  checkSchema(
+    {
+      code: {
+        ...isRequired('token'),
+        isNumeric: true,
+        custom: {
+          options: async (code, { req }) => {
+            const user = (req as Request).user
+
+            if (!user) throw new BadRequestError({ message: 'Please log in again!' })
+            //check is equaly
+            const tokenInDb = await EmailVerificationToken.findOne({ where: { user: { id: user?.id } } })
+            console.log(tokenInDb, code, tokenInDb != code)
+
+            if (!tokenInDb || tokenInDb.code != code) throw new AuthRequestError('Wrong code')
+            return true
+          }
+        }
+      }
+    },
+    ['body']
+  )
+)
