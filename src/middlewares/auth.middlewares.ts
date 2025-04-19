@@ -1,17 +1,19 @@
 import { checkSchema } from 'express-validator'
 import { Regex } from '~/constants/regex'
-import { AuthRequestError, BadRequestError } from '~/core/error.response'
+import { AuthRequestError, BadRequestError, ForbiddenRequestError } from '~/core/error.response'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import { validate } from './validation.middlewares'
 import { verifyToken } from '~/utils/jwt'
 import { env } from 'process'
 import { TokenPayload } from '~/dto/common.dto'
-import { Request } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { DatabaseService } from '~/services/database.service'
 import { User } from '~/entities/user.entity'
 import { Role } from '~/entities/role.entity'
 import { Token } from '~/entities/token.entity'
+import { Permission, Query } from 'accesscontrol'
+import { ac } from '~/config/access.config'
 
 async function checkUserExistence(userId: number) {
   const userRepository = await DatabaseService.getInstance().getRepository(User)
@@ -196,8 +198,19 @@ export const accessTokenValidation = validate(
                 secretKey: env.JWT_ACCESS_SECRET as string
               })) as TokenPayload
 
-              await checkUserExistence(decodedAuthorization.userId)
-              ;(req as Request).decodedAuthorization = decodedAuthorization
+              // set User
+              const { userId } = decodedAuthorization
+              const foundUser = await User.findOne({
+                where: {
+                  id: userId
+                },
+                relations: ['role']
+              })
+
+              if (foundUser) {
+                ;(req as Request).user = foundUser as User
+                ;(req as Request).decodedAuthorization = decodedAuthorization
+              }
             } catch (error) {
               if (error instanceof jwt.TokenExpiredError) {
                 throw new BadRequestError({
@@ -216,3 +229,19 @@ export const accessTokenValidation = validate(
     ['headers']
   )
 )
+
+export const checkPermission = (action: keyof Query, resource: string) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const role = req.user?.role
+    if (!role) {
+      throw new AuthRequestError('Unauthorized!')
+    }
+    const permission = ac.can(role.name)[action](resource) as Permission
+
+    if (!permission.granted) {
+      throw new ForbiddenRequestError('Forbidden!')
+    }
+
+    return next()
+  }
+}
