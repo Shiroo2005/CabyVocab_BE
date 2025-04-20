@@ -7,6 +7,7 @@ import topicRouter from './topic.route'
 import wordRouter from './word.route'
 import courseRouter from './course.route'
 import { emailRouter } from './email.route'
+import uploadRouter from './upload.route'
 
 const router = express.Router()
 
@@ -18,5 +19,6 @@ router.use('/topics', topicRouter)
 router.use('/words', wordRouter)
 router.use('/courses', courseRouter)
 router.use('/emails', emailRouter)
+router.use('/upload', uploadRouter)
 
 export default router

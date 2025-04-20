@@ -11,6 +11,9 @@ export const toNumberWithDefaultValue = (num: any, defaultValue: number) => {
     return defaultValue
   }
 }
+export const getRandomXElementFrom1ToN = (X: number, N: number) => {
+  return _.sampleSize(_.range(1, N), X)
+}
 
 export const getInfoData = ({ fields = [], object = {} }) => {
   return _.pick(object, fields)

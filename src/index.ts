@@ -8,6 +8,7 @@ import router from './routes'
 import swaggerUi from 'swagger-ui-express'
 import { swaggerSpec } from './swagger'
 import { DatabaseService } from './services/database.service'
+import { servingStaticConfig } from './config/static.config'
 const app = express()
 const port = 8081
 config()
@@ -30,6 +31,9 @@ app.use(express.json())
 // init db
 DatabaseService.getInstance().init()
 //////////////////////////////
+
+// Serving static image
+servingStaticConfig(app)
 
 //ROUTES
 app.use(router)
