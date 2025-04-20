@@ -41,7 +41,7 @@ async function seedUsers() {
   const userRole = (await Role.findOne({ where: { name: 'USER' } })) as Role
 
   if (count === 0) {
-    const data: DeepPartial<User>[] = [
+    const data = [
       {
         email: 'Admin001@gmail.com',
         // fullName: 'Admin001',
@@ -49,7 +49,7 @@ async function seedUsers() {
         role: adminRole,
         username: 'Admin001',
         status: UserStatus.VERIFIED
-      },
+      } as User,
       {
         email: 'User001@gmail.com',
         // fullName: 'User001',
@@ -57,11 +57,11 @@ async function seedUsers() {
         role: userRole,
         username: 'User001',
         status: UserStatus.VERIFIED
-      },
-      ...(createRandomUser() as DeepPartial<User>[])
+      } as User,
+      ...createRandomUser()
     ]
 
-    await User.save(data)
+    await User.getRepository().save(data.map((item) => User.create(item)))
 
     console.log('✅ Seeded Users successfully!')
   } else {
