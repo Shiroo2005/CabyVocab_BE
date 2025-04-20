@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prettier": "prettier --check .",
-    "prettier:fix": "prettier --write ."
+    "prettier:fix": "prettier --write .",
+    "git:commit-history": "git for-each-ref --format=\"%(refname:short) | %(committerdate:relative) | %(authorname) | %(subject)\" refs/heads/"
   },
   "keywords": [],
   "author": "",
