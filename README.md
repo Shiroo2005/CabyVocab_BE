@@ -21,3 +21,6 @@ VERIFICATION_EMAIL_EXPIRE_TIME=15m
 #EMAIL
 RESEND_API_KEY=re_dgTGCpsg_L7kKahscVMwF5R1uQA8uHDVB
 FROM_EMAIL=noreply@astrovocab.id.vn
+
+<img src="./diagram.png" alt="Sơ đồ kiến trúc hệ thống" width="700"/>
+```
