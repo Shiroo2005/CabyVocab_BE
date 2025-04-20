@@ -5,7 +5,8 @@ import {
   accessTokenValidation,
   loginValidation,
   refreshTokenValidation,
-  registerValidation
+  registerValidation,
+  verifyEmailTokenValidation
 } from '~/middlewares/auth.middlewares'
 const authRouter = express.Router()
 
@@ -17,6 +18,19 @@ authRouter.post('/register', registerValidation, wrapRequestHandler(authControll
 authRouter.post('/login', loginValidation, wrapRequestHandler(authController.login))
 authRouter.post('/refresh', refreshTokenValidation, wrapRequestHandler(authController.refreshToken))
 authRouter.post('/logout', accessTokenValidation, refreshTokenValidation, wrapRequestHandler(authController.logout))
+
+authRouter.use(accessTokenValidation)
+/**
+ * @description : Verify email token
+ * @method : POST
+ * @path : /verify-email
+ * @body : {token}
+ */
+authRouter.post(
+  '/verify-email',
+  verifyEmailTokenValidation,
+  wrapRequestHandler(authController.verifyEmailTokenController)
+)
 
 // PUT
 
