@@ -3,8 +3,9 @@ import { accessTokenValidation } from '~/middlewares/auth.middlewares'
 import { wrapRequestHandler } from '~/utils/handler'
 import { wordController } from '~/controllers/word.controller'
 import { createWordValidation } from '~/middlewares/word/createWords.middlewares'
-import { checkIdParamMiddleware } from '~/middlewares/common.middlewares'
+import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '~/middlewares/common.middlewares'
 import { updateWordValidation } from '~/middlewares/word/updateWord.middleware'
+import { Word } from '~/entities/word.entity'
 
 const wordRouter = express.Router()
 
@@ -13,7 +14,12 @@ wordRouter.use(accessTokenValidation)
 
 //GET
 //middlewares
-wordRouter.get('/', wrapRequestHandler(wordController.getAllWords))
+wordRouter.get(
+  '/',
+  checkQueryMiddleware(),
+  wrapRequestHandler(parseSort({ allowSortList: Word.allowSortList })),
+  wrapRequestHandler(wordController.getAllWords)
+)
 wordRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(wordController.getWordById))
 
 //POST
