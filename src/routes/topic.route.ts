@@ -12,19 +12,76 @@ const topicRouter = express.Router()
 topicRouter.use(accessTokenValidation)
 
 //GET
+/**
+ * @description : get all topics
+ * @method : GET
+ * @path : /
+ * @query :
+ * {
+ *  page?: number, 
+ *  limit?: number, 
+ *  title?: string, 
+ *  description?: string, 
+ *  type?: TopicType, 
+ *  sort?: FindOptionsOrder<Topic>
+ * }
+ */
 topicRouter.get(
   '/',
   checkQueryMiddleware(),
   wrapRequestHandler(parseSort({ allowSortList: Topic.allowSortList })),
   wrapRequestHandler(topicController.getAllTopics)
 )
+
+/**
+ * @description : Get topic by id
+ * @method : GET
+ * @path : /:id
+ * @header : Authorization
+ * @params : id
+ */
 topicRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(topicController.getTopicById))
 
 //POST
-topicRouter.post('/', create_updateTopicValidation, wrapRequestHandler(topicController.createTopic))
+/**
+ * @description : Create new topic
+ * @method : POST
+ * @path : /
+ * @header : Authorization
+ * @body : topics: [
+ *  {
+        title: string
+        description: string
+        thumbnail?: string
+        type?: TopicType
+ * }
+    ]
+ */
+topicRouter.post('/', create_updateTopicValidation, wrapRequestHandler(topicController.createTopics))
 
 //PATH
+/**
+ * @description : Restore topic by id
+ * @method : PATCH
+ * @path : /:id/restore
+ * @header : Authorization
+ * @params : id
+ */
 topicRouter.patch('/:id/restore', checkIdParamMiddleware, wrapRequestHandler(topicController.restoreTopic))
+
+/**
+ * @description : Update topic by id
+ * @method : PATCH
+ * @path : /:id
+ * @header : Authorization
+ * @params : id
+ * @body : {
+ *  title: string
+    description: string
+    thumbnail?: string
+    type?: TopicType
+ * }
+ */
 topicRouter.patch(
   '/:id',
   checkIdParamMiddleware,
@@ -35,6 +92,13 @@ topicRouter.patch(
 //PUT
 
 //DELETE
+/**
+ * @description : Delete topic by id
+ * @method : DELETE
+ * @path : /:id
+ * @header : Authorization
+ * @params : id
+ */
 topicRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(topicController.deleteTopic))
 
 export default topicRouter

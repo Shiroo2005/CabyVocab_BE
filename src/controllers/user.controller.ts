@@ -35,7 +35,11 @@ class UserController {
     const limit = parseInt(req.query.limit as string);
     return new CREATED({
       message: 'Get page users successful',
-      metaData: await userService.getAllUser(page, limit)
+      metaData: await userService.getAllUser({
+        ...req.query,
+        ...req.parseQueryPagination,
+        sort: req.sortParsed
+      })
     }).send(res);
   }
 

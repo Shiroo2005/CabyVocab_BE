@@ -123,4 +123,11 @@ export class User extends BaseEntity {
     const res = User.softRemove(user)
     return res
   }
+
+  static allowSortList = [
+    'id',
+    'email',
+    'username',
+    'status'
+  ]
 }

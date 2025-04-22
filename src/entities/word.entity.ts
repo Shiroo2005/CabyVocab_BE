@@ -106,7 +106,6 @@ export class Word extends BaseEntity {
     return newWord
   }
 
-  // dùng Partial
   static updateWord = async (
     word: Word,
     {

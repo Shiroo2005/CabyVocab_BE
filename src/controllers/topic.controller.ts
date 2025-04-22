@@ -6,7 +6,7 @@ import { UpdateTopicBodyReq } from '~/dto/req/topic/updateTopicBody.req'
 import { topicService } from '~/services/topic.service'
 
 class TopicController {
-  createTopic = async (req: Request<ParamsDictionary, any, CreateTopicBodyReq>, res: Response) => {
+  createTopics = async (req: Request<ParamsDictionary, any, CreateTopicBodyReq>, res: Response) => {
     return new CREATED({
       message: 'Create new topic successful!',
       metaData: await topicService.createTopics(req.body.topics)
