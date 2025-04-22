@@ -14,6 +14,19 @@ const userRouter = express.Router()
 userRouter.use(accessTokenValidation)
 
 //POST
+/**
+ * @description : Create a new user
+ * @method : POST
+ * @path : /
+ * @header : Authorization
+ * @body : {
+ *  email: string,
+ *  username: string,
+ *  password: string,
+ *  roleId: number,
+ *  avatar: string (URL from upload endpoint)
+ * }
+ */
 userRouter.post(
   '/',
   wrapRequestHandler(checkPermission('createAny', Resource.USER)),

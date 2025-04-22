@@ -29,10 +29,19 @@ export const uploadImages = async (files: Record<string, Express.Multer.File[]>)
 
   const _files = await Promise.all(fileArray.map((file) => processAndSaveImage(file)))
 
+  // ensure file operations are complete
+  await new Promise(resolve => setTimeout(resolve, 1500))
+    
   // delete temp files
-  fileArray.map((file) => {
-    unlinkAsync(file.path)
-  })
+  for (const file of fileArray) {
+    try {
+      if (fs.existsSync(file.path)) {
+        await unlinkAsync(file.path)
+      }
+    } catch (error) {
+      console.log(`Error checking/deleting temp file ${file.path}: ${error}`)
+    }
+  }
 
   return _files
 }
@@ -53,7 +62,10 @@ export const processAndSaveImage = async (file: Express.Multer.File) => {
   const destinationPath = path.resolve('uploads', folder)
   const newFileName = `${Date.now()}-${path.parse(file.originalname).name}.jpeg`
   const destinationFile = path.join(destinationPath, newFileName)
-  const urlImage = `${env.HOST_URL}/uploads/${folder}/${newFileName}`
+  
+  // Use local network IP or emulator addresses
+  const hostUrl = env.HOST_URL?.replace('localhost', '10.0.2.2') || 'http://10.0.2.2:8081';
+  const urlImage = `${hostUrl}/uploads/${folder}/${newFileName}`
 
   await sharp(filePath).jpeg().toFile(destinationFile)
 
