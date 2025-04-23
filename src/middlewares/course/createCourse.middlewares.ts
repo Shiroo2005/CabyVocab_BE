@@ -6,26 +6,38 @@ import { CourseLevel } from '~/constants/course'
 export const createCourseValidation = validate (
   checkSchema(
     {
-      title: {
+      courses: {
+        isArray: true,
+        custom: {
+          options: (value) => {
+            if (!Array.isArray(value) || value.length === 0) {
+              throw new Error('courses must contain at least 1 item')
+            }
+            return true
+          },
+          bail: true
+        }
+      },
+      'courses.*.title': {
         ...isRequired('title'),
         isString: true,
         ...isLength({ fieldName: 'title', min: 10, max: 255 })
       },
-      description: {
+      'courses.*.description': {
         ...isRequired('description'),
         isString: true,
         ...isLength({ fieldName: 'description', min: 10, max: 255 })
       },
-      target: {
+      'courses.*.target': {
         ...isRequired('target'),
         isString: true,
         ...isLength({ fieldName: 'target', min: 10, max: 255 })
       },
-      level: {
+      'courses.*.level': {
         optional: true,
         ...isEnum(CourseLevel, 'course level'),
       },
-      topics: {
+      'courses.*.topics': {
         isArray: true,
         custom: {
           options: (
@@ -34,6 +46,8 @@ export const createCourseValidation = validate (
               displayOrder: number
             }[]
           ) => {
+            // require display order is unique for each course
+            // display order array need to be from 1 - N
             if (!isValidAndUniqueDisplayOrder(topics))
               throw new Error('Display order array need to be unique for each course and from 1 to N!')
 
@@ -41,16 +55,18 @@ export const createCourseValidation = validate (
           }
         }
       },
-      id: {
+      'courses.*.topics.*.id': {
         ...isNumber
       },
-      displayOrder: {
+      'courses.*.topics.*.displayOrder': {
         ...isNumber
       }
     },
     ['body']
   )
 )
+
+
 
 export const isValidAndUniqueDisplayOrder = (topics: { id: number; displayOrder: number }[]): boolean => {
   const orders = topics.map((t) => t.displayOrder)
