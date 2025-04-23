@@ -5,6 +5,7 @@ import { Topic } from '~/entities/topic.entity'
 import { Word } from '~/entities/word.entity'
 import { wordService } from './word.service'
 import { validate } from 'class-validator'
+import { In } from 'typeorm'
 
 class TopicService {
   createTopics = async (topicsBody: TopicBody[]) => {
@@ -95,6 +96,16 @@ class TopicService {
   restoreTopic = async ({ id }: { id: number }) => {
     return await Topic.getRepository().restore(id)
   }
+
+  isExistTopic = async (topic: { id: number; displayOrder: number }) => {
+
+    const resTopic = await Topic.getRepository().findOne({
+      where: { id: topic.id }
+    });
+
+    return resTopic;
+  }
+
 }
 
 export const topicService = new TopicService()

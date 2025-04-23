@@ -17,7 +17,7 @@ wordRouter.use(accessTokenValidation)
  * @description : Get all words
  * @method : GET
  * @path : /
- * @header : Admin
+ * @header : 
  * @query : 
  * { 
  *  page?: number, 
@@ -45,7 +45,11 @@ wordRouter.get(
  * @method : GET
  * @path : /:id
  */
-wordRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(wordController.getWordById))
+wordRouter.get(
+  '/:id', 
+  checkIdParamMiddleware, 
+  wrapRequestHandler(wordController.getWordById)
+)
 
 //POST
 //checkPermission?
@@ -111,7 +115,6 @@ wordRouter.patch(
 //PUT
 
 //DELETE
-// DELETE
 /**
  * @description : Delete word by id
  * @method : DELETE
@@ -119,6 +122,10 @@ wordRouter.patch(
  * @param : id
  * @header : Authorization
  */
-wordRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(wordController.deleteWordById))
+wordRouter.delete(
+  '/:id', 
+  checkIdParamMiddleware, 
+  wrapRequestHandler(wordController.deleteWordById)
+)
 
 export default wordRouter
