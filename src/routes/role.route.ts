@@ -7,38 +7,65 @@ import {
     validateCreateRole, 
     validateUpdateRole, 
     checkRoleExists, 
-    isAdmin,
     validatePagination 
   } from '~/middlewares/role.middlewares'
 
 const roleRouter = express.Router()
 
 // GET
+/**
+ * @description : Get all roles with pagination
+ * @method : GET
+ * @path : /
+ * @query : {page, limit}
+ */
 roleRouter.get('/', validatePagination, wrapRequestHandler(roleController.getAllRoles))
 
+/**
+ * @description : Get role by ID
+ * @method : GET
+ * @path : /:id
+ * @params : {id}
+ */
 roleRouter.get('/:id', checkIdParamMiddleware, checkRoleExists, wrapRequestHandler(roleController.getRole))
 
-// POST - Create new role (admin only)
+// POST 
+/**
+ * @description : Create new role 
+ * @method : POST
+ * @path : /
+ * @body : {name, description}
+ */
 roleRouter.post('/', 
   accessTokenValidation,
- // isAdmin,
   validateCreateRole, 
   wrapRequestHandler(roleController.createRole)
 )
 
-// PUT - Update role (admin only)
+// PUT 
+/**
+ * @description : Update role by ID 
+ * @method : PUT
+ * @path : /:id
+ * @params : {id}
+ * @body : {name, description}
+ */
 roleRouter.put('/:id', 
   accessTokenValidation,
- // isAdmin,
   checkIdParamMiddleware, 
   validateUpdateRole, 
   wrapRequestHandler(roleController.putRole)
 )
 
-// DELETE - Delete role (admin only)
+// DELETE 
+/**
+ * @description : Delete role by ID 
+ * @method : DELETE
+ * @path : /:id
+ * @params : {id}
+ */
 roleRouter.delete('/:id', 
   accessTokenValidation,
- // isAdmin,
   checkIdParamMiddleware, 
   checkRoleExists, 
   wrapRequestHandler(roleController.deleteRoleById)

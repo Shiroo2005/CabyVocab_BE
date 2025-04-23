@@ -53,7 +53,10 @@ export const processAndSaveImage = async (file: Express.Multer.File) => {
   const destinationPath = path.resolve('uploads', folder)
   const newFileName = `${Date.now()}-${path.parse(file.originalname).name}.jpeg`
   const destinationFile = path.join(destinationPath, newFileName)
-  const urlImage = `${env.HOST_URL}/uploads/${folder}/${newFileName}`
+  
+  // Use local network IP or emulator addresses
+  const hostUrl = env.HOST_URL?.replace('localhost', '10.0.2.2') || 'http://10.0.2.2:8081';
+  const urlImage = `${hostUrl}/uploads/${folder}/${newFileName}`
 
   await sharp(filePath).jpeg().toFile(destinationFile)
 

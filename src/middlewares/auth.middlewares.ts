@@ -51,7 +51,8 @@ async function checkDuplicateUser(email: string, username: string) {
 async function validateUserCredentials(username: string, password: string) {
   const userRepository = await DatabaseService.getInstance().getRepository(User)
   const user = await userRepository.findOne({
-    where: { username }
+    where: { username },
+    relations: ['role']
   })
 
   const isMatch = user ? await bcrypt.compare(password, user.password) : false
