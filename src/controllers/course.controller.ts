@@ -57,7 +57,7 @@ class CourseController {
     const id = parseInt(req.params?.id)
 
     new CREATED({
-      message: 'Restore course success',
+      message: 'Delete course success',
       metaData: await courseService.deleteCourse({ id })
     }).send(res);
   }

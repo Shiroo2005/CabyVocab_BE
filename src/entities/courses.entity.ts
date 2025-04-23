@@ -86,13 +86,15 @@ export class Course extends BaseEntity {
           where: { id: topic.id }
         })
         if (existingTopic) {
-          courseTopics.push(
-              CourseTopic.create({
-              course: course,
-              topic: existingTopic,
-              displayOrder: topic.displayOrder,
-            })
-          );
+          const courseTopic = CourseTopic.create({
+            course: course,
+            topic: existingTopic,
+            displayOrder: topic.displayOrder,
+          })
+
+          courseTopic.save()
+
+          courseTopics.push(courseTopic);
         }
       }
 

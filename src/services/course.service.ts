@@ -30,7 +30,9 @@ class CourseService {
                 topic: existingTopic,
                 displayOrder: topic.displayOrder,
               });
-  
+
+              await courseTopic.save();
+
               validTopics.push(courseTopic);
             }
           }
@@ -80,7 +82,7 @@ class CourseService {
     const [courses, total] = await Course.findAndCount({
       skip,
       take: limit,
-      relations: ['CourseTopics'],
+      relations: ['courseTopics'],
       where: {
         title,
         target,
@@ -94,7 +96,7 @@ class CourseService {
         target: true,
         level: true,
         description: true,
-        courseTopics: {topic: {id: true}}
+        courseTopics: true,
       }
     })
 
