@@ -29,19 +29,10 @@ export const uploadImages = async (files: Record<string, Express.Multer.File[]>)
 
   const _files = await Promise.all(fileArray.map((file) => processAndSaveImage(file)))
 
-  // ensure file operations are complete
-  await new Promise(resolve => setTimeout(resolve, 1500))
-    
   // delete temp files
-  for (const file of fileArray) {
-    try {
-      if (fs.existsSync(file.path)) {
-        await unlinkAsync(file.path)
-      }
-    } catch (error) {
-      console.log(`Error checking/deleting temp file ${file.path}: ${error}`)
-    }
-  }
+  fileArray.map((file) => {
+    unlinkAsync(file.path)
+  })
 
   return _files
 }
