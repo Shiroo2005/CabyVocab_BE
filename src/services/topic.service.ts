@@ -43,7 +43,8 @@ class TopicService {
     const res = await Topic.findOne({
       where: {
         id
-      }
+      },
+      relations: ['words']
     })
 
     return res || {}
@@ -98,14 +99,12 @@ class TopicService {
   }
 
   isExistTopic = async (topic: { id: number; displayOrder: number }) => {
-
     const resTopic = await Topic.getRepository().findOne({
       where: { id: topic.id }
-    });
+    })
 
-    return resTopic;
+    return resTopic
   }
-
 }
 
 export const topicService = new TopicService()
