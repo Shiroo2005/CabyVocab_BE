@@ -16,17 +16,16 @@ userRouter.use(accessTokenValidation)
 
 //POST
 /**
- * @description : Create new user
+ * @description : Create a new user
  * @method : POST
  * @path : /
  * @header : Authorization
  * @body : {
- *  email: string
-    username: string
-    password: string
-    fullName: string
-    avatar: string
-    roleId: number
+ *  email: string,
+ *  username: string,
+ *  password: string,
+ *  roleId: number,
+ *  avatar: string (URL from upload endpoint)
  * }
  */
 userRouter.post(

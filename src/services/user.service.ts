@@ -6,15 +6,22 @@ import { User } from '~/entities/user.entity'
 import { unGetData } from '~/utils'
 
 class UserService {
-  createUser = async ({ email, username, password, roleId }: CreateUserBodyReq) => {
+  createUser = async ({ email, username, password, roleId, avatar }: CreateUserBodyReq) => {
     const role = await Role.findOne({
       where: { id: roleId }
     })
-
     if (!role) {
       throw new Error('Role not found!')
     }
-    const createUser = User.create({ email, username, password, role })
+    
+    const createUser = User.create({ 
+      email, 
+      username, 
+      password, 
+      role,
+      avatar: avatar || 'N/A' 
+    })
+    
     return unGetData({ fields: ['password'], object: await User.save(createUser) })
   }
 
@@ -126,6 +133,9 @@ class UserService {
       status,
       role
     })
+    
+    // Save the updated user to the database
+    await User.save(updatedUser)
 
     return unGetData({ fields: ['password'], object: updatedUser })
   }

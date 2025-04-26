@@ -6,6 +6,7 @@ export interface CreateUserBodyReq {
   username: string
   password: string
   roleId: number
+  avatar?: string
 }
 
 export interface UpdateUserBodyReq {

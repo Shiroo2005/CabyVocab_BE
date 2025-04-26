@@ -9,6 +9,8 @@ import { LogoutBodyReq } from '~/dto/req/auth/LogoutBody.req'
 import { sendVerifyEmail } from './email.service'
 import { EmailVerificationToken } from '~/entities/emailVerificationToken.entity'
 import { UserStatus } from '~/constants/userStatus'
+import { Role } from '~/entities/role.entity'
+
 dotenv.config()
 
 class AuthService {
@@ -20,14 +22,21 @@ class AuthService {
     email: string
     username: string
     password: string
-    fullName: string
   }) => {
+
+    // Find the USER role
+    const userRole = await Role.findOne({ where: { name: 'USER' } })
+    
+    if (!userRole) {
+      throw new Error('USER role not found')
+    }
+
     //create new user
     const newUser = User.create({
       email,
       username,
-      password
-      ///role
+      password,
+      role: userRole
     })
 
     //await save user
