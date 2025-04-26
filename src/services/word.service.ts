@@ -123,6 +123,7 @@ class WordService {
 
   restoreWordById = async ({ id }: { id: number }) => {
     const restoreWord = await Word.getRepository().restore(id)
+    
     return restoreWord
   }
 }

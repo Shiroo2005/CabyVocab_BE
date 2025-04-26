@@ -31,7 +31,6 @@ class WordController {
   }
 
   getAllWords = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
-    //middleware: check if page, limit is exists?
 
     return new SuccessResponse({
       message: 'Get all words successfully',

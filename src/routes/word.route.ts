@@ -12,27 +12,120 @@ const wordRouter = express.Router()
 // access token validation
 wordRouter.use(accessTokenValidation)
 
-//GET
-//middlewares
+// GET
+/**
+ * @description : Get all words
+ * @method : GET
+ * @path : /
+ * @header : 
+ * @query : 
+ * { 
+ *  page?: number, 
+ *  limit?: number
+ *  content?: string
+    pronunciation?: string
+    meaning?: string
+    position?: WordPosition
+    rank?: WordRank
+    example?: string
+    translateExample?: string
+    sort?: FindOptionsOrder<Word> (-id,+content)
+ * }
+ */
 wordRouter.get(
   '/',
   checkQueryMiddleware(),
   wrapRequestHandler(parseSort({ allowSortList: Word.allowSortList })),
   wrapRequestHandler(wordController.getAllWords)
 )
-wordRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(wordController.getWordById))
+
+
+/**
+ * @description : Get word by id
+ * @method : GET
+ * @path : /:id
+ */
+wordRouter.get(
+  '/:id', 
+  checkIdParamMiddleware, 
+  wrapRequestHandler(wordController.getWordById)
+)
 
 //POST
 //checkPermission?
+/**
+ * @description : Create new words
+ * @method : POST
+ * @path : /
+ * @header : Admin
+ * @body : {
+        content: string
+        pronunciation: string
+        meaning: string
+        position?: WordPosition
+        audio?: string
+        image?: string
+        rank?: WordRank
+        example?: string
+        translateExample?: string
+ * }[]
+ */
 wordRouter.post('/', createWordValidation, wrapRequestHandler(wordController.createWords))
 
 //PATCH
-wordRouter.patch('/:id', checkIdParamMiddleware, updateWordValidation, wrapRequestHandler(wordController.updateWord))
-wordRouter.patch('/:id/restore', checkIdParamMiddleware, wrapRequestHandler(wordController.restoreWord))
+
+/**
+ * @description : Update word
+ * @method : PATCH
+ * @path : /:id
+ * @header : Authorization
+ * @param: id
+ * @body :
+        content?: string
+        pronunciation?: string
+        meaning?: string
+        position?: WordPosition
+        audio?: string
+        image?: string
+        rank?: WordRank
+        example?: string
+        translateExample?: string
+ *
+ */
+wordRouter.patch(
+  '/:id', 
+  checkIdParamMiddleware,
+  updateWordValidation, 
+  wrapRequestHandler(wordController.updateWord)
+)
+
+/**
+ * @description : Restore word from deleted
+ * @method : PATCH
+ * @path : /:id/restore
+ * @header : Authorization
+ * @params: id
+ */
+wordRouter.patch(
+  '/:id/restore', 
+  checkIdParamMiddleware, 
+  wrapRequestHandler(wordController.restoreWord)
+)
 
 //PUT
 
 //DELETE
-wordRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(wordController.deleteWordById))
+/**
+ * @description : Delete word by id
+ * @method : DELETE
+ * @path : /:id
+ * @param : id
+ * @header : Authorization
+ */
+wordRouter.delete(
+  '/:id', 
+  checkIdParamMiddleware, 
+  wrapRequestHandler(wordController.deleteWordById)
+)
 
 export default wordRouter

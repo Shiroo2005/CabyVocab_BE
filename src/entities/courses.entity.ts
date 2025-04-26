@@ -16,6 +16,8 @@ import { Topic } from './topic.entity'
 import { WordRank } from '~/constants/word'
 import { CourseProgress } from './course_progress.entity'
 import { CourseTopic } from './course_topic.entity'
+import { CourseLevel } from '~/constants/course'
+import { UpdateCourseBodyReq } from '~/dto/req/course/updateCourseBody,req'
 
 @Entity()
 export class Course extends BaseEntity {
@@ -29,8 +31,11 @@ export class Course extends BaseEntity {
 
   @Column('varchar')
   @IsNotEmpty({message: 'courses level must be not empty'})
-  @IsEnum(WordRank, { message: 'Topic level must be in enum rank' })
-  level!: WordRank
+  @IsEnum(CourseLevel, { message: 'Topic level must be in enum rank' })
+  level!: CourseLevel
+
+  @Column('int', {default: 0})
+  totalTopic?: number
 
   @Column('varchar')
   @Length(1, 255, { message: 'Target must be between 1 and 255 chars long!' })
@@ -54,5 +59,58 @@ export class Course extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt?: Date
+
+  static updateCourse = async (
+    course: Course, 
+    {
+      title,
+      level,
+      target,
+      description,
+      topics
+    }: UpdateCourseBodyReq
+  ) => {
+    if (title) course.title = title
+    if (level) course.level = level
+    if (target) course.target = target
+    if (description) course.description = description
+
+    if (topics && topics.length > 0)
+    {
+      CourseTopic.delete({course: {id: course.id}})
+
+      const courseTopics: CourseTopic[] = []
+
+      for (const topic of topics) {
+        const existingTopic = await Topic.getRepository().findOne({
+          where: { id: topic.id }
+        })
+        if (existingTopic) {
+          const courseTopic = CourseTopic.create({
+            course: course,
+            topic: existingTopic,
+            displayOrder: topic.displayOrder,
+          })
+
+          courseTopic.save()
+
+          courseTopics.push(courseTopic);
+        }
+      }
+
+      course.courseTopics = courseTopics;
+    }
+
+    await course.save()
+    return course
+  }
+
+  static allowSortList = [
+    'id',
+    'title',
+    'level',
+    'target',
+    'description'
+  ]
 
 }
