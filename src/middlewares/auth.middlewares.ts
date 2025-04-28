@@ -253,7 +253,7 @@ export const verifyEmailTokenValidation = validate(
   checkSchema(
     {
       code: {
-        ...isRequired('token'),
+        ...isRequired('code'),
         isNumeric: true,
         custom: {
           options: async (code, { req }) => {

@@ -2,7 +2,6 @@ import { env } from 'process'
 import { Resend } from 'resend'
 import { SendMailOptions } from '~/dto/res/email/emailOption.res'
 import { SendVerifyMailOptions } from '~/dto/res/email/verifyEmail.res'
-import { EmailVerificationToken } from '~/entities/emailVerificationToken.entity'
 import { generateVerificationCode, renderEmailTemplate } from '~/utils/email'
 
 const resend = new Resend(env.RESEND_API_KEY)
