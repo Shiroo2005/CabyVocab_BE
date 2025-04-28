@@ -1,14 +1,12 @@
 import { checkSchema } from 'express-validator'
-import { isEmail, isLength, isPassword, isRequired, isUsername } from '../common.middlewares'
+import { isEmail, isLength, isUsername } from '../common.middlewares'
 import { BadRequestError } from '~/core/error.response'
-import { roleService } from '~/services/role.service'
 import { validate } from '../validation.middlewares'
 import { User } from '~/entities/user.entity'
 import { UserStatus } from '~/constants/userStatus'
-import { isIn } from 'class-validator'
 import { Role } from '~/entities/role.entity'
 
-export const updateUserByIdValidation = validate (
+export const updateUserByIdValidation = validate(
   checkSchema({
     username: {
       trim: true,
@@ -35,7 +33,7 @@ export const updateUserByIdValidation = validate (
     },
 
     avatar: {
-      trim: true,
+      trim: true
     },
 
     status: {
@@ -51,8 +49,8 @@ export const updateUserByIdValidation = validate (
         options: async (value, { req }) => {
           const foundRole = await Role.findOne({
             where: {
-              id: value 
-            } 
+              id: value
+            }
           })
 
           if (!foundRole) {
@@ -63,6 +61,5 @@ export const updateUserByIdValidation = validate (
         }
       }
     }
-
   })
 )

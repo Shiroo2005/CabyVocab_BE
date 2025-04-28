@@ -2,7 +2,6 @@ import { User } from '~/entities/user.entity'
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import { signAccessToken, signRefreshToken } from '~/utils/jwt'
-import { TokenPayload } from '~/dto/common.dto'
 import { Token } from '~/entities/token.entity'
 import { unGetData } from '~/utils'
 import { LogoutBodyReq } from '~/dto/req/auth/LogoutBody.req'
@@ -14,19 +13,10 @@ import { Role } from '~/entities/role.entity'
 dotenv.config()
 
 class AuthService {
-  register = async ({
-    email,
-    username,
-    password
-  }: {
-    email: string
-    username: string
-    password: string
-  }) => {
-
+  register = async ({ email, username, password }: { email: string; username: string; password: string }) => {
     // Find the USER role
     const userRole = await Role.findOne({ where: { name: 'USER' } })
-    
+
     if (!userRole) {
       throw new Error('USER role not found')
     }
@@ -50,6 +40,9 @@ class AuthService {
     //save token in db
     const newToken = Token.create({ refreshToken, user: newUser })
     await newToken.save()
+
+    //send email verification
+    this.sendVerifyEmail({ email, name: username, userId: createdUser.id as number })
 
     return {
       accessToken,

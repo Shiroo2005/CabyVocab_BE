@@ -1,4 +1,3 @@
-import { name } from 'ejs'
 import { CreateUserBodyReq, UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
 import { userQueryReq } from '~/dto/req/user/userQuery.req'
 import { Role } from '~/entities/role.entity'
@@ -13,15 +12,15 @@ class UserService {
     if (!role) {
       throw new Error('Role not found!')
     }
-    
-    const createUser = User.create({ 
-      email, 
-      username, 
-      password, 
+
+    const createUser = User.create({
+      email,
+      username,
+      password,
       role,
-      avatar: avatar || 'N/A' 
+      avatar: avatar || 'N/A'
     })
-    
+
     return unGetData({ fields: ['password'], object: await User.save(createUser) })
   }
 
@@ -31,14 +30,13 @@ class UserService {
         email
       },
       relations: ['role'],
-      select: 
-      {
+      select: {
         id: true,
         username: true,
         email: true,
         avatar: true,
         status: true,
-        role: {name: true}
+        role: { name: true }
       }
     })
     console.log(resUser)
@@ -46,39 +44,26 @@ class UserService {
     return resUser || {}
   }
 
-  getAllUser = async (
-    {
-      page =  1,
-      limit = 10,
-      email,
-      username,
-      roleName,
-      status,
-      sort
-    } : userQueryReq
-
-  ) => {
+  getAllUser = async ({ page = 1, limit = 10, email, username, roleName, status, sort }: userQueryReq) => {
     const skip = (page - 1) * limit
     const [users, total] = await User.findAndCount({
       skip,
       take: limit,
       relations: ['role'],
-      where:
-      {
+      where: {
         email,
         username,
-        role: {name: roleName},
+        role: { name: roleName },
         status
       },
       order: sort,
-      select: 
-      {
+      select: {
         id: true,
         username: true,
         email: true,
         avatar: true,
         status: true,
-        role: {name: true}
+        role: { name: true }
       }
     })
     return {
@@ -95,14 +80,13 @@ class UserService {
         id
       },
       relations: ['role'],
-      select:
-      {
+      select: {
         id: true,
         username: true,
         email: true,
         avatar: true,
         status: true,
-        role: {name: true}
+        role: { name: true, id: true }
       }
     })
 
@@ -133,7 +117,7 @@ class UserService {
       status,
       role
     })
-    
+
     // Save the updated user to the database
     await User.save(updatedUser)
 
