@@ -91,25 +91,6 @@ export const checkRoleExists = [
   }
 ]
 
-// Middleware to check if user has admin privileges
-export const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
-  const user = req.user as User
-  
-  if (!user) {
-    return next(new BadRequestError({ message: 'Access denied. Authentication required' }))
-  }
-  
-  if (!user.role || user.role.name !== 'ADMIN') {
-    return next(new BadRequestError({ message: 'Access denied. Admin privileges required' }))
-  }
-  
-  if (user.status !== UserStatus.VERIFIED) {
-    return next(new BadRequestError({ message: 'Access denied. Account not verified' }))
-  }
-  
-  next()
-}
-
 // Validate pagination parameters
 export const validatePagination = [
   (req: Request, res: Response, next: NextFunction) => {

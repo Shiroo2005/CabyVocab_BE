@@ -15,6 +15,7 @@ import { TopicType } from '~/constants/topic'
 import { Word } from './word.entity'
 import { CompletedTopic } from './completed_topic.entity'
 import { CourseTopic } from './course_topic.entity'
+import { WordTopic } from './wordTopic.entity'
 
 @Entity()
 export class Topic extends BaseEntity {
@@ -41,15 +42,18 @@ export class Topic extends BaseEntity {
   type?: TopicType
 
   //foreign key
-  @ManyToMany(() => Word, { cascade: true })
-  @JoinTable({ name: 'word_topic' })
-  words?: Word[]
+  // @ManyToMany(() => Word, { cascade: true })
+  // @JoinTable({ name: 'word_topic' })
+  // words?: Word[]
 
   @OneToMany(() => CompletedTopic, (completed_topic) => completed_topic.topic)
   completed_topics: CompletedTopic[]
 
-  @OneToMany(() => CourseTopic, (courseTopic) => courseTopic.course)
+  @OneToMany(() => CourseTopic, (courseTopic) => courseTopic.topic)
   courseTopics: CourseTopic[]
+
+  @OneToMany(() => WordTopic, (wordTopic) => wordTopic.topic)
+  wordTopics?: WordTopic[]
 
   @DeleteDateColumn()
   deletedAt?: Date
@@ -60,14 +64,14 @@ export class Topic extends BaseEntity {
   @UpdateDateColumn()
   updatedAt?: Date
 
-  static createTopic = ({ id, title, description, thumbnail, type, words }: Topic) => {
+  static createTopic = ({ id, title, description, thumbnail, type, wordTopics }: Topic) => {
     const newTopic = new Topic()
     newTopic.id = id
     newTopic.title = title
     newTopic.thumbnail = thumbnail
     newTopic.description = description
     newTopic.type = type
-    newTopic.words = words
+    newTopic.wordTopics = wordTopics
     return newTopic
   }
 
@@ -77,21 +81,21 @@ export class Topic extends BaseEntity {
       title,
       description,
       thumbnail,
-      type
-      //words
+      type,
+      wordTopics
     }: {
       title?: string
       description?: string
       thumbnail?: string
       type?: TopicType
-      //words?: Word[]
+      wordTopics?: WordTopic[]
     }
   ) => {
     if (title) topic.title = title
     if (description) topic.description = description
     if (thumbnail) topic.thumbnail = thumbnail
     if (type) topic.type = type
-    //if (words) topic.words = words
+    if (wordTopics) topic.wordTopics = wordTopics
 
     return topic
   }

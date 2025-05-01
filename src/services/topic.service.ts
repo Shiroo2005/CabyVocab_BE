@@ -6,6 +6,11 @@ import { Word } from '~/entities/word.entity'
 import { wordService } from './word.service'
 import { validate } from 'class-validator'
 import { In } from 'typeorm'
+import { CompletedTopic } from '~/entities/completed_topic.entity'
+import { BadRequestError } from '~/core/error.response'
+import { CompleteTopicBodyReq } from '~/dto/req/topic/completeTopicBody.req'
+import { DatabaseService } from './database.service'
+import { wordProgressService } from './wordProgress.service'
 
 class TopicService {
   createTopics = async (topicsBody: TopicBody[]) => {
@@ -25,7 +30,7 @@ class TopicService {
             }
           }
         }
-        const newTopic = Topic.create({ ...topic, words })
+        const newTopic = Topic.create({ ...topic})
         topics.push(newTopic)
       })
     )
@@ -33,7 +38,7 @@ class TopicService {
     //validate before save into db
     await validate(topics)
 
-    //save itopics nto db
+    //save topics into db
     const res = await Topic.save(topics)
 
     return res
@@ -44,7 +49,7 @@ class TopicService {
       where: {
         id
       },
-      relations: ['words']
+      relations: ['wordTopics', 'wordTopics.word']
     })
 
     return res || {}
@@ -104,6 +109,75 @@ class TopicService {
     })
 
     return resTopic
+  }
+
+  completedTopic = async ({ topic, userId }: CompleteTopicBodyReq) => {
+    //save complete topic into db
+    //create word progress
+    //update progress for user : streak, last study date, total study day
+
+    const databaseService = DatabaseService.getInstance()
+    const queryRunner = databaseService.appDataSource.createQueryRunner()
+
+    await queryRunner.startTransaction()
+    //start transaction
+    try {
+      const topicId = topic.id as number
+      // save complete topic into db
+      await queryRunner.manager
+        .getRepository(CompletedTopic)
+        .save({ user: { id: userId }, topic: { id: topicId }})
+
+      //create or update word progress record
+      const wordsInTopic = await wordService.getAllWordInTopic({ topicId })
+
+      const wordProgress = await wordProgressService.createOrUpdateWordProgress(
+        { wordProgress: wordsInTopic, userId },
+        queryRunner.manager
+      )
+
+      //update user progress
+      await wordProgressService.updateUserProgress({ userId, manager: queryRunner.manager })
+
+      // commit transaction now:
+      await queryRunner.commitTransaction()
+
+      return wordProgress
+    } catch (err) {
+      await queryRunner.rollbackTransaction()
+      console.log(`Error when handle topic service: ${err}`)
+      throw new BadRequestError({message: `${err}`})
+    } finally {
+      // you need to release query runner which is manually created:
+      await queryRunner.release()
+    }
+    //end transaction
+  }
+
+  isTopicAlreadyCompleted = async ({ topicId, userId }: { topicId: number; userId: number }) => {
+    return await CompletedTopic.exists({ where: { topic: { id: topicId }, user: { id: userId } } })
+  }
+
+  getUserProgress = async ({ userId }: { userId: number }) => {
+    // Get completed topics
+    const completedTopics = await CompletedTopic.find({
+      where: { user: { id: userId } },
+      relations: ['topic']
+    })
+    
+    // Get word progress summary
+    const progressSummary = await wordProgressService.getSummary({ userId })
+    
+    // Get total topics
+    const totalTopics = await Topic.count()
+    
+    return {
+      completedTopics: completedTopics.map(ct => ct.topic),
+      completedTopicsCount: completedTopics.length,
+      totalTopics,
+      progressPercentage: totalTopics > 0 ? (completedTopics.length / totalTopics) * 100 : 0,
+      wordProgressSummary: progressSummary
+    }
   }
 }
 

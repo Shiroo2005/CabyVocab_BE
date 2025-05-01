@@ -1,41 +1,41 @@
-import { IsDate, IsEnum, IsNotEmpty, IsOptional, IsUrl, Length } from 'class-validator'
 import {
     BaseEntity,
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   JoinColumn,
-  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
-import { IntervalLevel, MasteryLevel, MasteryToIntervalMap } from '~/constants/wordProgress'
+import {
+  DEFAULT_EASE_FACTOR,
+  DEFAULT_MASTERY_LEVEL,
+  DEFAULT_REVIEW_COUNT,
+  INTERVAL_BASE,
+  MULTI_BASE,
+  WORD_MASTERY_LEVEL
+} from '~/constants/userProgress'
 import { User } from './user.entity'
 import { Word } from './word.entity'
+import { now } from 'lodash'
 
 @Entity()
 export class WordProgress extends BaseEntity{
   @PrimaryGeneratedColumn()
   id?: number
 
-  @Column('varchar')
-  @IsEnum(MasteryLevel, {message: 'Invalid mastery level'})
-  mastery_level?: MasteryLevel
+  @Column('int', { default: WORD_MASTERY_LEVEL.NEW })
+  masteryLevel: WORD_MASTERY_LEVEL
+
+  @Column('int', { default: 0 })
+  easeFactor: number
 
   @Column('int')
-  @IsEnum(IntervalLevel)
-  @IsOptional()
-  interval?: number
+  reviewCount!: number
 
-  //default: 2.5
-  @Column('double', {default: 2.5})
-  ease_factor: number
-
-  @Column('datetime', {default: null} )
-  @IsDate({message: 'Invalid next review date'})
-  next_review_date!: Date;
+  @Column('datetime')
+  nextReviewDate!: Date
 
   @ManyToOne(() => User, (user) => user.wordProgresses)
   @JoinColumn({name: 'userId'})
@@ -49,32 +49,52 @@ export class WordProgress extends BaseEntity{
   updatedAt?: Date
 
   @CreateDateColumn()
-  createAt?: Date
+  createdAt?: Date 
 
-  static createWordProgress = ({mastery_level, user, word} : WordProgress) =>
-  {
-    const newWordProgress = new WordProgress ()
+  static createWordProgress = ({
+    masteryLevel,
+    userId,
+    wordId,
+    easeFactor,
+    reviewedDate = new Date(now()),
+    reviewCount
+  }: {
+    masteryLevel?: WORD_MASTERY_LEVEL
+    userId: number
+    wordId: number
+    easeFactor?: number
+    reviewedDate?: Date
+    reviewCount?: number
+  }) => {
+    const newWordProgress = new WordProgress()
 
-    newWordProgress.user = user;
-    newWordProgress.word = word;
-    
-    if(mastery_level !== undefined)
-    {
-      newWordProgress.mastery_level = mastery_level;
-      newWordProgress.interval = MasteryToIntervalMap[mastery_level];
-    }
+    newWordProgress.user = { id: userId } as User
+    newWordProgress.word = { id: wordId } as Word
+    newWordProgress.masteryLevel = masteryLevel || DEFAULT_MASTERY_LEVEL
+    newWordProgress.easeFactor = easeFactor || DEFAULT_EASE_FACTOR
+    newWordProgress.nextReviewDate = WordProgress.calculateReviewDate(newWordProgress.easeFactor, reviewedDate)
+    newWordProgress.reviewCount = reviewCount || DEFAULT_REVIEW_COUNT
 
-    return newWordProgress;
+    return newWordProgress
   }
 
-  static updateWordProgress = ( wordProgress: WordProgress, {mastery_level, ease_factor} : WordProgress) => {
-    if(mastery_level !== undefined)
-    {
-      wordProgress.mastery_level = mastery_level;
-      wordProgress.interval = MasteryToIntervalMap[mastery_level];
-    }
-    if(ease_factor !== undefined) wordProgress.ease_factor = ease_factor;
+  static calculateReviewDate = (easeFactor: number, reviewedDate: Date, masteryLevel?: WORD_MASTERY_LEVEL) => {
+    const OneHour = 60 * 60 * 1000
+    const spaceReview = INTERVAL_BASE * Math.pow(MULTI_BASE, easeFactor) * OneHour // Convert days to milliseconds
+    const newDate = new Date(reviewedDate)
+    newDate.setTime(newDate.getTime() + spaceReview)
+    return newDate
+  }
 
-    return wordProgress;
+  static updateWordProgress = (
+    wordProgress: WordProgress,
+    { easeFactor, masteryLevel, nextReviewDate, reviewCount }: WordProgress
+  ) => {
+    if (easeFactor) wordProgress.easeFactor = easeFactor
+    if (masteryLevel) wordProgress.masteryLevel = masteryLevel
+    if (nextReviewDate) wordProgress.nextReviewDate = nextReviewDate
+    if (reviewCount) wordProgress.reviewCount = reviewCount
+
+    return wordProgress
   }
 }

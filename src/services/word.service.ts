@@ -3,19 +3,29 @@ import { WordBody } from '~/dto/req/word/createWordBody.req'
 import { UpdateWordBodyReq } from '~/dto/req/word/updateWordBody.req'
 import { wordQueryReq } from '~/dto/req/word/wordQuery.req'
 import { Word } from '~/entities/word.entity'
+import { WordTopic } from '~/entities/wordTopic.entity'
 
 class WordService {
   createWords = async (words: WordBody[]) => {
-    // create object word
-    const _words = words.map((word) => Word.create({ ...word }))
-
-    //validate before save
-    await validate(_words)
-
-    //save in db
-    const result = await Word.save(_words)
-
-    return result
+    // Create words using the static createWord method which properly handles topicIds
+    const _words = await Promise.all(
+      words.map(async (word) => {
+        return await Word.createWord({
+          content: word.content,
+          meaning: word.meaning,
+          pronunciation: word.pronunciation,
+          audio: word.audio,
+          image: word.image,
+          rank: word.rank,
+          position: word.position,
+          example: word.example,
+          translateExample: word.translateExample,
+          topicIds: word.topicIds
+        } as Word & { topicIds?: number[] })
+      })
+    )
+  
+    return _words
   }
 
   updateWord = async (
@@ -125,6 +135,21 @@ class WordService {
     const restoreWord = await Word.getRepository().restore(id)
     
     return restoreWord
+  }
+
+  getAllWordInTopic = async ({ topicId }: { topicId: number }) => {
+    const wordTopics = await WordTopic.find({
+      where: {
+        topic: {
+          id: topicId
+        }
+      },
+      relations: ['word']
+    })
+
+    if (wordTopics.length == 0) return []
+
+    return wordTopics.map((item) => item.word as Word)
   }
 }
 
