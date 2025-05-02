@@ -1,4 +1,5 @@
 import { validate } from 'class-validator'
+import { NotFoundRequestError } from '~/core/error.response'
 import { WordBody } from '~/dto/req/word/createWordBody.req'
 import { UpdateWordBodyReq } from '~/dto/req/word/updateWordBody.req'
 import { wordQueryReq } from '~/dto/req/word/wordQuery.req'
@@ -46,22 +47,23 @@ class WordService {
     const word = await Word.findOne({
       where: { id }
     })
-
-    if (word)
-      Word.updateWord(word, {
-        content,
-        meaning,
-        pronunciation,
-        audio,
-        example,
-        image,
-        position,
-        rank,
-        translateExample,
-        topicIds
-      })
-
-    return word || {}
+  
+    if (!word) {
+      throw new NotFoundRequestError('Word not found with the provided ID')
+    }
+  
+    return Word.updateWord(word, {
+      content,
+      meaning,
+      pronunciation,
+      audio,
+      example,
+      image,
+      position,
+      rank,
+      translateExample,
+      topicIds
+    })
   }
 
   getWordById = async ({ id }: { id: number }) => {

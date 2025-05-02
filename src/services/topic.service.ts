@@ -11,37 +11,54 @@ import { BadRequestError } from '~/core/error.response'
 import { CompleteTopicBodyReq } from '~/dto/req/topic/completeTopicBody.req'
 import { DatabaseService } from './database.service'
 import { wordProgressService } from './wordProgress.service'
+import { WordTopic } from '~/entities/wordTopic.entity'
 
 class TopicService {
   createTopics = async (topicsBody: TopicBody[]) => {
-    const topics = [] as Topic[]
+    const databaseService = DatabaseService.getInstance()
+    const queryRunner = databaseService.appDataSource.createQueryRunner()
 
-    await Promise.all(
-      topicsBody.map(async (topic) => {
-        const { wordIds } = topic
-        const words = [] as Word[]
-
-        if (wordIds && wordIds.length > 0) {
-          //filter word id valid
-          for (const id of wordIds) {
-            const foundWord = await wordService.getWordById({ id })
-            if (foundWord && Object.keys(foundWord).length != 0) {
-              words.push({ id } as Word)
-            }
-          }
-        }
-        const newTopic = Topic.create({ ...topic})
+    await queryRunner.startTransaction()
+    try {
+      const topics = [] as Topic[]
+      
+      // Prepare all topics first
+      for (const topic of topicsBody) {
+        const newTopic = Topic.create({ ...topic })
         topics.push(newTopic)
-      })
-    )
+      }
 
-    //validate before save into db
-    await validate(topics)
-
-    //save topics into db
-    const res = await Topic.save(topics)
-
-    return res
+      // Validate before saving
+      await validate(topics)
+      
+      // Save all topics in a single operation
+      const savedTopics = await queryRunner.manager.save(topics)
+      
+      // Handle word associations if needed
+      for (let i = 0; i < savedTopics.length; i++) {
+        const topic = savedTopics[i]
+        const wordIds = topicsBody[i].wordIds
+        
+        if (wordIds && wordIds.length > 0) {
+          // Create word-topic associations in bulk
+          const wordTopics = wordIds.map(wordId => ({
+            topicId: topic.id,
+            wordId: wordId
+          }))
+          
+          await queryRunner.manager.getRepository(WordTopic).save(wordTopics)
+        }
+      }
+      
+      await queryRunner.commitTransaction()
+      return savedTopics
+    } catch (err) {
+      await queryRunner.rollbackTransaction()
+      console.log(`Error when creating topics: ${err}`)
+      throw new BadRequestError({message: `${err}`})
+    } finally {
+      await queryRunner.release()
+    }
   }
 
   getTopicById = async ({ id }: { id: number }) => {
@@ -52,7 +69,17 @@ class TopicService {
       relations: ['wordTopics', 'wordTopics.word']
     })
 
-    return res || {}
+    if (!res) return {}
+
+    const words = res.wordTopics?.map(wordTopic => wordTopic.word) || []
+    
+    const result = {
+      ...res,
+      words,
+      wordTopics: undefined 
+    }
+
+    return result
   }
 
   getAllTopics = async ({ page = 1, limit = 10, title, description, type, sort }: topicQueryReq) => {
