@@ -11,7 +11,7 @@ import { UpdateWordProgressData } from '~/dto/req/wordProgress/updateWordProgres
 import { User } from '~/entities/user.entity'
 import { WordProgress } from '~/entities/word_progress.entity'
 import { DatabaseService } from './database.service'
-import { BadRequestError } from '~/core/error.response'
+import { BadRequestError, NotFoundRequestError } from '~/core/error.response'
 
 // Get database service for transactions
 const databaseService = DatabaseService.getInstance()
@@ -34,43 +34,68 @@ class WordProgressService {
   updateWordProgress = async ({ words, userId }: { words: UpdateWordProgressData[]; userId: number }) => {
     const queryRunner = databaseService.appDataSource.createQueryRunner()
 
-    await queryRunner.startTransaction()
-    //start transaction
     try {
-      const _wordProgress: WordProgress[] = words
-        .map((wordBody) => {
-          const { newEaseFactor, newLevel } = this.calculateProgressByWrongCount(
-            wordBody.word.masteryLevel,
-            wordBody.word.easeFactor,
-            wordBody.wrongCount || 0
-          )
+      await queryRunner.connect()
+      await queryRunner.startTransaction() //start transaction
 
-          //mapping data
-          const wordProgress = wordBody.word
-          wordProgress.easeFactor = newEaseFactor
-          wordProgress.masteryLevel = newLevel
-          wordProgress.nextReviewDate = WordProgress.calculateReviewDate(wordProgress.easeFactor, wordBody.reviewedDate)
-          wordProgress.reviewCount += 1
-
-          return wordProgress
+      const wordProgressMap = new Map();
+      
+      const wordProgresses = await Promise.all(words.map(async (wordBody) => {
+        const foundProgress = await WordProgress.findOne({
+          where: {
+            word: { id: wordBody.wordId },
+            user: { id: userId }
+          },
+          relations: ['word']
         })
-        .filter((wordBody) => wordBody.easeFactor < MAX_EASE_FACTOR)
+  
+        if (!foundProgress) {
+          throw new NotFoundRequestError('Word progress not found')
+        }
+  
+        const { newEaseFactor, newLevel } = this.calculateProgressByWrongCount(
+          foundProgress.masteryLevel,
+          foundProgress.easeFactor,
+          wordBody.wrongCount || 0 
+        )
+  
+        foundProgress.easeFactor = newEaseFactor
+        foundProgress.masteryLevel = newLevel
+        foundProgress.nextReviewDate = WordProgress.calculateReviewDate(foundProgress.easeFactor, wordBody.reviewedDate)
+        foundProgress.reviewCount += 1
+  
+        wordProgressMap.set(wordBody.wordId, foundProgress)
+        return foundProgress
+      }))
 
-      // Use Active Record pattern
-      const result = await WordProgress.save(_wordProgress)
+      const uniqueWordProgress = Array.from(wordProgressMap.values())
+        .filter((wordBody) => wordBody.easeFactor <= MAX_EASE_FACTOR)
+
+      const result = await WordProgress.save(uniqueWordProgress)
 
       await this.updateUserProgress({ userId, manager: queryRunner.manager })
 
-      // commit transaction now:
       await queryRunner.commitTransaction()
 
-      return result
+      return {
+        updatedWords: result.map(wp => ({
+          wordId: wp.word.id,
+          masteryLevel: wp.masteryLevel,
+          easeFactor: wp.easeFactor,
+          reviewCount: wp.reviewCount,
+          nextReviewDate: wp.nextReviewDate
+        })),
+        summary: {
+          totalUpdated: result.length
+        }
+      }
     } catch (err) {
-      await queryRunner.rollbackTransaction()
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction()
+      }
       console.log(`Error when handle update word progress: ${err}`)
       throw new BadRequestError({ message: `${err}`})
     } finally {
-      // you need to release query runner which is manually created:
       await queryRunner.release()
     }
     //end transaction

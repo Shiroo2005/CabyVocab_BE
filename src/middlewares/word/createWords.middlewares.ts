@@ -86,7 +86,11 @@ export const createWordValidation = validate(
             })
 
             if (topics.length !== value.length) {
-              throw new BadRequestError({ message: 'topicIDs không hợp lệ' })
+              const existingTopicIds = topics.map(topic => topic.id)
+              const nonExistingTopicIds = value.filter(id => !existingTopicIds.includes(id))
+              throw new BadRequestError({ 
+                message: `The following topic IDs do not exist: ${nonExistingTopicIds.join(', ')}` 
+              })
             }
             return true
           }

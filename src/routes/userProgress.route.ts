@@ -47,14 +47,16 @@ userProgressRouter.post('/complete-topic', completeTopicValidation, wrapRequestH
  * @method : PUT
  * @path : /
  * @header : Authorization
- * @query : wordProgress:{
- *      wrongCount: number
- *      wordId: number
- *      reviewedDate: Date
- *      }[]
+ * @query : wordProgress: [
+ *   {
+ *     wordId: number,
+ *     wrongCount: number,
+ *     reviewedDate: Date
+ *   }
+ * ]
  */
 userProgressRouter.put(
   '/word',
-  wrapRequestHandler(updateWordProgressValidation),
-  wrapRequestHandler(updateWordProgressController)
+  ...updateWordProgressValidation, 
+  wrapRequestHandler(updateWordProgressController) 
 )

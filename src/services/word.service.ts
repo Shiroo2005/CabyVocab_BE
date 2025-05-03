@@ -1,17 +1,28 @@
 import { validate } from 'class-validator'
-import { NotFoundRequestError } from '~/core/error.response'
+import { BadRequestError, NotFoundRequestError } from '~/core/error.response'
 import { WordBody } from '~/dto/req/word/createWordBody.req'
 import { UpdateWordBodyReq } from '~/dto/req/word/updateWordBody.req'
 import { wordQueryReq } from '~/dto/req/word/wordQuery.req'
 import { Word } from '~/entities/word.entity'
 import { WordTopic } from '~/entities/wordTopic.entity'
+import { DatabaseService } from './database.service'
+import { Topic } from '~/entities/topic.entity'
+import { In } from 'typeorm'
 
 class WordService {
   createWords = async (words: WordBody[]) => {
-    // Create words using the static createWord method which properly handles topicIds
-    const _words = await Promise.all(
-      words.map(async (word) => {
-        return await Word.createWord({
+    const databaseService = DatabaseService.getInstance()
+    const queryRunner = databaseService.appDataSource.createQueryRunner()
+    
+    try {
+      await queryRunner.connect() 
+      await queryRunner.startTransaction()
+      
+      const createdWords = []
+      
+      for (const word of words) {
+        // Create the word
+        const newWord = Word.create({
           content: word.content,
           meaning: word.meaning,
           pronunciation: word.pronunciation,
@@ -20,13 +31,36 @@ class WordService {
           rank: word.rank,
           position: word.position,
           example: word.example,
-          translateExample: word.translateExample,
-          topicIds: word.topicIds
-        } as Word & { topicIds?: number[] })
-      })
-    )
-  
-    return _words
+          translateExample: word.translateExample
+        })
+        
+        // Save the word
+        const savedWord = await queryRunner.manager.save(newWord)
+        
+        // Create word-topic associations if needed
+        if (word.topicIds && word.topicIds.length > 0) {
+          const wordTopics = word.topicIds.map(topicId => ({
+            wordId: savedWord.id,
+            topicId: topicId
+          }))
+          
+          await queryRunner.manager.getRepository(WordTopic).save(wordTopics)
+        }
+        
+        createdWords.push(savedWord)
+      }
+      
+      await queryRunner.commitTransaction()
+      return createdWords
+    } catch (err) {
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction()
+      }
+      console.log(`Error when creating words: ${err}`)
+      throw new BadRequestError({ message: `${err}` })
+    } finally {
+      await queryRunner.release()
+    }
   }
 
   updateWord = async (
