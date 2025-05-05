@@ -41,8 +41,9 @@ class AuthService {
     const newToken = Token.create({ refreshToken, user: newUser })
     await newToken.save()
 
-    //send email verification
-    this.sendVerifyEmail({ email, name: username, userId: createdUser.id as number })
+    this.sendVerifyEmail({ email, name: username, userId: createdUser.id as number }).then(() => {
+      console.log('Error when send email register')
+    })
 
     return {
       accessToken,
