@@ -1,21 +1,66 @@
 import { validate } from 'class-validator'
+import { BadRequestError, NotFoundRequestError } from '~/core/error.response'
 import { WordBody } from '~/dto/req/word/createWordBody.req'
 import { UpdateWordBodyReq } from '~/dto/req/word/updateWordBody.req'
 import { wordQueryReq } from '~/dto/req/word/wordQuery.req'
 import { Word } from '~/entities/word.entity'
+import { WordTopic } from '~/entities/wordTopic.entity'
+import { DatabaseService } from './database.service'
+import { Topic } from '~/entities/topic.entity'
+import { In } from 'typeorm'
 
 class WordService {
   createWords = async (words: WordBody[]) => {
-    // create object word
-    const _words = words.map((word) => Word.create({ ...word }))
-
-    //validate before save
-    await validate(_words)
-
-    //save in db
-    const result = await Word.save(_words)
-
-    return result
+    const databaseService = DatabaseService.getInstance()
+    const queryRunner = databaseService.appDataSource.createQueryRunner()
+    
+    try {
+      await queryRunner.connect() 
+      await queryRunner.startTransaction()
+      
+      const createdWords = []
+      
+      for (const word of words) {
+        // Create the word
+        const newWord = Word.create({
+          content: word.content,
+          meaning: word.meaning,
+          pronunciation: word.pronunciation,
+          audio: word.audio,
+          image: word.image,
+          rank: word.rank,
+          position: word.position,
+          example: word.example,
+          translateExample: word.translateExample
+        })
+        
+        // Save the word
+        const savedWord = await queryRunner.manager.save(newWord)
+        
+        // Create word-topic associations if needed
+        if (word.topicIds && word.topicIds.length > 0) {
+          const wordTopics = word.topicIds.map(topicId => ({
+            wordId: savedWord.id,
+            topicId: topicId
+          }))
+          
+          await queryRunner.manager.getRepository(WordTopic).save(wordTopics)
+        }
+        
+        createdWords.push(savedWord)
+      }
+      
+      await queryRunner.commitTransaction()
+      return createdWords
+    } catch (err) {
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction()
+      }
+      console.log(`Error when creating words: ${err}`)
+      throw new BadRequestError({ message: `${err}` })
+    } finally {
+      await queryRunner.release()
+    }
   }
 
   updateWord = async (
@@ -36,22 +81,23 @@ class WordService {
     const word = await Word.findOne({
       where: { id }
     })
-
-    if (word)
-      Word.updateWord(word, {
-        content,
-        meaning,
-        pronunciation,
-        audio,
-        example,
-        image,
-        position,
-        rank,
-        translateExample,
-        topicIds
-      })
-
-    return word || {}
+  
+    if (!word) {
+      throw new NotFoundRequestError('Word not found with the provided ID')
+    }
+  
+    return Word.updateWord(word, {
+      content,
+      meaning,
+      pronunciation,
+      audio,
+      example,
+      image,
+      position,
+      rank,
+      translateExample,
+      topicIds
+    })
   }
 
   getWordById = async ({ id }: { id: number }) => {
@@ -125,6 +171,21 @@ class WordService {
     const restoreWord = await Word.getRepository().restore(id)
     
     return restoreWord
+  }
+
+  getAllWordInTopic = async ({ topicId }: { topicId: number }) => {
+    const wordTopics = await WordTopic.find({
+      where: {
+        topic: {
+          id: topicId
+        }
+      },
+      relations: ['word']
+    })
+
+    if (wordTopics.length == 0) return []
+
+    return wordTopics.map((item) => item.word as Word)
   }
 }
 

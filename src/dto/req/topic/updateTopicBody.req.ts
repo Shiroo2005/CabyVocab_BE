@@ -5,5 +5,6 @@ export interface UpdateTopicBodyReq {
   title: string,
   description: string,
   thumbnail?: string,
-  type?: TopicType
+  type?: TopicType,
+  courseIds?: number[]
 }

@@ -3,7 +3,8 @@ import { topicController } from '~/controllers/topic.controller'
 import { Topic } from '~/entities/topic.entity'
 import { accessTokenValidation } from '~/middlewares/auth.middlewares'
 import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '~/middlewares/common.middlewares'
-import { create_updateTopicValidation } from '~/middlewares/topic/createTopic.middlewares'
+import { createTopicValidation } from '~/middlewares/topic/createTopic.middlewares'
+import { updateTopicValidation } from '~/middlewares/topic/updateTopic.middleware'
 import { wrapRequestHandler } from '~/utils/handler'
 
 const topicRouter = express.Router()
@@ -57,7 +58,7 @@ topicRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(topicControll
  * }
     ]
  */
-topicRouter.post('/', create_updateTopicValidation, wrapRequestHandler(topicController.createTopics))
+topicRouter.post('/', createTopicValidation, wrapRequestHandler(topicController.createTopics))
 
 //PATH
 /**
@@ -85,7 +86,7 @@ topicRouter.patch('/:id/restore', checkIdParamMiddleware, wrapRequestHandler(top
 topicRouter.patch(
   '/:id',
   checkIdParamMiddleware,
-  create_updateTopicValidation,
+  updateTopicValidation,
   wrapRequestHandler(topicController.updateTopic)
 )
 

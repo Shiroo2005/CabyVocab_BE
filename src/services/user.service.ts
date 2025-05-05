@@ -36,6 +36,9 @@ class UserService {
         email: true,
         avatar: true,
         status: true,
+        streak: true,
+        lastStudyDate: true,
+        totalStudyDay: true,
         role: { name: true }
       }
     })
@@ -63,6 +66,9 @@ class UserService {
         email: true,
         avatar: true,
         status: true,
+        streak: true,
+        lastStudyDate: true,
+        totalStudyDay: true,
         role: { name: true }
       }
     })
@@ -86,6 +92,9 @@ class UserService {
         email: true,
         avatar: true,
         status: true,
+        streak: true,
+        lastStudyDate: true,
+        totalStudyDay: true,
         role: { name: true, id: true }
       }
     })

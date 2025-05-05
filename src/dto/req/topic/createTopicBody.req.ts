@@ -9,5 +9,6 @@ export interface TopicBody {
   description: string
   thumbnail?: string
   type?: TopicType
-  wordIds: number[]
+  wordIds?: number[],
+  courseIds: number[] 
 }

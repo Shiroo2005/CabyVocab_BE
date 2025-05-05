@@ -48,6 +48,15 @@ export class User extends BaseEntity {
   @Column({ default: UserStatus.NOT_VERIFIED, type: 'varchar' })
   status?: UserStatus
 
+  @Column('int', { default: 0 })
+  streak?: number
+
+  @Column('timestamp', { default: null })
+  lastStudyDate?: Date
+
+  @Column('int', { default: 0 })
+  totalStudyDay?: number
+
   @ManyToOne(() => Role, (role) => role.users)
   role?: Role
 
@@ -78,7 +87,7 @@ export class User extends BaseEntity {
     this.password = hashData(this.password)
   }
 
-  static createUser = ({ id, email, username, password, avatar, status, role }: User) => {
+  static createUser = ({ id, email, username, password, avatar, status, role, lastStudyDate, streak, totalStudyDay }: User) => {
     const newUser = new User()
 
     newUser.id = id
@@ -88,6 +97,9 @@ export class User extends BaseEntity {
     newUser.avatar = avatar
     newUser.status = status
     newUser.role = role
+    newUser.lastStudyDate = lastStudyDate
+    newUser.totalStudyDay = totalStudyDay
+    newUser.streak = streak
 
     return newUser
   }
@@ -99,14 +111,20 @@ export class User extends BaseEntity {
       email,
       avatar,
       status,
-      role
+      role,
+      lastStudyDate,
+      streak,
+      totalStudyDay
     }: {
       username?: string
       email?: string
       avatar?: string
       status?: UserStatus
       roleId?: number
-      role?: Role
+      role?: Role,
+      totalStudyDay?: number
+      lastStudyDate?: Date
+      streak?: number
     }
   ) => {
     if (username) user.username = username
@@ -114,6 +132,9 @@ export class User extends BaseEntity {
     if (avatar) user.avatar = avatar
     if (status) user.status = status
     if (role && role.id) user.role = role
+    if (totalStudyDay) user.totalStudyDay = totalStudyDay
+    if (lastStudyDate) user.lastStudyDate = lastStudyDate
+    if (streak) user.streak = streak
     //if (tokens && tokens.length == 0) user.tokens = tokens
 
     return user

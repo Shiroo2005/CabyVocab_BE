@@ -8,45 +8,92 @@ import { topicService } from './topic.service'
 import { Topic } from '~/entities/topic.entity'
 import { courseQueryReq } from '~/dto/req/course/courseQueryReq.req'
 import { unGetData } from '~/utils'
+import { BadRequestError } from '~/core/error.response'
+import { DatabaseService } from './database.service'
 
 class CourseService {
   createCourse = async (coursesBody: CourseBody[]) => {
-    const courses = await Promise.all(
-      coursesBody.map(async (courseBody) => {
+    const databaseService = DatabaseService.getInstance()
+    const queryRunner = databaseService.appDataSource.createQueryRunner()
+  
+    try {
+      await queryRunner.connect()
+      await queryRunner.startTransaction()
+      
+      const courses = []
+      
+      for (const courseBody of coursesBody) {
         const newCourse = Course.create({ ...courseBody })
-
+        
+        // Save the course first to get an ID
+        const savedCourse = await queryRunner.manager.save(newCourse)
+        
         const { topics } = courseBody
-
+        
         if (topics && topics.length > 0) {
-          const validTopics: CourseTopic[] = []
-
+          const courseTopics = []
+          
           for (const topic of topics) {
-            const existingTopic = await topicService.isExistTopic(topic)
-
+            const existingTopic = await Topic.findOne({
+              where: { id: topic.id }
+            })
+            
             if (existingTopic) {
               const courseTopic = CourseTopic.create({
-                course: newCourse,
+                course: savedCourse,
                 topic: existingTopic,
                 displayOrder: topic.displayOrder
               })
-
-              await courseTopic.save()
-
-              validTopics.push(courseTopic)
+              
+              const savedCourseTopic = await queryRunner.manager.save(courseTopic)
+              courseTopics.push(savedCourseTopic)
             }
           }
-
-          newCourse.courseTopics = validTopics
+          
+          savedCourse.courseTopics = courseTopics
+          savedCourse.totalTopic = courseTopics.length
+          
+          // Update the course with the total topic count
+          await queryRunner.manager.save(savedCourse)
         }
-
-        return newCourse
-      })
-    )
-
-    //save topic into db
-    const createdCourses = await Course.getRepository().save(courses)
-
-    return createdCourses
+        
+        // Fetch the complete course with all relations
+        const completeCourse = await queryRunner.manager.findOne(Course, {
+          where: { id: savedCourse.id },
+          relations: ['courseTopics', 'courseTopics.topic']
+        })
+        
+        if (completeCourse) {
+          // Create a clean course object without the nested redundancy
+          const cleanCourse = {
+            id: completeCourse.id,
+            title: completeCourse.title,
+            level: completeCourse.level,
+            target: completeCourse.target,
+            description: completeCourse.description,
+            topics: completeCourse.courseTopics.map(ct => ({
+              ...ct.topic,
+              displayOrder: ct.displayOrder
+            })),
+            createdAt: completeCourse.createdAt,
+            updatedAt: completeCourse.updatedAt
+          }
+          
+          courses.push(cleanCourse)
+        }
+      }
+      
+      await queryRunner.commitTransaction()
+      return courses
+    } catch (err) {
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction()
+      }
+      console.log(`Error when creating courses: ${err}`)
+      throw new BadRequestError({ message: `${err}` })
+    } finally {
+      await queryRunner.release()
+    }
   }
 
   getCourseById = async ({ id }: { id: number }) => {
@@ -115,12 +162,74 @@ class CourseService {
     }
   }
 
-  updateCourse = async (id: number, course: UpdateCourseBodyReq) => {
-    const updateCourse = await Course.getRepository().findOne({ where: { id: id } })
+  updateCourse = async (id: number, { title, description, level, target, topics }: UpdateCourseBodyReq) => {
+    const databaseService = DatabaseService.getInstance()
+    const queryRunner = databaseService.appDataSource.createQueryRunner()
+  
+    try {
+      await queryRunner.connect()
+      await queryRunner.startTransaction()
+      
+      // First update the basic course properties
+      await queryRunner.manager.update(Course, id, {
+        title,
+        description,
+        level,
+        target
+      })
+  
+      // Handle topic associations if provided
+      if (topics && topics.length > 0) {
+        // Remove existing course-topic associations
+        await queryRunner.manager.delete(CourseTopic, { course: { id } })
+        
+        // Create new course-topic associations with the provided display orders
+        const courseTopics = [];
+        
+        for (const topic of topics) {
+          courseTopics.push({
+            course: { id },
+            topic: { id: topic.id },
+            displayOrder: topic.displayOrder
+          });
+        }
+        
+        await queryRunner.manager.getRepository(CourseTopic).save(courseTopics);
+      }
+      
+      // Fetch the updated course with a cleaner structure
+      const updatedCourse = await queryRunner.manager.findOne(Course, {
+        where: { id },
+        relations: ['courseTopics', 'courseTopics.topic']
+      })
+      
+      if (!updatedCourse) return {}
 
-    if (updateCourse) {
-      const resCourse = Course.updateCourse(updateCourse, course)
-      return resCourse || {}
+      // Create a clean course object without the nested redundancy
+      const result = {
+        id: updatedCourse.id,
+        title: updatedCourse.title,
+        level: updatedCourse.level,
+        target: updatedCourse.target,
+        description: updatedCourse.description,
+        topics: updatedCourse.courseTopics.map(ct => ({
+          ...ct.topic,
+          displayOrder: ct.displayOrder
+        })),
+        createdAt: updatedCourse.createdAt,
+        updatedAt: updatedCourse.updatedAt
+      }
+      
+      await queryRunner.commitTransaction()
+      return result
+    } catch (err) {
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction()
+      }
+      console.log(`Error when updating course: ${err}`)
+      throw new BadRequestError({ message: `${err}` })
+    } finally {
+      await queryRunner.release()
     }
   }
 

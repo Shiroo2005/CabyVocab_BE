@@ -15,6 +15,7 @@ import {
 import { WordPosition, WordRank } from '~/constants/word'
 import { Topic } from './topic.entity'
 import { WordProgress } from './word_progress.entity'
+import { WordTopic } from './wordTopic.entity'
 
 @Entity()
 export class Word extends BaseEntity {
@@ -65,13 +66,16 @@ export class Word extends BaseEntity {
   translateExample?: string
 
   //foreign key
-  @ManyToMany(() => Topic, (topic) => topic.words)
-  @JoinTable({ name: 'word_topic' })
-  topics?: Topic[]
-
   @OneToMany(() => WordProgress, (wordProgress) => wordProgress.word)
   wordProgresses: WordProgress[]
 
+  @OneToMany(() => WordTopic, (wordTopic) => wordTopic.word)
+  wordTopics?: WordTopic[]
+
+  // @ManyToMany(() => Topic)
+  // @JoinTable()
+  // topics: Topic[]
+  
   @DeleteDateColumn()
   deletedAt?: Date
 
@@ -81,7 +85,7 @@ export class Word extends BaseEntity {
   @UpdateDateColumn()
   updatedAt?: Date
 
-  static createWord = ({
+  static createWord = async ({
     content,
     meaning,
     pronunciation,
@@ -90,8 +94,9 @@ export class Word extends BaseEntity {
     rank,
     position,
     example,
-    translateExample
-  }: Word) => {
+    translateExample,
+    topicIds
+  }: Word & { topicIds?: number[] }) => {
     const newWord = new Word()
     newWord.content = content
     newWord.position = position
@@ -102,6 +107,20 @@ export class Word extends BaseEntity {
     newWord.rank = rank
     newWord.example = example
     newWord.translateExample = translateExample
+
+    // Save the word first to get an ID
+    await newWord.save()
+
+    // Create word-topic relationships if topicIds are provided
+    if (topicIds && topicIds.length > 0) {
+      // Create new relationships - using the same approach as updateWord
+      for (const topicId of topicIds) {
+        const wordTopic = new WordTopic();
+        wordTopic.wordId = newWord.id as number;
+        wordTopic.topicId = topicId;
+        await wordTopic.save();
+      }
+    }
 
     return newWord
   }
@@ -143,10 +162,16 @@ export class Word extends BaseEntity {
     if (translateExample) word.translateExample = translateExample
 
     if (topicIds && topicIds.length > 0) {
-      const topics = await Topic.find({
-        where: { id: In(topicIds) }
-      })
-      word.topics = topics // Associate the topics with the word
+      // Remove existing relationships
+      await WordTopic.delete({ wordId: word.id });
+      
+      // Create new relationships
+      for (const topicId of topicIds) {
+        const wordTopic = new WordTopic();
+        wordTopic.wordId = word.id as number;
+        wordTopic.topicId = topicId;
+        await wordTopic.save();
+      }
     }
     await word.save()
     return word
