@@ -39,17 +39,26 @@ wordRouter.get(
   wrapRequestHandler(wordController.getAllWords)
 )
 
+/**
+ * @description : Get word rank
+ * @method : GET
+ * @path : /rank-list
+ */
+wordRouter.get('/:rank-list', wrapRequestHandler(wordController.getWorkRankList))
+
+/**
+ * @description : Get word position
+ * @method : GET
+ * @path : /rank-position
+ */
+wordRouter.get('/:position-list', wrapRequestHandler(wordController.getWordPosition))
 
 /**
  * @description : Get word by id
  * @method : GET
  * @path : /:id
  */
-wordRouter.get(
-  '/:id', 
-  checkIdParamMiddleware, 
-  wrapRequestHandler(wordController.getWordById)
-)
+wordRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(wordController.getWordById))
 
 //POST
 //checkPermission?
@@ -92,12 +101,7 @@ wordRouter.post('/', createWordValidation, wrapRequestHandler(wordController.cre
         translateExample?: string
  *
  */
-wordRouter.patch(
-  '/:id', 
-  checkIdParamMiddleware,
-  updateWordValidation, 
-  wrapRequestHandler(wordController.updateWord)
-)
+wordRouter.patch('/:id', checkIdParamMiddleware, updateWordValidation, wrapRequestHandler(wordController.updateWord))
 
 /**
  * @description : Restore word from deleted
@@ -106,11 +110,7 @@ wordRouter.patch(
  * @header : Authorization
  * @params: id
  */
-wordRouter.patch(
-  '/:id/restore', 
-  checkIdParamMiddleware, 
-  wrapRequestHandler(wordController.restoreWord)
-)
+wordRouter.patch('/:id/restore', checkIdParamMiddleware, wrapRequestHandler(wordController.restoreWord))
 
 //PUT
 
@@ -122,10 +122,6 @@ wordRouter.patch(
  * @param : id
  * @header : Authorization
  */
-wordRouter.delete(
-  '/:id', 
-  checkIdParamMiddleware, 
-  wrapRequestHandler(wordController.deleteWordById)
-)
+wordRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(wordController.deleteWordById))
 
 export default wordRouter

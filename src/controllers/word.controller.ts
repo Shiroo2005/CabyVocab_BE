@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
+import { getWordPosition, getWorkRank } from '~/constants/word'
 import { CREATED, SuccessResponse } from '~/core/success.response'
 import { CreateWordBodyReq } from '~/dto/req/word/createWordBody.req'
 import { UpdateWordBodyReq } from '~/dto/req/word/updateWordBody.req'
@@ -24,14 +25,32 @@ class WordController {
 
   getWordById = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     const id = parseInt(req.params?.id)
+
     return new SuccessResponse({
       message: 'Get word by id successful!',
       metaData: await wordService.getWordById({ id })
     }).send(res)
   }
 
-  getAllWords = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+  getWorkRankList = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+    return new SuccessResponse({
+      message: 'Get word rank successful!',
+      metaData: {
+        data: getWorkRank()
+      }
+    }).send(res)
+  }
 
+  getWordPosition = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+    return new SuccessResponse({
+      message: 'Get word position successful!',
+      metaData: {
+        data: getWordPosition()
+      }
+    }).send(res)
+  }
+
+  getAllWords = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
     return new SuccessResponse({
       message: 'Get all words successfully',
       metaData: await wordService.getAllWords({

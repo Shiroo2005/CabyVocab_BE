@@ -1,4 +1,3 @@
-import { userController } from '~/controllers/user.controller'
 import express from 'express'
 import { accessTokenValidation } from '~/middlewares/auth.middlewares'
 import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '~/middlewares/common.middlewares'
@@ -18,7 +17,7 @@ courseRouter.use(accessTokenValidation)
  * @description : get all courses
  * @method : GET
  * @path : /
- * @Query : 
+ * @Query :
  * {
  *     page?: number,
  *     limit?: number,
@@ -37,22 +36,25 @@ courseRouter.get(
 )
 
 /**
+ * @description : Get const course level
+ * @method : GET
+ * @path : /course-level-list
+ */
+courseRouter.get('/level-list', wrapRequestHandler(courseController.getCourseLevelList))
+
+/**
  * @description : Get course by id
  * @method : GET
  * @path : /:id
  */
-courseRouter.get(
-  '/:id',
-  checkIdParamMiddleware,
-  wrapRequestHandler(courseController.getCourseByID)
-)
+courseRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(courseController.getCourseByID))
 
 //POST
 /**
  * @description : Create new courses
  * @method : POST
  * @path : /
- * @header : 
+ * @header :
  * @body : {
  *    title: string,
  *    level: CourseLevel
@@ -64,11 +66,7 @@ courseRouter.get(
  *    }[]
  * }[]
  */
-courseRouter.post(
-  '/',
-  createCourseValidation,
-  wrapRequestHandler(courseController.createCourse)
-)
+courseRouter.post('/', createCourseValidation, wrapRequestHandler(courseController.createCourse))
 
 //PATH
 /**
@@ -102,11 +100,7 @@ courseRouter.patch(
  * @header : Authorization
  * @params: id
  */
-courseRouter.patch(
-  '/:id/restore',
-  checkIdParamMiddleware,
-  wrapRequestHandler(courseController.restoreCourse)
-)
+courseRouter.patch('/:id/restore', checkIdParamMiddleware, wrapRequestHandler(courseController.restoreCourse))
 
 //PUT
 
@@ -118,10 +112,6 @@ courseRouter.patch(
  * @param : id
  * @header : Authorization
  */
-courseRouter.delete(
-  '/:id',
-  checkIdParamMiddleware,
-  wrapRequestHandler(courseController.deleteCourse)
-)
+courseRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(courseController.deleteCourse))
 
 export default courseRouter

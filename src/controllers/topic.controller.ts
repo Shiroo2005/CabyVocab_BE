@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
+import { getTopicTypeList } from '~/constants/topic'
 import { CREATED, SuccessResponse } from '~/core/success.response'
 import { CreateTopicBodyReq } from '~/dto/req/topic/createTopicBody.req'
 import { UpdateTopicBodyReq } from '~/dto/req/topic/updateTopicBody.req'
@@ -35,6 +36,15 @@ class TopicController {
     return new SuccessResponse({
       message: 'Get all topics successful!',
       metaData: await topicService.getAllTopics({ ...req.query, ...req.parseQueryPagination, sort: req.sortParsed })
+    }).send(res)
+  }
+
+  getTopicTypeList = async (req: Request, res: Response) => {
+    return new SuccessResponse({
+      message: 'Get all topics type successful!',
+      metaData: {
+        data: getTopicTypeList()
+      }
     }).send(res)
   }
 
