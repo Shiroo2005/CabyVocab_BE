@@ -19,11 +19,11 @@ topicRouter.use(accessTokenValidation)
  * @path : /
  * @query :
  * {
- *  page?: number, 
- *  limit?: number, 
- *  title?: string, 
- *  description?: string, 
- *  type?: TopicType, 
+ *  page?: number,
+ *  limit?: number,
+ *  title?: string,
+ *  description?: string,
+ *  type?: TopicType,
  *  sort?: FindOptionsOrder<Topic>
  * }
  */
@@ -33,6 +33,15 @@ topicRouter.get(
   wrapRequestHandler(parseSort({ allowSortList: Topic.allowSortList })),
   wrapRequestHandler(topicController.getAllTopics)
 )
+
+/**
+ * @description : Get topic type
+ * @method : GET
+ * @path : /:type-list
+ * @header : Authorization
+ * @params : id
+ */
+topicRouter.get('/type-list', wrapRequestHandler(topicController.getTopicTypeList))
 
 /**
  * @description : Get topic by id

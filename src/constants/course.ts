@@ -3,3 +3,7 @@ export enum CourseLevel {
   INTERMEDIATE = 'Intermediate',
   ADVANCE = 'Advance'
 }
+
+export const getCourseLevel = () => {
+  return Object.values(CourseLevel)
+}
