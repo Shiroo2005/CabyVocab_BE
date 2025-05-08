@@ -69,7 +69,7 @@ class UserService {
         streak: true,
         lastStudyDate: true,
         totalStudyDay: true,
-        role: { name: true }
+        role: { name: true, id: true }
       }
     })
     return {
@@ -130,7 +130,10 @@ class UserService {
     // Save the updated user to the database
     await User.save(updatedUser)
 
-    return unGetData({ fields: ['password'], object: updatedUser })
+    return unGetData({
+      fields: ['password', 'role.createdAt', 'role.updatedAt', 'role.deletedAt', 'role.description'],
+      object: updatedUser
+    })
   }
 
   deleteUserByID = async (id: number) => {

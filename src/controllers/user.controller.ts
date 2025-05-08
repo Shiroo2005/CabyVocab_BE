@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
-import { CREATED } from '~/core/success.response'
+import { CREATED, SuccessResponse } from '~/core/success.response'
 import { userService } from '~/services/user.service'
 
 class UserController {
@@ -13,7 +13,7 @@ class UserController {
 
   getUserByEmail = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     const email = req.query.email as string
-    return new CREATED({
+    return new SuccessResponse({
       message: 'Get user successful',
       metaData: await userService.getUserByEmail(email)
     }).send(res)
@@ -21,14 +21,14 @@ class UserController {
 
   getUserById = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     const id = parseInt(req.params?.id)
-    return new CREATED({
+    return new SuccessResponse({
       message: 'Get User successful',
       metaData: await userService.getUserByID(id)
     }).send(res)
   }
 
   getAllUsers = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
-    return new CREATED({
+    return new SuccessResponse({
       message: 'Get page users successful',
       metaData: await userService.getAllUser({
         ...req.query,
@@ -40,7 +40,7 @@ class UserController {
 
   updateUser = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     const id = parseInt(req.params?.id)
-    return new CREATED({
+    return new SuccessResponse({
       message: 'Update successful',
       metaData: await userService.updateUserByID(id, req.body)
     }).send(res)
@@ -48,7 +48,7 @@ class UserController {
 
   restoreUser = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     const id = parseInt(req.params.id as string)
-    return new CREATED({
+    return new SuccessResponse({
       message: 'Restore user successful',
       metaData: await userService.restoreUser(id)
     }).send(res)
@@ -56,7 +56,7 @@ class UserController {
 
   deleteUser = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     const id = parseInt(req.params?.id)
-    return new CREATED({
+    return new SuccessResponse({
       message: 'Delete user successful',
       metaData: await userService.deleteUserByID(id)
     }).send(res)
