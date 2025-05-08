@@ -3,12 +3,12 @@ import { roleController } from '~/controllers/role.controller'
 import { checkIdParamMiddleware } from '~/middlewares/common.middlewares'
 import { wrapRequestHandler } from '~/utils/handler'
 import { accessTokenValidation } from '~/middlewares/auth.middlewares'
-import { 
-    validateCreateRole, 
-    validateUpdateRole, 
-    checkRoleExists, 
-    validatePagination 
-  } from '~/middlewares/role.middlewares'
+import {
+  validateCreateRole,
+  validateUpdateRole,
+  checkRoleExists,
+  validatePagination
+} from '~/middlewares/role.middlewares'
 
 const roleRouter = express.Router()
 
@@ -29,45 +29,43 @@ roleRouter.get('/', validatePagination, wrapRequestHandler(roleController.getAll
  */
 roleRouter.get('/:id', checkIdParamMiddleware, checkRoleExists, wrapRequestHandler(roleController.getRole))
 
-// POST 
+// POST
 /**
- * @description : Create new role 
+ * @description : Create new role
  * @method : POST
  * @path : /
  * @body : {name, description}
  */
-roleRouter.post('/', 
-  accessTokenValidation,
-  validateCreateRole, 
-  wrapRequestHandler(roleController.createRole)
-)
+roleRouter.post('/', accessTokenValidation, validateCreateRole, wrapRequestHandler(roleController.createRole))
 
-// PUT 
+// PUT
 /**
- * @description : Update role by ID 
+ * @description : Update role by ID
  * @method : PUT
  * @path : /:id
  * @params : {id}
  * @body : {name, description}
  */
-roleRouter.put('/:id', 
+roleRouter.put(
+  '/:id',
   accessTokenValidation,
-  checkIdParamMiddleware, 
-  validateUpdateRole, 
+  checkIdParamMiddleware,
+  validateUpdateRole,
   wrapRequestHandler(roleController.putRole)
 )
 
-// DELETE 
+// DELETE
 /**
- * @description : Delete role by ID 
+ * @description : Delete role by ID
  * @method : DELETE
  * @path : /:id
  * @params : {id}
  */
-roleRouter.delete('/:id', 
+roleRouter.delete(
+  '/:id',
   accessTokenValidation,
-  checkIdParamMiddleware, 
-  checkRoleExists, 
+  checkIdParamMiddleware,
+  checkRoleExists,
   wrapRequestHandler(roleController.deleteRoleById)
 )
 export default roleRouter
