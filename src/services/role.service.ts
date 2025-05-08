@@ -37,15 +37,14 @@ class RoleService {
     return foundRole
   }
 
-  putRoleById = async ({ id, name, description }: { id: string; name: string; description?: string }) => {
+  putRoleById = async ({ id, name, description }: { id: string; name: string; description: string }) => {
     const roleToUpdate = await Role.findOne({ where: { id: Number(id) } })
     if (!roleToUpdate) {
       throw new Error('Role not found')
     }
     roleToUpdate.name = name
-    if (description !== undefined) {
-      roleToUpdate.description = description
-    }
+    roleToUpdate.description = description
+
     const updatedRole = await Role.save(roleToUpdate)
     return updatedRole
   }
