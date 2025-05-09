@@ -17,6 +17,7 @@ import { CourseTopic } from './courseTopic.entity'
 import { WordTopic } from './wordTopic.entity'
 import { User } from './user.entity'
 import { Vote } from './vote.entity'
+import { Comment } from './comment.entity'
 
 @Entity()
 export class Topic extends BaseEntity {
@@ -60,6 +61,9 @@ export class Topic extends BaseEntity {
 
   @OneToMany(() => WordTopic, (wordTopic) => wordTopic.topic)
   wordTopics?: WordTopic[]
+
+  @OneToMany(() => Comment, (comment) => comment.topic)
+  comments: Comment[]
 
   @DeleteDateColumn()
   deletedAt?: Date

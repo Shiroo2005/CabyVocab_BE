@@ -14,6 +14,8 @@ import { FindOptionsOrder } from 'typeorm'
 import { Vote } from '~/entities/vote.entity'
 import { VoteTopic } from '~/dto/req/topic/voteTopic.req'
 import { unGetData } from '~/utils'
+import { CreateCommentBodyReq } from '~/dto/req/topic/comment/createCommentBody.req'
+import { Comment } from '~/entities/comment.entity'
 
 class TopicService {
   createTopics = async (
@@ -98,9 +100,17 @@ class TopicService {
           createdBy: {
             id: true
           }
+        },
+        comments: {
+          content: true,
+          id: true,
+          parentComment: {
+            id: true,
+            content: true
+          }
         }
       },
-      relations: ['wordTopics', 'wordTopics.word', 'votes', 'votes.createdBy']
+      relations: ['votes', 'votes.createdBy', 'comments', 'comments.parentComment']
     })
 
     if (!res) return {}
@@ -159,9 +169,17 @@ class TopicService {
           createdBy: {
             id: true
           }
+        },
+        comments: {
+          content: true,
+          id: true,
+          parentComment: {
+            id: true,
+            content: true
+          }
         }
       },
-      relations: ['votes', 'votes.createdBy']
+      relations: ['votes', 'votes.createdBy', 'comments', 'comments.parentComment']
     })
 
     return {
@@ -376,6 +394,21 @@ class TopicService {
         id: topicId
       }
     })
+  }
+
+  commentTopic = async ({ content, topicId, userId, parentId = null }: CreateCommentBodyReq) => {
+    const comment = Comment.create({
+      content,
+      createdBy: { id: userId },
+      parentComment: {
+        id: parentId
+      } as Comment,
+      topic: {
+        id: topicId
+      }
+    })
+
+    return await comment.save()
   }
 }
 

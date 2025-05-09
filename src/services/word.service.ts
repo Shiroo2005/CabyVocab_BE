@@ -1,4 +1,3 @@
-import { validate } from 'class-validator'
 import { BadRequestError, NotFoundRequestError } from '~/core/error.response'
 import { WordBody } from '~/dto/req/word/createWordBody.req'
 import { UpdateWordBodyReq } from '~/dto/req/word/updateWordBody.req'
@@ -6,20 +5,18 @@ import { wordQueryReq } from '~/dto/req/word/wordQuery.req'
 import { Word } from '~/entities/word.entity'
 import { WordTopic } from '~/entities/wordTopic.entity'
 import { DatabaseService } from './database.service'
-import { Topic } from '~/entities/topic.entity'
-import { In } from 'typeorm'
 
 class WordService {
   createWords = async (words: WordBody[]) => {
     const databaseService = DatabaseService.getInstance()
     const queryRunner = databaseService.appDataSource.createQueryRunner()
-    
+
     try {
-      await queryRunner.connect() 
+      await queryRunner.connect()
       await queryRunner.startTransaction()
-      
+
       const createdWords = []
-      
+
       for (const word of words) {
         // Create the word
         const newWord = Word.create({
@@ -33,23 +30,23 @@ class WordService {
           example: word.example,
           translateExample: word.translateExample
         })
-        
+
         // Save the word
         const savedWord = await queryRunner.manager.save(newWord)
-        
+
         // Create word-topic associations if needed
         if (word.topicIds && word.topicIds.length > 0) {
-          const wordTopics = word.topicIds.map(topicId => ({
+          const wordTopics = word.topicIds.map((topicId) => ({
             wordId: savedWord.id,
             topicId: topicId
           }))
-          
+
           await queryRunner.manager.getRepository(WordTopic).save(wordTopics)
         }
-        
+
         createdWords.push(savedWord)
       }
-      
+
       await queryRunner.commitTransaction()
       return createdWords
     } catch (err) {
@@ -81,11 +78,11 @@ class WordService {
     const word = await Word.findOne({
       where: { id }
     })
-  
+
     if (!word) {
       throw new NotFoundRequestError('Word not found with the provided ID')
     }
-  
+
     return Word.updateWord(word, {
       content,
       meaning,
@@ -169,7 +166,7 @@ class WordService {
 
   restoreWordById = async ({ id }: { id: number }) => {
     const restoreWord = await Word.getRepository().restore(id)
-    
+
     return restoreWord
   }
 

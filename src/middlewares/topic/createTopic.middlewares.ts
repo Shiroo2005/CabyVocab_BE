@@ -3,8 +3,6 @@ import { checkSchema } from 'express-validator'
 import { isRequired, isLength, isString, isEnum } from '../common.middlewares'
 import { TopicType } from '~/constants/topic'
 import { BadRequestError } from '~/core/error.response'
-import { Course } from '~/entities/courses.entity'
-import { In } from 'typeorm'
 
 export const createTopicValidation = validate(
   checkSchema(

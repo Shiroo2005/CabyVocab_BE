@@ -5,6 +5,7 @@ import { CREATED, SuccessResponse } from '~/core/success.response'
 import { CreateTopicBodyReq } from '~/dto/req/topic/createTopicBody.req'
 import { UpdateTopicBodyReq } from '~/dto/req/topic/updateTopicBody.req'
 import { User } from '~/entities/user.entity'
+import { commentService } from '~/services/comment.service'
 import { topicService } from '~/services/topic.service'
 
 class TopicController {
@@ -86,6 +87,30 @@ class TopicController {
     return new SuccessResponse({
       message: 'Unvote topic by id successful!',
       metaData: await topicService.unVoteTopic({ userId: user.id as number, topicId })
+    }).send(res)
+  }
+
+  createComment = async (req: Request<ParamsDictionary, any, { content: string; parentId: number }>, res: Response) => {
+    const topicId = parseInt(req.params?.id)
+
+    const user = req.user as User
+
+    return new SuccessResponse({
+      message: 'Create comment successful!',
+      metaData: await topicService.commentTopic({ userId: user.id as number, topicId, ...req.body })
+    }).send(res)
+  }
+
+  getChildComment = async (
+    req: Request<ParamsDictionary, any, { content: string; parentId: number }>,
+    res: Response
+  ) => {
+    const parentId = parseInt(req.params?.parentId)
+    const topicId = parseInt(req.params?.id)
+
+    return new SuccessResponse({
+      message: 'Get child comment by id successful!',
+      metaData: await commentService.findChildComment(parentId, topicId)
     }).send(res)
   }
 }

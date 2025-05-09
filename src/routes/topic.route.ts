@@ -4,6 +4,8 @@ import { topicController } from '~/controllers/topic.controller'
 import { Topic } from '~/entities/topic.entity'
 import { accessTokenValidation, checkPermission } from '~/middlewares/auth.middlewares'
 import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '~/middlewares/common.middlewares'
+import { createCommentValidation } from '~/middlewares/topic/comment/createComment.middlewares'
+import { getChildCommentValidation } from '~/middlewares/topic/comment/getChildComment.middlewares'
 import { CreateCustomizeTopicMiddleware } from '~/middlewares/topic/createCustomizeTopic.middlewares'
 import { createTopicValidation } from '~/middlewares/topic/createTopic.middlewares'
 import { updateTopicValidation } from '~/middlewares/topic/updateTopic.middleware'
@@ -34,6 +36,17 @@ topicRouter.get(
   checkQueryMiddleware(),
   wrapRequestHandler(parseSort({ allowSortList: Topic.allowSortList })),
   wrapRequestHandler(topicController.getAllTopics)
+)
+
+/**
+ * @description : get children comment
+ * @method : GET
+ * @path : /:id
+ */
+topicRouter.get(
+  '/:id/child-comment/:parentId',
+  wrapRequestHandler(getChildCommentValidation),
+  wrapRequestHandler(topicController.getChildComment)
 )
 
 /**
@@ -115,6 +128,19 @@ topicRouter.post('/:id/like', checkIdParamMiddleware, wrapRequestHandler(topicCo
  * @header : Authorization
  */
 topicRouter.post('/:id/unlike', checkIdParamMiddleware, wrapRequestHandler(topicController.unVoteTopic))
+
+/**
+ * @description : Comment
+ * @method : POST
+ * @path : /:id/comment/:parentId
+ * @header : Authorization
+ */
+topicRouter.post(
+  '/:id/comment',
+  checkIdParamMiddleware,
+  createCommentValidation,
+  wrapRequestHandler(topicController.createComment)
+)
 
 //PATH
 /**
