@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { Topic } from '~/entities/topic.entity'
-import { CourseTopic } from '~/entities/course_topic.entity'
+import { CourseTopic } from '~/entities/courseTopic.entity'
 import { CourseLevel } from '~/constants/course'
 import { Course } from '~/entities/courses.entity'
 

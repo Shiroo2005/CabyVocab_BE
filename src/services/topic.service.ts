@@ -1,10 +1,8 @@
-import { TopicBody } from '~/dto/req/topic/createTopicBody.req'
-import { topicQueryReq } from '~/dto/req/topic/topicQuery.req'
 import { UpdateTopicBodyReq } from '~/dto/req/topic/updateTopicBody.req'
 import { Topic } from '~/entities/topic.entity'
 import { wordService } from './word.service'
 import { validate } from 'class-validator'
-import { CompletedTopic } from '~/entities/completed_topic.entity'
+import { CompletedTopic } from '~/entities/completedTopic.entity'
 import { BadRequestError } from '~/core/error.response'
 import { CompleteTopicBodyReq } from '~/dto/req/topic/completeTopicBody.req'
 import { DatabaseService } from './database.service'
@@ -13,6 +11,9 @@ import { WordTopic } from '~/entities/wordTopic.entity'
 import { TopicType } from '~/constants/topic'
 import { User } from '~/entities/user.entity'
 import { FindOptionsOrder } from 'typeorm'
+import { Vote } from '~/entities/vote.entity'
+import { VoteTopic } from '~/dto/req/topic/voteTopic.req'
+import { unGetData } from '~/utils'
 
 class TopicService {
   createTopics = async (
@@ -86,7 +87,20 @@ class TopicService {
       where: {
         id
       },
-      relations: ['wordTopics', 'wordTopics.word']
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        thumbnail: true,
+        type: true,
+        votes: {
+          id: true,
+          createdBy: {
+            id: true
+          }
+        }
+      },
+      relations: ['wordTopics', 'wordTopics.word', 'votes', 'votes.createdBy']
     })
 
     if (!res) return {}
@@ -110,7 +124,7 @@ class TopicService {
     type,
     sort,
     createdBy = undefined,
-    isPublic = 'false'
+    isPublic
   }: {
     page?: number
     limit?: number
@@ -130,8 +144,8 @@ class TopicService {
         title,
         description,
         type,
-        createdBy: { id: createdBy ? parseInt(createdBy) : (createdBy as undefined) },
-        isPublic: isPublic == '1' ? true : false
+        createdBy: { id: createdBy ? parseInt(createdBy) : undefined },
+        ...(isPublic !== undefined && { isPublic: isPublic == 'true' ? true : false })
       },
       order: sort,
       select: {
@@ -139,8 +153,15 @@ class TopicService {
         title: true,
         description: true,
         thumbnail: true,
-        type: true
-      }
+        type: true,
+        votes: {
+          id: true,
+          createdBy: {
+            id: true
+          }
+        }
+      },
+      relations: ['votes', 'votes.createdBy']
     })
 
     return {
@@ -322,6 +343,39 @@ class TopicService {
       progressPercentage: totalTopics > 0 ? (completedTopics.length / totalTopics) * 100 : 0,
       wordProgressSummary: progressSummary
     }
+  }
+
+  voteTopic = async ({ topicId, userId }: VoteTopic) => {
+    const foundLike = await Vote.findOne({
+      where: {
+        createdBy: { id: userId },
+        topic: { id: topicId }
+      },
+      withDeleted: true
+    })
+
+    if (!foundLike) {
+      const newLike = Vote.create({
+        createdBy: { id: userId },
+        topic: { id: topicId }
+      })
+
+      return unGetData({ fields: ['createdBy', 'topic'], object: await newLike.save() })
+    }
+
+    await Vote.getRepository().restore({ id: foundLike.id })
+    return foundLike
+  }
+
+  unVoteTopic = async ({ topicId, userId }: VoteTopic) => {
+    return await Vote.getRepository().softDelete({
+      createdBy: {
+        id: userId
+      },
+      topic: {
+        id: topicId
+      }
+    })
   }
 }
 

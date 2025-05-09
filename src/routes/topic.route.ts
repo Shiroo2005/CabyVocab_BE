@@ -100,6 +100,22 @@ topicRouter.post(
   wrapRequestHandler(topicController.createTopics)
 )
 
+/**
+ * @description : Vote topic
+ * @method : POST
+ * @path : /:id/like
+ * @header : Authorization
+ */
+topicRouter.post('/:id/like', checkIdParamMiddleware, wrapRequestHandler(topicController.voteTopic))
+
+/**
+ * @description : UnVote topic
+ * @method : POST
+ * @path : /:id/unlinke
+ * @header : Authorization
+ */
+topicRouter.post('/:id/unlike', checkIdParamMiddleware, wrapRequestHandler(topicController.unVoteTopic))
+
 //PATH
 /**
  * @description : Restore topic by id

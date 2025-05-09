@@ -9,7 +9,7 @@ import {
 import { CreateWordProgressBodyReq } from '~/dto/req/wordProgress/createWordProgressBody.req'
 import { UpdateWordProgressData } from '~/dto/req/wordProgress/updateWordProgressBody.req'
 import { User } from '~/entities/user.entity'
-import { WordProgress } from '~/entities/word_progress.entity'
+import { WordProgress } from '~/entities/wordProgress.entity'
 import { DatabaseService } from './database.service'
 import { BadRequestError, NotFoundRequestError } from '~/core/error.response'
 
@@ -24,10 +24,10 @@ class WordProgressService {
 
     // Use provided manager or fallback to Active Record pattern
     if (manager) {
-      return await manager.save(WordProgress, items);
+      return await manager.save(WordProgress, items)
     } else {
       // Use Active Record pattern
-      return await WordProgress.save(items);
+      return await WordProgress.save(items)
     }
   }
 
@@ -38,38 +38,44 @@ class WordProgressService {
       await queryRunner.connect()
       await queryRunner.startTransaction() //start transaction
 
-      const wordProgressMap = new Map();
-      
-      const wordProgresses = await Promise.all(words.map(async (wordBody) => {
-        const foundProgress = await WordProgress.findOne({
-          where: {
-            word: { id: wordBody.wordId },
-            user: { id: userId }
-          },
-          relations: ['word']
-        })
-  
-        if (!foundProgress) {
-          throw new NotFoundRequestError('Word progress not found')
-        }
-  
-        const { newEaseFactor, newLevel } = this.calculateProgressByWrongCount(
-          foundProgress.masteryLevel,
-          foundProgress.easeFactor,
-          wordBody.wrongCount || 0 
-        )
-  
-        foundProgress.easeFactor = newEaseFactor
-        foundProgress.masteryLevel = newLevel
-        foundProgress.nextReviewDate = WordProgress.calculateReviewDate(foundProgress.easeFactor, wordBody.reviewedDate)
-        foundProgress.reviewCount += 1
-  
-        wordProgressMap.set(wordBody.wordId, foundProgress)
-        return foundProgress
-      }))
+      const wordProgressMap = new Map()
 
-      const uniqueWordProgress = Array.from(wordProgressMap.values())
-        .filter((wordBody) => wordBody.easeFactor <= MAX_EASE_FACTOR)
+      const wordProgresses = await Promise.all(
+        words.map(async (wordBody) => {
+          const foundProgress = await WordProgress.findOne({
+            where: {
+              word: { id: wordBody.wordId },
+              user: { id: userId }
+            },
+            relations: ['word']
+          })
+
+          if (!foundProgress) {
+            throw new NotFoundRequestError('Word progress not found')
+          }
+
+          const { newEaseFactor, newLevel } = this.calculateProgressByWrongCount(
+            foundProgress.masteryLevel,
+            foundProgress.easeFactor,
+            wordBody.wrongCount || 0
+          )
+
+          foundProgress.easeFactor = newEaseFactor
+          foundProgress.masteryLevel = newLevel
+          foundProgress.nextReviewDate = WordProgress.calculateReviewDate(
+            foundProgress.easeFactor,
+            wordBody.reviewedDate
+          )
+          foundProgress.reviewCount += 1
+
+          wordProgressMap.set(wordBody.wordId, foundProgress)
+          return foundProgress
+        })
+      )
+
+      const uniqueWordProgress = Array.from(wordProgressMap.values()).filter(
+        (wordBody) => wordBody.easeFactor <= MAX_EASE_FACTOR
+      )
 
       const result = await WordProgress.save(uniqueWordProgress)
 
@@ -78,7 +84,7 @@ class WordProgressService {
       await queryRunner.commitTransaction()
 
       return {
-        updatedWords: result.map(wp => ({
+        updatedWords: result.map((wp) => ({
           wordId: wp.word.id,
           masteryLevel: wp.masteryLevel,
           easeFactor: wp.easeFactor,
@@ -94,7 +100,7 @@ class WordProgressService {
         await queryRunner.rollbackTransaction()
       }
       console.log(`Error when handle update word progress: ${err}`)
-      throw new BadRequestError({ message: `${err}`})
+      throw new BadRequestError({ message: `${err}` })
     } finally {
       await queryRunner.release()
     }
@@ -103,8 +109,8 @@ class WordProgressService {
 
   createOrUpdateWordProgress = async (wordProgressData: CreateWordProgressBodyReq, manager?: EntityManager) => {
     const nowTime = new Date(now())
-    const repo = manager ? manager.getRepository(WordProgress) : WordProgress.getRepository();
-    
+    const repo = manager ? manager.getRepository(WordProgress) : WordProgress.getRepository()
+
     const items = await Promise.all(
       wordProgressData.wordProgress.map(async (word) => {
         // check if word is already learn by user
@@ -138,13 +144,13 @@ class WordProgressService {
         }
       })
     )
-    
+
     // Use provided manager or fallback to Active Record pattern
     if (manager) {
-      return await manager.save(WordProgress, items);
+      return await manager.save(WordProgress, items)
     } else {
       // Use Active Record pattern
-      return await WordProgress.save(items);
+      return await WordProgress.save(items)
     }
   }
 
@@ -241,12 +247,12 @@ class WordProgressService {
       }
     })
 
-    return wordReview.map(progress => ({
+    return wordReview.map((progress) => ({
       word: progress.word,
       masteryLevel: progress.masteryLevel,
       reviewCount: progress.reviewCount,
       nextReviewDate: progress.nextReviewDate
-    }));
+    }))
   }
 
   getSummary = async ({ userId }: { userId: number }) => {
@@ -256,13 +262,13 @@ class WordProgressService {
       .addSelect('COUNT(wp.id)', 'count')
       .where('wp.user.id = :userId', { userId })
       .groupBy('wp.masteryLevel')
-    
+
     const rawResult = await queryBuilder.getRawMany()
     const totalLearnWord = rawResult.reduce((sum, item) => sum + Number(item.count), 0)
 
     // Mapping raw to {masteryLevel, count}
     const countWordWithEachLevel = Object.keys(WORD_MASTERY_LEVEL)
-      .filter(key => isNaN(Number(key)))
+      .filter((key) => isNaN(Number(key)))
       .map((level) => {
         return {
           level: level,
@@ -280,8 +286,8 @@ class WordProgressService {
 
   updateUserProgress = async ({ userId, manager }: { userId: number; manager?: EntityManager }) => {
     // Use provided manager or fallback to Active Record pattern
-    const repo = manager ? manager.getRepository(User) : User.getRepository();
-    
+    const repo = manager ? manager.getRepository(User) : User.getRepository()
+
     const foundUser = await repo.findOne({
       where: {
         id: userId
@@ -289,7 +295,7 @@ class WordProgressService {
     })
 
     if (!foundUser) {
-      throw new BadRequestError({message: 'User not found!'})
+      throw new BadRequestError({ message: 'User not found!' })
     }
 
     // Update progress for this user
@@ -305,17 +311,17 @@ class WordProgressService {
     foundUser.lastStudyDate = now
 
     // Save only the progress fields, not the entire user object
-    return manager 
+    return manager
       ? await repo.update(userId, {
           streak: foundUser.streak,
           totalStudyDay: foundUser.totalStudyDay,
           lastStudyDate: foundUser.lastStudyDate
-        }) 
+        })
       : await User.update(userId, {
           streak: foundUser.streak,
           totalStudyDay: foundUser.totalStudyDay,
           lastStudyDate: foundUser.lastStudyDate
-        });
+        })
   }
 }
 

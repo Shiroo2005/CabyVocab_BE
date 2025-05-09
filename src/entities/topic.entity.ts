@@ -6,18 +6,17 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
 import { TopicType } from '~/constants/topic'
-import { CompletedTopic } from './completed_topic.entity'
-import { CourseTopic } from './course_topic.entity'
+import { CompletedTopic } from './completedTopic.entity'
+import { CourseTopic } from './courseTopic.entity'
 import { WordTopic } from './wordTopic.entity'
 import { User } from './user.entity'
+import { Vote } from './vote.entity'
 
 @Entity()
 export class Topic extends BaseEntity {
@@ -45,6 +44,9 @@ export class Topic extends BaseEntity {
 
   @Column('bool')
   isPublic: boolean
+
+  @OneToMany(() => Vote, (vote) => vote.topic)
+  votes: Vote[]
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'createdBy' })

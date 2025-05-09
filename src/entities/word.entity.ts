@@ -14,7 +14,7 @@ import {
 } from 'typeorm'
 import { WordPosition, WordRank } from '~/constants/word'
 import { Topic } from './topic.entity'
-import { WordProgress } from './word_progress.entity'
+import { WordProgress } from './wordProgress.entity'
 import { WordTopic } from './wordTopic.entity'
 
 @Entity()
@@ -75,7 +75,7 @@ export class Word extends BaseEntity {
   // @ManyToMany(() => Topic)
   // @JoinTable()
   // topics: Topic[]
-  
+
   @DeleteDateColumn()
   deletedAt?: Date
 
@@ -115,10 +115,10 @@ export class Word extends BaseEntity {
     if (topicIds && topicIds.length > 0) {
       // Create new relationships - using the same approach as updateWord
       for (const topicId of topicIds) {
-        const wordTopic = new WordTopic();
-        wordTopic.wordId = newWord.id as number;
-        wordTopic.topicId = topicId;
-        await wordTopic.save();
+        const wordTopic = new WordTopic()
+        wordTopic.wordId = newWord.id as number
+        wordTopic.topicId = topicId
+        await wordTopic.save()
       }
     }
 
@@ -163,14 +163,14 @@ export class Word extends BaseEntity {
 
     if (topicIds && topicIds.length > 0) {
       // Remove existing relationships
-      await WordTopic.delete({ wordId: word.id });
-      
+      await WordTopic.delete({ wordId: word.id })
+
       // Create new relationships
       for (const topicId of topicIds) {
-        const wordTopic = new WordTopic();
-        wordTopic.wordId = word.id as number;
-        wordTopic.topicId = topicId;
-        await wordTopic.save();
+        const wordTopic = new WordTopic()
+        wordTopic.wordId = word.id as number
+        wordTopic.topicId = topicId
+        await wordTopic.save()
       }
     }
     await word.save()

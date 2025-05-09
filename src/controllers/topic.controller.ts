@@ -4,6 +4,7 @@ import { getTopicTypeList } from '~/constants/topic'
 import { CREATED, SuccessResponse } from '~/core/success.response'
 import { CreateTopicBodyReq } from '~/dto/req/topic/createTopicBody.req'
 import { UpdateTopicBodyReq } from '~/dto/req/topic/updateTopicBody.req'
+import { User } from '~/entities/user.entity'
 import { topicService } from '~/services/topic.service'
 
 class TopicController {
@@ -63,6 +64,28 @@ class TopicController {
     return new SuccessResponse({
       message: 'Restore topic by id successful!',
       metaData: await topicService.restoreTopic({ id })
+    }).send(res)
+  }
+
+  voteTopic = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    const topicId = parseInt(req.params?.id)
+
+    const user = req.user as User
+
+    return new SuccessResponse({
+      message: 'Vote topic by id successful!',
+      metaData: await topicService.voteTopic({ userId: user.id as number, topicId })
+    }).send(res)
+  }
+
+  unVoteTopic = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    const topicId = parseInt(req.params?.id)
+
+    const user = req.user as User
+
+    return new SuccessResponse({
+      message: 'Unvote topic by id successful!',
+      metaData: await topicService.unVoteTopic({ userId: user.id as number, topicId })
     }).send(res)
   }
 }

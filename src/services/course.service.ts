@@ -1,6 +1,6 @@
 import { CourseBody } from '~/dto/req/course/createCourseBody.req'
 import { UpdateCourseBodyReq } from '~/dto/req/course/updateCourseBody,req'
-import { CourseTopic } from '~/entities/course_topic.entity'
+import { CourseTopic } from '~/entities/courseTopic.entity'
 import { Course } from '~/entities/courses.entity'
 import { Topic } from '~/entities/topic.entity'
 import { courseQueryReq } from '~/dto/req/course/courseQueryReq.req'
