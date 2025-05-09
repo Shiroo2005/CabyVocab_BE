@@ -38,31 +38,9 @@ export const createTopicValidation = validate(
         ...isRequired('Topic type'),
         ...isEnum(TopicType, 'Topic type')
       },
-      'topics.*.courseIds': {
+      'topic.*.isPublic': {
         optional: true,
-        isArray: {
-          errorMessage: 'courseIds must be an array'
-        },
-        custom: {
-          options: async (value: number[]) => {
-            if (!value || value.length === 0) {
-              return true
-            }
-            
-            const courses = await Course.find({
-              where: { id: In(value) }
-            })
-
-            if (courses.length !== value.length) {
-              const existingCourseIds = courses.map(course => course.id)
-              const nonExistingCourseIds = value.filter(id => !existingCourseIds.includes(id))
-              throw new BadRequestError({ 
-                message: `The following course IDs do not exist: ${nonExistingCourseIds.join(', ')}` 
-              })
-            }
-            return true
-          }
-        }
+        isBoolean: true
       }
     },
     ['body']

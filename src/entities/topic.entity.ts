@@ -5,17 +5,19 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
 import { TopicType } from '~/constants/topic'
-import { Word } from './word.entity'
 import { CompletedTopic } from './completed_topic.entity'
 import { CourseTopic } from './course_topic.entity'
 import { WordTopic } from './wordTopic.entity'
+import { User } from './user.entity'
 
 @Entity()
 export class Topic extends BaseEntity {
@@ -41,13 +43,15 @@ export class Topic extends BaseEntity {
   @IsOptional()
   type?: TopicType
 
-  //foreign key
-  // @ManyToMany(() => Word, { cascade: true })
-  // @JoinTable({ name: 'word_topic' })
-  // words?: Word[]
+  @Column('bool')
+  isPublic: boolean
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'createdBy' })
+  createdBy: User
 
   @OneToMany(() => CompletedTopic, (completed_topic) => completed_topic.topic)
-  completed_topics: CompletedTopic[]
+  completedTopics: CompletedTopic[]
 
   @OneToMany(() => CourseTopic, (courseTopic) => courseTopic.topic)
   courseTopics: CourseTopic[]

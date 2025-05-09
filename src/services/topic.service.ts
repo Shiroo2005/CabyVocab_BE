@@ -2,20 +2,30 @@ import { TopicBody } from '~/dto/req/topic/createTopicBody.req'
 import { topicQueryReq } from '~/dto/req/topic/topicQuery.req'
 import { UpdateTopicBodyReq } from '~/dto/req/topic/updateTopicBody.req'
 import { Topic } from '~/entities/topic.entity'
-import { Word } from '~/entities/word.entity'
 import { wordService } from './word.service'
 import { validate } from 'class-validator'
-import { In } from 'typeorm'
 import { CompletedTopic } from '~/entities/completed_topic.entity'
 import { BadRequestError } from '~/core/error.response'
 import { CompleteTopicBodyReq } from '~/dto/req/topic/completeTopicBody.req'
 import { DatabaseService } from './database.service'
 import { wordProgressService } from './wordProgress.service'
 import { WordTopic } from '~/entities/wordTopic.entity'
-import { CourseTopic } from '~/entities/course_topic.entity'
+import { TopicType } from '~/constants/topic'
+import { User } from '~/entities/user.entity'
+import { FindOptionsOrder } from 'typeorm'
 
 class TopicService {
-  createTopics = async (topicsBody: TopicBody[]) => {
+  createTopics = async (
+    topicsBody: {
+      title: string
+      description: string
+      thumbnail?: string
+      type?: TopicType
+      wordIds?: number[]
+      isPublic?: boolean
+    }[],
+    user?: User
+  ) => {
     const databaseService = DatabaseService.getInstance()
     const queryRunner = databaseService.appDataSource.createQueryRunner()
 
@@ -27,7 +37,9 @@ class TopicService {
 
       // Prepare all topics first
       for (const topic of topicsBody) {
-        const newTopic = Topic.create({ ...topic })
+        //check is customize topics by user
+        const createdBy = user
+        const newTopic = Topic.create({ ...topic, createdBy, isPublic: topic.isPublic || false })
         topics.push(newTopic)
       }
 
@@ -41,7 +53,6 @@ class TopicService {
       for (let i = 0; i < savedTopics.length; i++) {
         const topic = savedTopics[i]
         const wordIds = topicsBody[i].wordIds || []
-        const courseIds = topicsBody[i].courseIds || []
 
         // Handle word associations
         if (wordIds && wordIds.length > 0) {
@@ -52,34 +63,6 @@ class TopicService {
           }))
 
           await queryRunner.manager.getRepository(WordTopic).save(wordTopics)
-        }
-
-        // Handle course associations
-        if (courseIds && courseIds.length > 0) {
-          // For each course, find the highest existing display order
-          const courseTopics = []
-
-          for (const courseId of courseIds) {
-            // Find the highest display order for this course
-            const highestOrder = await queryRunner.manager
-              .getRepository(CourseTopic)
-              .createQueryBuilder('courseTopic')
-              .where('courseTopic.courseId = :courseId', { courseId })
-              .orderBy('courseTopic.displayOrder', 'DESC')
-              .getOne()
-
-            // Calculate the next display order (either increment or start at 0)
-            const nextDisplayOrder = highestOrder ? highestOrder.displayOrder + 1 : 0
-
-            // Create the new course-topic association
-            courseTopics.push({
-              topic: { id: topic.id },
-              course: { id: courseId },
-              displayOrder: nextDisplayOrder
-            })
-          }
-
-          await queryRunner.manager.getRepository(CourseTopic).save(courseTopics)
         }
       }
 
@@ -119,7 +102,25 @@ class TopicService {
     return result
   }
 
-  getAllTopics = async ({ page = 1, limit = 10, title, description, type, sort }: topicQueryReq) => {
+  getAllTopics = async ({
+    page = 1,
+    limit = 10,
+    title,
+    description,
+    type,
+    sort,
+    createdBy = undefined,
+    isPublic = 'false'
+  }: {
+    page?: number
+    limit?: number
+    title?: string
+    description?: string
+    type?: TopicType
+    sort?: FindOptionsOrder<Topic>
+    createdBy?: string
+    isPublic?: string
+  }) => {
     const skip = (page - 1) * limit
 
     const [topics, total] = await Topic.findAndCount({
@@ -128,7 +129,9 @@ class TopicService {
       where: {
         title,
         description,
-        type
+        type,
+        createdBy: { id: createdBy ? parseInt(createdBy) : (createdBy as undefined) },
+        isPublic: isPublic == '1' ? true : false
       },
       order: sort,
       select: {
@@ -148,7 +151,7 @@ class TopicService {
     }
   }
 
-  updateTopic = async (id: number, { title, description, thumbnail, type, wordIds }: UpdateTopicBodyReq) => {
+  updateTopic = async (id: number, { title, description, thumbnail, type, wordIds, isPublic }: UpdateTopicBodyReq) => {
     const databaseService = DatabaseService.getInstance()
     const queryRunner = databaseService.appDataSource.createQueryRunner()
 
@@ -161,7 +164,8 @@ class TopicService {
         title,
         description,
         thumbnail,
-        type
+        type,
+        isPublic
       })
 
       // Handle word associations if provided

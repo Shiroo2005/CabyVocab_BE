@@ -1,7 +1,6 @@
 import { Role } from '~/entities/role.entity'
 import { User } from '~/entities/user.entity'
 import { createRandomUser } from '~/core/data/user.data'
-import { DeepPartial } from 'typeorm'
 import { UserStatus } from '~/constants/userStatus'
 import { Word } from '~/entities/word.entity'
 import { wordSeedData } from '~/core/data/word.data'

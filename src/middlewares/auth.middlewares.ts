@@ -207,10 +207,24 @@ export const accessTokenValidation = validate(
                 where: {
                   id: userId
                 },
+                select: {
+                  avatar: true,
+                  email: true,
+                  id: true,
+                  username: true,
+                  role: {
+                    id: true,
+                    name: true
+                  },
+                  totalStudyDay: true,
+                  completedTopics: true,
+                  courseProgresses: true,
+                  deletedAt: true
+                },
                 relations: ['role']
               })
 
-              if (foundUser) {
+              if (foundUser && !foundUser.deletedAt) {
                 ;(req as Request).user = foundUser as User
                 ;(req as Request).decodedAuthorization = decodedAuthorization
               }

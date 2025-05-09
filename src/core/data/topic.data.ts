@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker'
 import { TopicType } from '~/constants/topic'
 import { Word } from '~/entities/word.entity'
 
-const TOPIC_COUNT = 400
+const TOPIC_COUNT = 10
 
 const randomTopic = (words: Word[]): Topic => {
   return {
@@ -11,7 +11,8 @@ const randomTopic = (words: Word[]): Topic => {
     description: faker.lorem.sentence(),
     thumbnail: faker.image.avatar(),
     type: TopicType.FREE,
-    words: faker.helpers.arrayElements(words, faker.number.int({ min: 2, max: 4 }))
+    words: faker.helpers.arrayElements(words, faker.number.int({ min: 2, max: 4 })),
+    isPublic: true
   } as Topic
 }
 

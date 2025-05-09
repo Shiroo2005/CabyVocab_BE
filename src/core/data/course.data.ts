@@ -1,11 +1,8 @@
 import { faker } from '@faker-js/faker'
 import { Topic } from '~/entities/topic.entity'
-import { topicSeedData } from './topic.data'
 import { CourseTopic } from '~/entities/course_topic.entity'
 import { CourseLevel } from '~/constants/course'
 import { Course } from '~/entities/courses.entity'
-
-const COURSE_COUNT = 20
 
 const randomCourse = (topics: Topic[]): Course => {
   const selectedTopics = faker.helpers.arrayElements(topics, faker.number.int({ min: 1, max: 3 }))

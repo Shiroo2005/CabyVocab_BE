@@ -6,4 +6,5 @@ export interface UpdateTopicBodyReq {
   thumbnail?: string
   type?: TopicType
   wordIds: number[]
+  isPublic?: boolean
 }

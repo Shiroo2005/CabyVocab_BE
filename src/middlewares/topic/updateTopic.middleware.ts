@@ -28,6 +28,10 @@ export const updateTopicValidation = validate(
         ...isRequired('Topic type'),
         ...isEnum(TopicType, 'Topic type')
       },
+      isPublic: {
+        optional: true,
+        isBoolean: true
+      },
       wordIds: {
         isArray: {
           errorMessage: 'wordIds must be an array'

@@ -10,7 +10,7 @@ class TopicController {
   createTopics = async (req: Request<ParamsDictionary, any, CreateTopicBodyReq>, res: Response) => {
     return new CREATED({
       message: 'Create new topic successful!',
-      metaData: await topicService.createTopics(req.body.topics)
+      metaData: await topicService.createTopics(req.body.topics, req.body.user)
     }).send(res)
   }
 

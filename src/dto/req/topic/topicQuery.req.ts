@@ -9,4 +9,6 @@ export interface topicQueryReq {
   description?: string
   type?: TopicType
   sort?: FindOptionsOrder<Topic>
+  createdBy?: number
+  isPublic?: boolean
 }

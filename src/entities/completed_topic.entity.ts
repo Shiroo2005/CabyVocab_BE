@@ -20,11 +20,11 @@ export class CompletedTopic extends BaseEntity {
   id?: number
 
   @ManyToOne(() => User, (user) => user)
-  @JoinColumn({name: 'userId'})
+  @JoinColumn({ name: 'userId' })
   user: User
 
-  @ManyToOne(() => Topic, (topic) => topic.completed_topics)
-  @JoinColumn({name: 'topicId'})
+  @ManyToOne(() => Topic, (topic) => topic.completedTopics)
+  @JoinColumn({ name: 'topicId' })
   topic: Topic
 
   @CreateDateColumn()

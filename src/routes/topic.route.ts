@@ -1,8 +1,10 @@
 import express from 'express'
+import { Resource } from '~/constants/access'
 import { topicController } from '~/controllers/topic.controller'
 import { Topic } from '~/entities/topic.entity'
-import { accessTokenValidation } from '~/middlewares/auth.middlewares'
+import { accessTokenValidation, checkPermission } from '~/middlewares/auth.middlewares'
 import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '~/middlewares/common.middlewares'
+import { CreateCustomizeTopicMiddleware } from '~/middlewares/topic/createCustomizeTopic.middlewares'
 import { createTopicValidation } from '~/middlewares/topic/createTopic.middlewares'
 import { updateTopicValidation } from '~/middlewares/topic/updateTopic.middleware'
 import { wrapRequestHandler } from '~/utils/handler'
@@ -14,7 +16,7 @@ topicRouter.use(accessTokenValidation)
 
 //GET
 /**
- * @description : get all topics
+ * @description : get all topics own by admin
  * @method : GET
  * @path : /
  * @query :
@@ -67,7 +69,36 @@ topicRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(topicControll
  * }
     ]
  */
-topicRouter.post('/', createTopicValidation, wrapRequestHandler(topicController.createTopics))
+topicRouter.post(
+  '/',
+  wrapRequestHandler(checkPermission('createAny', Resource.TOPIC)),
+  createTopicValidation,
+  wrapRequestHandler(topicController.createTopics)
+)
+
+/**
+ * @description : Create new topic by user
+ * @method : POST
+ * @path : /
+ * @header : Authorization
+ * @body : topics: [
+ *  {
+        title: string
+        description: string
+        thumbnail?: string
+        type?: TopicType
+        wordIds?: number[]
+        isPublic?:boolean
+ * }
+    ]
+ */
+topicRouter.post(
+  '/by-user/',
+  wrapRequestHandler(checkPermission('createOwn', Resource.TOPIC)),
+  createTopicValidation,
+  wrapRequestHandler(CreateCustomizeTopicMiddleware),
+  wrapRequestHandler(topicController.createTopics)
+)
 
 //PATH
 /**
@@ -77,7 +108,12 @@ topicRouter.post('/', createTopicValidation, wrapRequestHandler(topicController.
  * @header : Authorization
  * @params : id
  */
-topicRouter.patch('/:id/restore', checkIdParamMiddleware, wrapRequestHandler(topicController.restoreTopic))
+topicRouter.patch(
+  '/:id/restore',
+  wrapRequestHandler(checkPermission('updateAny', Resource.TOPIC)),
+  checkIdParamMiddleware,
+  wrapRequestHandler(topicController.restoreTopic)
+)
 
 /**
  * @description : Update topic by id
@@ -94,6 +130,7 @@ topicRouter.patch('/:id/restore', checkIdParamMiddleware, wrapRequestHandler(top
  */
 topicRouter.patch(
   '/:id',
+  wrapRequestHandler(checkPermission('updateAny', Resource.TOPIC)),
   checkIdParamMiddleware,
   updateTopicValidation,
   wrapRequestHandler(topicController.updateTopic)
@@ -109,6 +146,11 @@ topicRouter.patch(
  * @header : Authorization
  * @params : id
  */
-topicRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(topicController.deleteTopic))
+topicRouter.delete(
+  '/:id',
+  wrapRequestHandler(checkPermission('deleteAny', Resource.TOPIC)),
+  checkIdParamMiddleware,
+  wrapRequestHandler(topicController.deleteTopic)
+)
 
 export default topicRouter

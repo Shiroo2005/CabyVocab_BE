@@ -2,7 +2,7 @@ import { Word } from '~/entities/word.entity'
 import { faker } from '@faker-js/faker'
 import { WordPosition, WordRank } from '~/constants/word'
 
-const WORD_COUNT = 1000
+const WORD_COUNT = 10
 
 const randomWord = (): Word => {
   return {

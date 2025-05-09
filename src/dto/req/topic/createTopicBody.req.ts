@@ -1,7 +1,9 @@
 import { TopicType } from '~/constants/topic'
+import { User } from '~/entities/user.entity'
 
 export interface CreateTopicBodyReq {
   topics: TopicBody[]
+  user?: User
 }
 
 export interface TopicBody {
@@ -9,6 +11,6 @@ export interface TopicBody {
   description: string
   thumbnail?: string
   type?: TopicType
-  wordIds?: number[],
-  courseIds: number[] 
+  wordIds?: number[]
+  isPublic?: boolean
 }

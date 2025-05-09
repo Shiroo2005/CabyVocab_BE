@@ -4,7 +4,7 @@ import { UserStatus } from '~/constants/userStatus'
 import { Role } from '~/entities/role.entity'
 import _ from 'lodash'
 
-const COUNT = 1000
+const COUNT = 10
 
 const randomUser = () => {
   return {
