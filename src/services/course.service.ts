@@ -241,6 +241,47 @@ class CourseService {
 
     return res
   }
+  
+  getCourseTopics = async ({ 
+    courseId, 
+    page = 1, 
+    limit = 10, 
+    sort 
+  }: { 
+    courseId: number, 
+    page?: number, 
+    limit?: number, 
+    sort?: any 
+  }) => {
+    const skip = (page - 1) * limit;
+
+    // Find all course-topic relationships for this course
+    const courseTopics = await CourseTopic.find({
+      where: { course: { id: courseId } },
+      relations: ['topic'],
+      order: { displayOrder: 'ASC', ...sort },
+      skip,
+      take: limit
+    });
+
+    // Count total topics for this course
+    const total = await CourseTopic.count({
+      where: { course: { id: courseId } }
+    });
+
+    // Map the results to return topic data with display order
+    const topics = courseTopics.map(courseTopic => ({
+      ...courseTopic.topic,
+      displayOrder: courseTopic.displayOrder
+    }));
+
+    return {
+      topics,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit)
+    };
+  }
 }
 
 export const courseService = new CourseService()

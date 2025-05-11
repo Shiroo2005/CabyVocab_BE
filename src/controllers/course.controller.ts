@@ -71,6 +71,18 @@ class CourseController {
       metaData: await courseService.deleteCourse({ id })
     }).send(res)
   }
+  getCourseTopics = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    const courseId = parseInt(req.params?.id);
+
+    new SuccessResponse({
+      message: 'Get course topics successful!',
+      metaData: await courseService.getCourseTopics({
+        courseId,
+        ...req.parseQueryPagination,
+        sort: req.sortParsed
+      })
+    }).send(res);
+  }
 }
 
 export const courseController = new CourseController()
