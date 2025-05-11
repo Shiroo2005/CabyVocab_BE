@@ -5,17 +5,17 @@ import { validate } from '../validation.middlewares'
 import { User } from '~/entities/user.entity'
 import { UserStatus } from '~/constants/userStatus'
 import { Role } from '~/entities/role.entity'
+import { Request } from 'express'
+import { toNumber } from 'lodash'
 
 export const updateUserByIdValidation = validate(
   checkSchema({
     username: {
-      trim: true,
       ...isUsername,
       ...isLength({ fieldName: 'username' })
     },
 
     email: {
-      trim: true,
       ...isEmail,
       custom: {
         options: async (value, { req }) => {
@@ -23,8 +23,8 @@ export const updateUserByIdValidation = validate(
             where: [{ email: value }, { username: req.body.username }]
           })
 
-          if (!foundUser) {
-            throw new BadRequestError({ message: 'Email or username not exists!' })
+          if (foundUser && (foundUser.id as number) != toNumber((req as Request).params.id)) {
+            throw new BadRequestError({ message: 'Email or username already in!' })
           }
 
           return true

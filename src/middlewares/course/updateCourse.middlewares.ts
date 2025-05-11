@@ -1,10 +1,9 @@
 import { checkSchema } from 'express-validator'
 import { validate } from '../validation.middlewares'
-import { isEnum, isLength, isRequired } from '../common.middlewares'
-import _, { isNumber } from 'lodash'
+import { isEnum, isLength } from '../common.middlewares'
 import { CourseLevel } from '~/constants/course'
 
-export const updateCourseValidation = validate (
+export const updateCourseValidation = validate(
   checkSchema(
     {
       title: {
@@ -24,7 +23,7 @@ export const updateCourseValidation = validate (
       },
       level: {
         optional: true,
-        ...isEnum(CourseLevel, 'course level'),
+        ...isEnum(CourseLevel, 'course level')
       },
       topics: {
         isArray: true,
@@ -40,12 +39,6 @@ export const updateCourseValidation = validate (
             return true
           }
         }
-      },
-      id: {
-        ...isNumber
-      },
-      displayOrder: {
-        ...isNumber
       }
     },
     ['body']

@@ -15,23 +15,22 @@ import {
 import { Topic } from './topic.entity'
 import { Course } from './courses.entity'
 
-
 @Entity()
 @Index(['course', 'displayOrder'], { unique: true })
 export class CourseTopic extends BaseEntity {
   @PrimaryGeneratedColumn()
-  id: number;
+  id: number
 
   @ManyToOne(() => Course, (course) => course.courseTopics)
-  @JoinColumn({name: 'courseId'})
-  course?: Course;
+  @JoinColumn({ name: 'courseId' })
+  course?: Course
 
   @ManyToOne(() => Topic, (topic) => topic.courseTopics)
-  @JoinColumn({name: 'topicId'})
-  topic?: Topic;
+  @JoinColumn({ name: 'topicId' })
+  topic?: Topic
 
   @Column('int')
-  displayOrder: number;
+  displayOrder: number
 
   @DeleteDateColumn()
   deletedAt?: Date

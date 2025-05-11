@@ -87,7 +87,18 @@ export class User extends BaseEntity {
     this.password = hashData(this.password)
   }
 
-  static createUser = ({ id, email, username, password, avatar, status, role, lastStudyDate, streak, totalStudyDay }: User) => {
+  static createUser = ({
+    id,
+    email,
+    username,
+    password,
+    avatar,
+    status,
+    role,
+    lastStudyDate,
+    streak,
+    totalStudyDay
+  }: User) => {
     const newUser = new User()
 
     newUser.id = id
@@ -121,7 +132,7 @@ export class User extends BaseEntity {
       avatar?: string
       status?: UserStatus
       roleId?: number
-      role?: Role,
+      role?: Role
       totalStudyDay?: number
       lastStudyDate?: Date
       streak?: number
@@ -145,10 +156,5 @@ export class User extends BaseEntity {
     return res
   }
 
-  static allowSortList = [
-    'id',
-    'email',
-    'username',
-    'status'
-  ]
+  static allowSortList = ['id', 'email', 'username', 'status']
 }

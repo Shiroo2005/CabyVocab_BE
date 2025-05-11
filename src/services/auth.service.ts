@@ -93,7 +93,12 @@ class AuthService {
     })
 
     if (!user) return {}
-    return { user: unGetData({ fields: ['password'], object: user }) }
+    return {
+      user: unGetData({
+        fields: ['password', 'role.createdAt', 'role.updatedAt', 'role.deletedAt', 'role.description'],
+        object: user
+      })
+    }
   }
 
   logout = async ({ refreshToken }: LogoutBodyReq) => {

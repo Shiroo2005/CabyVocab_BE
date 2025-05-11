@@ -46,7 +46,7 @@ class TopicService {
         // Handle word associations
         if (wordIds && wordIds.length > 0) {
           // Create word-topic associations in bulk
-          const wordTopics = wordIds.map(wordId => ({
+          const wordTopics = wordIds.map((wordId) => ({
             topicId: topic.id,
             wordId: wordId
           }))
@@ -57,7 +57,7 @@ class TopicService {
         // Handle course associations
         if (courseIds && courseIds.length > 0) {
           // For each course, find the highest existing display order
-          const courseTopics = [];
+          const courseTopics = []
 
           for (const courseId of courseIds) {
             // Find the highest display order for this course
@@ -66,20 +66,20 @@ class TopicService {
               .createQueryBuilder('courseTopic')
               .where('courseTopic.courseId = :courseId', { courseId })
               .orderBy('courseTopic.displayOrder', 'DESC')
-              .getOne();
+              .getOne()
 
             // Calculate the next display order (either increment or start at 0)
-            const nextDisplayOrder = highestOrder ? highestOrder.displayOrder + 1 : 0;
+            const nextDisplayOrder = highestOrder ? highestOrder.displayOrder + 1 : 0
 
             // Create the new course-topic association
             courseTopics.push({
               topic: { id: topic.id },
               course: { id: courseId },
               displayOrder: nextDisplayOrder
-            });
+            })
           }
 
-          await queryRunner.manager.getRepository(CourseTopic).save(courseTopics);
+          await queryRunner.manager.getRepository(CourseTopic).save(courseTopics)
         }
       }
 
@@ -108,7 +108,7 @@ class TopicService {
 
     if (!res) return {}
 
-    const words = res.wordTopics?.map(wordTopic => wordTopic.word) || []
+    const words = res.wordTopics?.map((wordTopic) => wordTopic.word) || []
 
     const result = {
       ...res,
@@ -148,7 +148,7 @@ class TopicService {
     }
   }
 
-  updateTopic = async (id: number, { title, description, thumbnail, type, courseIds, wordIds }: UpdateTopicBodyReq & { courseIds?: number[], wordIds?: number[] }) => {
+  updateTopic = async (id: number, { title, description, thumbnail, type, wordIds }: UpdateTopicBodyReq) => {
     const databaseService = DatabaseService.getInstance()
     const queryRunner = databaseService.appDataSource.createQueryRunner()
 
@@ -156,6 +156,7 @@ class TopicService {
       await queryRunner.connect()
       await queryRunner.startTransaction()
       // First update the basic topic properties
+
       await queryRunner.manager.update(Topic, id, {
         title,
         description,
@@ -169,7 +170,7 @@ class TopicService {
         await queryRunner.manager.delete(WordTopic, { topicId: id })
 
         // Create new word-topic associations
-        const wordTopics = wordIds.map(wordId => ({
+        const wordTopics = wordIds.map((wordId) => ({
           topicId: id,
           wordId: wordId
         }))
@@ -178,32 +179,32 @@ class TopicService {
       }
 
       // Handle course associations if provided
-      if (courseIds && courseIds.length > 0) {
-        // For each course, find the highest existing display order
-        const courseTopics = [];
+      // if (courseIds && courseIds.length > 0) {
+      //   // For each course, find the highest existing display order
+      //   const courseTopics = []
 
-        for (const courseId of courseIds) {
-          // Find the highest display order for this course
-          const highestOrder = await queryRunner.manager
-            .getRepository(CourseTopic)
-            .createQueryBuilder('courseTopic')
-            .where('courseTopic.courseId = :courseId', { courseId })
-            .orderBy('courseTopic.displayOrder', 'DESC')
-            .getOne();
+      //   for (const courseId of courseIds) {
+      //     // Find the highest display order for this course
+      //     const highestOrder = await queryRunner.manager
+      //       .getRepository(CourseTopic)
+      //       .createQueryBuilder('courseTopic')
+      //       .where('courseTopic.courseId = :courseId', { courseId })
+      //       .orderBy('courseTopic.displayOrder', 'DESC')
+      //       .getOne()
 
-          // Calculate the next display order (either increment or start at 0)
-          const nextDisplayOrder = highestOrder ? highestOrder.displayOrder + 1 : 0;
+      //     // Calculate the next display order (either increment or start at 0)
+      //     const nextDisplayOrder = highestOrder ? highestOrder.displayOrder + 1 : 0
 
-          // Create the new course-topic association
-          courseTopics.push({
-            topic: { id: id },
-            course: { id: courseId },
-            displayOrder: nextDisplayOrder
-          });
-        }
+      //     // Create the new course-topic association
+      //     courseTopics.push({
+      //       topic: { id: id },
+      //       course: { id: courseId },
+      //       displayOrder: nextDisplayOrder
+      //     })
+      //   }
 
-        await queryRunner.manager.getRepository(CourseTopic).save(courseTopics);
-      }
+      //   await queryRunner.manager.getRepository(CourseTopic).save(courseTopics)
+      // }
 
       // Refresh the topic to include all associations
       const updatedTopic = await queryRunner.manager.findOne(Topic, {
@@ -213,12 +214,12 @@ class TopicService {
 
       if (!updatedTopic) return {}
 
-      const words = updatedTopic.wordTopics?.map(wordTopic => wordTopic.word) || []
+      const words = updatedTopic.wordTopics?.map((wordTopic) => wordTopic.word) || []
 
       const result = {
         ...updatedTopic,
-        words,
-        wordTopics: undefined
+        words
+        // wordTopics
       }
 
       await queryRunner.commitTransaction()
@@ -263,9 +264,7 @@ class TopicService {
       await queryRunner.startTransaction()
       const topicId = topic.id as number
       // save complete topic into db
-      await queryRunner.manager
-        .getRepository(CompletedTopic)
-        .save({ user: { id: userId }, topic: { id: topicId } })
+      await queryRunner.manager.getRepository(CompletedTopic).save({ user: { id: userId }, topic: { id: topicId } })
 
       //create or update word progress record
       const wordsInTopic = await wordService.getAllWordInTopic({ topicId })
@@ -313,7 +312,7 @@ class TopicService {
     const totalTopics = await Topic.count()
 
     return {
-      completedTopics: completedTopics.map(ct => ct.topic),
+      completedTopics: completedTopics.map((ct) => ct.topic),
       completedTopicsCount: completedTopics.length,
       totalTopics,
       progressPercentage: totalTopics > 0 ? (completedTopics.length / totalTopics) * 100 : 0,

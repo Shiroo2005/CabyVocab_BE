@@ -7,6 +7,8 @@ import { Word } from '~/entities/word.entity'
 import { wordSeedData } from '~/core/data/word.data'
 import { Topic } from '~/entities/topic.entity'
 import { topicSeedData } from '~/core/data/topic.data'
+import { Course } from '~/entities/courses.entity'
+import { courseSeedData } from '~/core/data/course.data'
 
 async function seedRole() {
   const count = await Role.count()
@@ -89,13 +91,27 @@ async function seedTopics() {
   const words = await seedWords()
   if (!words) return
 
-  await Topic.save(topicSeedData(words))
   console.log('✅ Seeded Topics successfully!')
+  return await Topic.save(topicSeedData(words))
 }
+
+async function seedCourse() {
+  const count = await Course.count()
+  if (count > 0) {
+    console.log('ℹ️ Courses already exist, skipping seed...')
+    return
+  }
+  const topics = await seedTopics()
+  if (!topics) return
+
+  await Course.save(courseSeedData(topics))
+  console.log('✅ Seeded Course successfully!')
+}
+
 export async function seedInitialData() {
   await seedRole()
   await seedUsers()
-  await seedTopics()
+  await seedCourse()
 
   console.log('Initial data setup complete')
 }
