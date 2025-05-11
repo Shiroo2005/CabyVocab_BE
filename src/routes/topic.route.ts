@@ -1,6 +1,7 @@
 import express from 'express'
 import { topicController } from '~/controllers/topic.controller'
 import { Topic } from '~/entities/topic.entity'
+import { Word } from '~/entities/word.entity'
 import { accessTokenValidation } from '~/middlewares/auth.middlewares'
 import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '~/middlewares/common.middlewares'
 import { createTopicValidation } from '~/middlewares/topic/createTopic.middlewares'
@@ -110,5 +111,20 @@ topicRouter.patch(
  * @params : id
  */
 topicRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(topicController.deleteTopic))
+
+//GET
+/**
+ * @description : Get topic words
+ * @method : GET
+ * @path : /:id/words
+ * @param : id
+ * @header : Authorization
+ */
+topicRouter.get(
+  '/:id/words',
+  checkIdParamMiddleware,
+  checkQueryMiddleware(),
+  wrapRequestHandler(topicController.getTopicWords)
+)
 
 export default topicRouter

@@ -6,6 +6,7 @@ import { Course } from '~/entities/courses.entity'
 import { courseController } from '~/controllers/course.controller'
 import { createCourseValidation } from '~/middlewares/course/createCourse.middlewares'
 import { updateCourseValidation } from '~/middlewares/course/updateCourse.middlewares'
+import { Topic } from '~/entities/topic.entity'
 
 const courseRouter = express.Router()
 
@@ -113,5 +114,20 @@ courseRouter.patch('/:id/restore', checkIdParamMiddleware, wrapRequestHandler(co
  * @header : Authorization
  */
 courseRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(courseController.deleteCourse))
+
+//GET
+/**
+ * @description : Get course topics
+ * @method : GET
+ * @path : /:id/topics
+ * @param : id
+ * @header : Authorization
+ */
+courseRouter.get(
+  '/:id/topics',
+  checkIdParamMiddleware,
+  checkQueryMiddleware(),
+  wrapRequestHandler(courseController.getCourseTopics)
+)
 
 export default courseRouter

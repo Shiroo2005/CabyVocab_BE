@@ -65,6 +65,19 @@ class TopicController {
       metaData: await topicService.restoreTopic({ id })
     }).send(res)
   }
+
+  getTopicWords = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    const topicId = parseInt(req.params?.id)
+
+    new SuccessResponse({
+      message: 'Get topic words successful!',
+      metaData: await topicService.getTopicWords({
+        topicId,
+        ...req.parseQueryPagination,
+        sort: req.sortParsed
+      })
+    }).send(res)
+  }
 }
 
 export const topicController = new TopicController()

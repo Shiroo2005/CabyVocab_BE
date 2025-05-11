@@ -319,6 +319,43 @@ class TopicService {
       wordProgressSummary: progressSummary
     }
   }
+
+  getTopicWords = async ({
+    topicId,
+    page = 1,
+    limit = 10,
+    sort
+  }: {
+    topicId: number,
+    page?: number,
+    limit?: number,
+    sort?: any
+  }) => {
+    const skip = (page - 1) * limit
+
+    const topicWords = await WordTopic.find({
+      where: { topic: { id: topicId } },
+      relations: ['word'],
+      order: sort,
+      skip,
+      take: limit
+    })
+
+    const total = await WordTopic.count({
+      where: { topic: { id: topicId } }
+    })
+
+    const words = topicWords.map(topicWord => ({
+      ...topicWord.word
+    }))
+
+    return {
+      words,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit)
+    }
+  }
 }
 
 export const topicService = new TopicService()
