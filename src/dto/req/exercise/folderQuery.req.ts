@@ -6,4 +6,5 @@ export interface folderQueryReq {
   limit?: number
   name?: string
   sort?: FindOptionsOrder<Folder>
+  code?: string
 }

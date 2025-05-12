@@ -1,4 +1,5 @@
-import { In, Like } from 'typeorm'
+import { Equal, In, Like } from 'typeorm'
+import { lengthCode } from '~/constants/folder'
 import { BadRequestError } from '~/core/error.response'
 import { CreateFolderBodyReq } from '~/dto/req/exercise/createFolderBody.req'
 import { folderQueryReq } from '~/dto/req/exercise/folderQuery.req'
@@ -7,11 +8,13 @@ import { FlashCard } from '~/entities/flashCard.entity'
 import { Folder } from '~/entities/folder.entity'
 import { Quiz } from '~/entities/quiz.entity'
 import { User } from '~/entities/user.entity'
+import { generatedUuid } from '~/utils'
 
 class ExerciseService {
   createNewFolder = async ({ name }: CreateFolderBodyReq, userId: number) => {
     const createdFolder = await Folder.save({
       name,
+      code: generatedUuid(lengthCode),
       createdBy: {
         id: userId
       }
@@ -24,13 +27,14 @@ class ExerciseService {
     if (folderId != userId) throw new BadRequestError({ message: 'Can not update this folder!' })
   }
 
-  getAllFolder = async ({ page = 1, limit = 10, name, sort }: folderQueryReq) => {
+  getAllFolder = async ({ page = 1, limit = 10, name, sort, code }: folderQueryReq) => {
     const skip = (page - 1) * limit
     const [folders, total] = await Folder.findAndCount({
       skip,
       take: limit,
       where: {
-        name: Like(`%${name}%`)
+        name: Like(`%${name || ''}%`),
+        code
       },
       order: sort,
       select: {

@@ -1,5 +1,6 @@
 import {
   BaseEntity,
+  BeforeInsert,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
@@ -12,11 +13,16 @@ import {
 import { User } from './user.entity'
 import { Quiz } from './quiz.entity'
 import { FlashCard } from './flashCard.entity'
+import { generatedUuid } from '~/utils'
+import { lengthCode } from '~/constants/folder'
 
 @Entity()
 export class Folder extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number
+
+  @Column({ unique: true, type: 'varchar' })
+  code: string
 
   @Column('nvarchar')
   name: string

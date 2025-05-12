@@ -1,4 +1,5 @@
 import _, { parseInt, toNumber } from 'lodash'
+import { nanoid } from 'nanoid'
 
 export const isValidNumber = (num: string) => !Number.isNaN(parseInt(num))
 export const toNumberWithDefaultValue = (num: any, defaultValue: number) => {
@@ -13,6 +14,11 @@ export const toNumberWithDefaultValue = (num: any, defaultValue: number) => {
 }
 export const getRandomXElementFrom1ToN = (X: number, N: number) => {
   return _.sampleSize(_.range(1, N), X)
+}
+
+export const generatedUuid = (length: number) => {
+  if (length <= 0) length = 5 // default
+  return nanoid(length)
 }
 
 export const getInfoData = ({ fields = [], object = {} }) => {
