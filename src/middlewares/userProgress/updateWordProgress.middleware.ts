@@ -5,59 +5,62 @@ import { User } from '~/entities/user.entity'
 import { checkSchema } from 'express-validator'
 import { wordService } from '~/services/word.service'
 import { validate } from '../validation.middlewares'
-import { WordProgress } from '~/entities/word_progress.entity'
+import { WordProgress } from '~/entities/wordProgress.entity'
 
 // Create a validation schema for word progress updates
-const wordProgressValidationSchema = checkSchema({
-  wordProgress: {
-    isArray: {
-      errorMessage: 'wordProgress must be an array'
+const wordProgressValidationSchema = checkSchema(
+  {
+    wordProgress: {
+      isArray: {
+        errorMessage: 'wordProgress must be an array'
+      },
+      notEmpty: {
+        errorMessage: 'wordProgress cannot be empty'
+      }
     },
-    notEmpty: {
-      errorMessage: 'wordProgress cannot be empty'
-    }
-  },
-  'wordProgress.*.wordId': {
-    exists: {
-      errorMessage: 'wordId is required'
-    },
-    isInt: {
-      errorMessage: 'wordId must be an integer'
-    },
-    toInt: true,
-    custom: {
-      options: async (wordId) => {
-        const word = await wordService.getWordById({ id: wordId })
-        if (!word || Object.keys(word).length === 0) {
-          throw new NotFoundRequestError('Word not found')
+    'wordProgress.*.wordId': {
+      exists: {
+        errorMessage: 'wordId is required'
+      },
+      isInt: {
+        errorMessage: 'wordId must be an integer'
+      },
+      toInt: true,
+      custom: {
+        options: async (wordId) => {
+          const word = await wordService.getWordById({ id: wordId })
+          if (!word || Object.keys(word).length === 0) {
+            throw new NotFoundRequestError('Word not found')
+          }
+          return true
         }
-        return true
       }
+    },
+    'wordProgress.*.wrongCount': {
+      optional: true,
+      isInt: {
+        options: { min: 0 },
+        errorMessage: 'wrongCount must be a non-negative integer'
+      },
+      toInt: true,
+      custom: {
+        options: (value) => {
+          return value === undefined || value >= 0
+        }
+      }
+    },
+    'wordProgress.*.reviewedDate': {
+      exists: {
+        errorMessage: 'reviewedDate is required'
+      },
+      isISO8601: {
+        errorMessage: 'reviewedDate must be a valid ISO 8601 date'
+      },
+      toDate: true
     }
   },
-  'wordProgress.*.wrongCount': {
-    optional: true,
-    isInt: {
-      options: { min: 0 },
-      errorMessage: 'wrongCount must be a non-negative integer'
-    },
-    toInt: true,
-    custom: {
-      options: (value) => {
-        return value === undefined || value >= 0
-      }
-    }
-  },
-  'wordProgress.*.reviewedDate': {
-    exists: {
-      errorMessage: 'reviewedDate is required'
-    },
-    isISO8601: {
-      errorMessage: 'reviewedDate must be a valid ISO 8601 date'
-    },
-    toDate: true
-  }
-}, ['body']);
+  ['body']
+)
 
 // First validate the schema, then process the word progress data
 export const updateWordProgressValidation = [

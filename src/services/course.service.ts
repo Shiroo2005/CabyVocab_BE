@@ -1,6 +1,6 @@
 import { CourseBody } from '~/dto/req/course/createCourseBody.req'
 import { UpdateCourseBodyReq } from '~/dto/req/course/updateCourseBody,req'
-import { CourseTopic } from '~/entities/course_topic.entity'
+import { CourseTopic } from '~/entities/courseTopic.entity'
 import { Course } from '~/entities/courses.entity'
 import { Topic } from '~/entities/topic.entity'
 import { courseQueryReq } from '~/dto/req/course/courseQueryReq.req'
@@ -241,19 +241,19 @@ class CourseService {
 
     return res
   }
-  
-  getCourseTopics = async ({ 
-    courseId, 
-    page = 1, 
-    limit = 10, 
-    sort 
-  }: { 
-    courseId: number, 
-    page?: number, 
-    limit?: number, 
-    sort?: any 
+
+  getCourseTopics = async ({
+    courseId,
+    page = 1,
+    limit = 10,
+    sort
+  }: {
+    courseId: number
+    page?: number
+    limit?: number
+    sort?: any
   }) => {
-    const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit
 
     // Find all course-topic relationships for this course
     const courseTopics = await CourseTopic.find({
@@ -262,25 +262,25 @@ class CourseService {
       order: { displayOrder: 'ASC', ...sort },
       skip,
       take: limit
-    });
+    })
 
     // Count total topics for this course
     const total = await CourseTopic.count({
       where: { course: { id: courseId } }
-    });
+    })
 
     // Map the results to return topic data with display order
-    const topics = courseTopics.map(courseTopic => ({
+    const topics = courseTopics.map((courseTopic) => ({
       ...courseTopic.topic,
       displayOrder: courseTopic.displayOrder
-    }));
+    }))
 
     return {
       topics,
       total,
       currentPage: page,
       totalPages: Math.ceil(total / limit)
-    };
+    }
   }
 }
 

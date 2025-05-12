@@ -6,13 +6,13 @@ import { Word } from '~/entities/word.entity'
 import { wordService } from './word.service'
 import { validate } from 'class-validator'
 import { In } from 'typeorm'
-import { CompletedTopic } from '~/entities/completed_topic.entity'
+import { CompletedTopic } from '~/entities/completedTopic.entity'
 import { BadRequestError } from '~/core/error.response'
 import { CompleteTopicBodyReq } from '~/dto/req/topic/completeTopicBody.req'
 import { DatabaseService } from './database.service'
 import { wordProgressService } from './wordProgress.service'
 import { WordTopic } from '~/entities/wordTopic.entity'
-import { CourseTopic } from '~/entities/course_topic.entity'
+import { CourseTopic } from '~/entities/courseTopic.entity'
 
 class TopicService {
   createTopics = async (topicsBody: TopicBody[]) => {
@@ -326,9 +326,9 @@ class TopicService {
     limit = 10,
     sort
   }: {
-    topicId: number,
-    page?: number,
-    limit?: number,
+    topicId: number
+    page?: number
+    limit?: number
     sort?: any
   }) => {
     const skip = (page - 1) * limit
@@ -345,7 +345,7 @@ class TopicService {
       where: { topic: { id: topicId } }
     })
 
-    const words = topicWords.map(topicWord => ({
+    const words = topicWords.map((topicWord) => ({
       ...topicWord.word
     }))
 

@@ -14,8 +14,8 @@ import {
 } from 'typeorm'
 import { Topic } from './topic.entity'
 import { WordRank } from '~/constants/word'
-import { CourseProgress } from './course_progress.entity'
-import { CourseTopic } from './course_topic.entity'
+import { CourseProgress } from './courseProgress.entity'
+import { CourseTopic } from './courseTopic.entity'
 import { CourseLevel } from '~/constants/course'
 import { UpdateCourseBodyReq } from '~/dto/req/course/updateCourseBody,req'
 
@@ -30,11 +30,11 @@ export class Course extends BaseEntity {
   title!: string
 
   @Column('varchar')
-  @IsNotEmpty({message: 'courses level must be not empty'})
+  @IsNotEmpty({ message: 'courses level must be not empty' })
   @IsEnum(CourseLevel, { message: 'Topic level must be in enum rank' })
   level!: CourseLevel
 
-  @Column('int', {default: 0})
+  @Column('int', { default: 0 })
   totalTopic?: number
 
   @Column('varchar')
@@ -50,7 +50,7 @@ export class Course extends BaseEntity {
 
   @OneToMany(() => CourseTopic, (courseTopic) => courseTopic.course)
   courseTopics: CourseTopic[]
-  
+
   @DeleteDateColumn()
   deletedAt?: Date
 
@@ -60,24 +60,14 @@ export class Course extends BaseEntity {
   @UpdateDateColumn()
   updatedAt?: Date
 
-  static updateCourse = async (
-    course: Course, 
-    {
-      title,
-      level,
-      target,
-      description,
-      topics
-    }: UpdateCourseBodyReq
-  ) => {
+  static updateCourse = async (course: Course, { title, level, target, description, topics }: UpdateCourseBodyReq) => {
     if (title) course.title = title
     if (level) course.level = level
     if (target) course.target = target
     if (description) course.description = description
 
-    if (topics && topics.length > 0)
-    {
-      CourseTopic.delete({course: {id: course.id}})
+    if (topics && topics.length > 0) {
+      CourseTopic.delete({ course: { id: course.id } })
 
       const courseTopics: CourseTopic[] = []
 
@@ -89,28 +79,21 @@ export class Course extends BaseEntity {
           const courseTopic = CourseTopic.create({
             course: course,
             topic: existingTopic,
-            displayOrder: topic.displayOrder,
+            displayOrder: topic.displayOrder
           })
 
           courseTopic.save()
 
-          courseTopics.push(courseTopic);
+          courseTopics.push(courseTopic)
         }
       }
 
-      course.courseTopics = courseTopics;
+      course.courseTopics = courseTopics
     }
 
     await course.save()
     return course
   }
 
-  static allowSortList = [
-    'id',
-    'title',
-    'level',
-    'target',
-    'description'
-  ]
-
+  static allowSortList = ['id', 'title', 'level', 'target', 'description']
 }

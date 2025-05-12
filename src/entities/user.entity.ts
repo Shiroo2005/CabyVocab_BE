@@ -17,9 +17,9 @@ import { UserStatus } from '~/constants/userStatus'
 import { Role } from './role.entity'
 import { hashData } from '~/utils/jwt'
 import { Token } from './token.entity'
-import { CompletedTopic } from './completed_topic.entity'
-import { WordProgress } from './word_progress.entity'
-import { CourseProgress } from './course_progress.entity'
+import { CompletedTopic } from './completedTopic.entity'
+import { WordProgress } from './wordProgress.entity'
+import { CourseProgress } from './courseProgress.entity'
 
 @Entity()
 export class User extends BaseEntity {

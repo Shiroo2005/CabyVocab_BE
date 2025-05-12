@@ -13,8 +13,8 @@ import {
 } from 'typeorm'
 import { TopicType } from '~/constants/topic'
 import { Word } from './word.entity'
-import { CompletedTopic } from './completed_topic.entity'
-import { CourseTopic } from './course_topic.entity'
+import { CompletedTopic } from './completedTopic.entity'
+import { CourseTopic } from './courseTopic.entity'
 import { WordTopic } from './wordTopic.entity'
 
 @Entity()
