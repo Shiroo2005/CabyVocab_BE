@@ -17,9 +17,11 @@ class ExerciseController {
     }).send(res)
   }
   getAll = async (req: Request<ParamsDictionary, any, CreateFolderBodyReq>, res: Response, next: NextFunction) => {
+    const user = req.user as User
+
     return new SuccessResponse({
       message: 'Get all folder exercise successful',
-      metaData: await exerciseService.getAllFolder({
+      metaData: await exerciseService.getAllFolder(user.id as number, {
         ...req.query,
         ...req.parseQueryPagination,
         sort: req.sortParsed
@@ -30,9 +32,11 @@ class ExerciseController {
   getById = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     const id = parseInt(req.params.id)
 
+    const user = req.user as User
+
     return new SuccessResponse({
       message: 'Get folder exercise by id successful',
-      metaData: await exerciseService.getFolderById(id)
+      metaData: await exerciseService.getFolderById(user.id as number, id)
     }).send(res)
   }
 
@@ -53,6 +57,28 @@ class ExerciseController {
     return new SuccessResponse({
       message: 'Delete folder by id successful',
       metaData: await exerciseService.deleteFolderById(user.id as number, id)
+    }).send(res)
+  }
+
+  voteFolder = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    const folderId = parseInt(req.params?.id)
+
+    const user = req.user as User
+
+    return new SuccessResponse({
+      message: 'Vote folder by id successful!',
+      metaData: await exerciseService.voteFolder({ userId: user.id as number, folderId })
+    }).send(res)
+  }
+
+  unVoteFolder = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    const folderId = parseInt(req.params?.id)
+
+    const user = req.user as User
+
+    return new SuccessResponse({
+      message: 'Unvote folder by id successful!',
+      metaData: await exerciseService.unVoteFolder({ userId: user.id as number, folderId })
     }).send(res)
   }
 }

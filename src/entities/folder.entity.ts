@@ -15,6 +15,7 @@ import { Quiz } from './quiz.entity'
 import { FlashCard } from './flashCard.entity'
 import { generatedUuid } from '~/utils'
 import { lengthCode } from '~/constants/folder'
+import { Vote } from './vote.entity'
 
 @Entity()
 export class Folder extends BaseEntity {
@@ -44,6 +45,9 @@ export class Folder extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt?: Date
+
+  @OneToMany(() => Vote, (vote) => vote.folder)
+  votes: Vote[]
 
   static allowSortList = ['name']
 }

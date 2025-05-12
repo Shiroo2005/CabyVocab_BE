@@ -49,6 +49,22 @@ exerciseRouter.get(
  */
 exerciseRouter.post('/new-folder', createExerciseValidation, wrapRequestHandler(exerciseController.create))
 
+/**
+ * @description : Vote topic
+ * @method : POST
+ * @path : /:id/like
+ * @header : Authorization
+ */
+exerciseRouter.post('/:id/like', checkIdParamMiddleware, wrapRequestHandler(exerciseController.voteFolder))
+
+/**
+ * @description : UnVote topic
+ * @method : POST
+ * @path : /:id/unlinke
+ * @header : Authorization
+ */
+exerciseRouter.post('/:id/unlike', checkIdParamMiddleware, wrapRequestHandler(exerciseController.unVoteFolder))
+
 //PUT
 
 //PATCH

@@ -4,11 +4,13 @@ import { BadRequestError } from '~/core/error.response'
 import { CreateFolderBodyReq } from '~/dto/req/exercise/createFolderBody.req'
 import { folderQueryReq } from '~/dto/req/exercise/folderQuery.req'
 import { updateFolderBodyReq } from '~/dto/req/exercise/updateFolderBody.req'
+import { VoteFolder } from '~/dto/req/exercise/voteFolder.req'
 import { FlashCard } from '~/entities/flashCard.entity'
 import { Folder } from '~/entities/folder.entity'
 import { Quiz } from '~/entities/quiz.entity'
 import { User } from '~/entities/user.entity'
-import { generatedUuid } from '~/utils'
+import { Vote } from '~/entities/vote.entity'
+import { generatedUuid, unGetData } from '~/utils'
 
 class ExerciseService {
   createNewFolder = async ({ name }: CreateFolderBodyReq, userId: number) => {
@@ -27,7 +29,7 @@ class ExerciseService {
     if (folderId != userId) throw new BadRequestError({ message: 'Can not update this folder!' })
   }
 
-  getAllFolder = async ({ page = 1, limit = 10, name, sort, code }: folderQueryReq) => {
+  getAllFolder = async (userId: number, { page = 1, limit = 10, name, sort, code }: folderQueryReq) => {
     const skip = (page - 1) * limit
     const [folders, total] = await Folder.findAndCount({
       skip,
@@ -40,12 +42,27 @@ class ExerciseService {
       select: {
         id: true,
         name: true,
-        createdBy: true
+        createdBy: true,
+        code: true
       }
     })
 
+    const data = await Promise.all(
+      folders.map(async (folder) => {
+        const [voteCount, isAlreadyVote] = await Promise.all([
+          await this.findNumberVoteByFolderId(folder.id),
+          await this.isAlreadyVote(folder.id, userId)
+        ])
+        return {
+          ...folder,
+          voteCount,
+          isAlreadyVote
+        }
+      })
+    )
+
     return {
-      folders,
+      folders: data,
       total,
       currentPage: page,
       totalPages: Math.ceil(total / limit)
@@ -57,14 +74,18 @@ class ExerciseService {
       where: {
         id
       },
-      relations: ['createdBy', 'quizzes'],
+      relations: ['createdBy', 'quizzes', 'votes', 'votes.createdBy'],
       select: {
         id: true,
         name: true,
+        code: true,
         createdBy: {
           id: true
         },
         quizzes: {
+          id: true
+        },
+        flashCards: {
           id: true
         }
       }
@@ -110,10 +131,10 @@ class ExerciseService {
     }
 
     await foundFolder.save()
-    return this.getFolderById(id)
+    return this.getFolderById(user.id as number, id)
   }
 
-  getFolderById = async (id: number) => {
+  getFolderById = async (userId: number, id: number) => {
     const foundFolder = await Folder.findOne({
       where: {
         id
@@ -122,6 +143,7 @@ class ExerciseService {
       select: {
         id: true,
         name: true,
+        code: true,
         flashCards: {
           id: true,
           frontContent: true,
@@ -137,7 +159,37 @@ class ExerciseService {
       }
     })
 
-    return foundFolder || {}
+    const voteCount = await this.findNumberVoteByFolderId(id)
+    const isAlreadyVote = await this.isAlreadyVote(id, userId)
+
+    return {
+      ...foundFolder,
+      voteCount,
+      isAlreadyVote
+    }
+  }
+
+  findNumberVoteByFolderId = async (id: number) => {
+    return Vote.countBy({
+      folder: {
+        id
+      }
+    })
+  }
+
+  isAlreadyVote = async (folderId: number, userId: number) => {
+    return Vote.exists({
+      where: {
+        createdBy: {
+          id: userId
+        },
+        folder: {
+          id: folderId
+        }
+      },
+      relations: ['createdBy'],
+      withDeleted: false
+    })
   }
 
   deleteQuizById = async (ids: number[]) => {
@@ -159,6 +211,39 @@ class ExerciseService {
     await this.checkOwn(userId, id)
     return await Folder.getRepository().softDelete({
       id
+    })
+  }
+
+  voteFolder = async ({ folderId, userId }: VoteFolder) => {
+    const foundVote = await Vote.findOne({
+      where: {
+        createdBy: { id: userId },
+        folder: { id: folderId }
+      },
+      withDeleted: true
+    })
+
+    if (!foundVote) {
+      const newVote = Vote.create({
+        createdBy: { id: userId },
+        folder: { id: folderId }
+      })
+
+      return unGetData({ fields: ['createdBy', 'folder'], object: await newVote.save() })
+    }
+
+    await Vote.getRepository().restore({ id: foundVote.id })
+    return foundVote
+  }
+
+  unVoteFolder = async ({ folderId, userId }: VoteFolder) => {
+    return await Vote.getRepository().softDelete({
+      createdBy: {
+        id: userId
+      },
+      folder: {
+        id: folderId
+      }
     })
   }
 }
