@@ -3,6 +3,9 @@ import { exerciseController } from '~/controllers/exercise.controller'
 import { Folder } from '~/entities/folder.entity'
 import { accessTokenValidation } from '~/middlewares/auth.middlewares'
 import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '~/middlewares/common.middlewares'
+import { createCommentValidation } from '~/middlewares/exercise/comment/createComment.middlewares'
+import { getChildCommentValidation } from '~/middlewares/exercise/comment/getChildComment.middlewares'
+import { updateCommentValidation } from '~/middlewares/exercise/comment/updateComment.middlewares'
 import { createExerciseValidation } from '~/middlewares/exercise/createExercise.middlewares'
 import { updateExerciseValidation } from '~/middlewares/exercise/updateExercise.middlewares'
 import { wrapRequestHandler } from '~/utils/handler'
@@ -38,6 +41,17 @@ exerciseRouter.get(
   wrapRequestHandler(exerciseController.getAll)
 )
 
+/**
+ * @description : get children comment
+ * @method : GET
+ * @path : /:id
+ */
+exerciseRouter.get(
+  '/:id/child-comment/:parentId',
+  wrapRequestHandler(getChildCommentValidation),
+  wrapRequestHandler(exerciseController.getChildComment)
+)
+
 //POST
 /**
  * @description : Create new folder
@@ -65,9 +79,35 @@ exerciseRouter.post('/:id/like', checkIdParamMiddleware, wrapRequestHandler(exer
  */
 exerciseRouter.post('/:id/unlike', checkIdParamMiddleware, wrapRequestHandler(exerciseController.unVoteFolder))
 
+/**
+ * @description : Comment
+ * @method : POST
+ * @path : /:id/comment/
+ * @header : Authorization
+ */
+exerciseRouter.post(
+  '/:id/comment',
+  checkIdParamMiddleware,
+  createCommentValidation,
+  wrapRequestHandler(exerciseController.createComment)
+)
+
 //PUT
 
 //PATCH
+
+/**
+ * @description : Update comment
+ * @method : PUT
+ * @path : /:id/comment/
+ * @header : Authorization
+ */
+exerciseRouter.put(
+  '/:id/comment/:commentId',
+  checkIdParamMiddleware,
+  updateCommentValidation,
+  wrapRequestHandler(exerciseController.updateComment)
+)
 /**
  * @description : Update folder by id
  * @method : PATCH
@@ -111,3 +151,10 @@ exerciseRouter.patch('/:id', updateExerciseValidation, wrapRequestHandler(exerci
  * @path : /:id
  */
 exerciseRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(exerciseController.deleteById))
+
+/**
+ * @description : Delete comment folder by id
+ * @method : DELETE
+ * @path : /:id
+ */
+exerciseRouter.delete('/:id/comment/:commentId', wrapRequestHandler(exerciseController.deleteComment))

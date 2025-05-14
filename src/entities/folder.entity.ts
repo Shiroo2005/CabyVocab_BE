@@ -16,6 +16,7 @@ import { FlashCard } from './flashCard.entity'
 import { generatedUuid } from '~/utils'
 import { lengthCode } from '~/constants/folder'
 import { Vote } from './vote.entity'
+import { Comment } from './comment.entity'
 
 @Entity()
 export class Folder extends BaseEntity {
@@ -48,6 +49,9 @@ export class Folder extends BaseEntity {
 
   @OneToMany(() => Vote, (vote) => vote.folder)
   votes: Vote[]
+
+  @OneToMany(() => Comment, (comment) => comment.folder)
+  comments: Comment[]
 
   static allowSortList = ['name']
 }

@@ -1,10 +1,13 @@
 import { Equal, In, Like } from 'typeorm'
 import { lengthCode } from '~/constants/folder'
 import { BadRequestError } from '~/core/error.response'
+import { CreateCommentBodyReq } from '~/dto/req/exercise/comment/createCommentBody.req'
+import { UpdateCommentBodyReq } from '~/dto/req/exercise/comment/updateCommentBody.req'
 import { CreateFolderBodyReq } from '~/dto/req/exercise/createFolderBody.req'
 import { folderQueryReq } from '~/dto/req/exercise/folderQuery.req'
 import { updateFolderBodyReq } from '~/dto/req/exercise/updateFolderBody.req'
 import { VoteFolder } from '~/dto/req/exercise/voteFolder.req'
+import { Comment } from '~/entities/comment.entity'
 import { FlashCard } from '~/entities/flashCard.entity'
 import { Folder } from '~/entities/folder.entity'
 import { Quiz } from '~/entities/quiz.entity'
@@ -49,13 +52,15 @@ class ExerciseService {
 
     const data = await Promise.all(
       folders.map(async (folder) => {
-        const [voteCount, isAlreadyVote] = await Promise.all([
+        const [voteCount, isAlreadyVote, commentCount] = await Promise.all([
           await this.findNumberVoteByFolderId(folder.id),
-          await this.isAlreadyVote(folder.id, userId)
+          await this.isAlreadyVote(folder.id, userId),
+          await this.findNumberCommentByFolderId(folder.id)
         ])
         return {
           ...folder,
           voteCount,
+          commentCount,
           isAlreadyVote
         }
       })
@@ -159,18 +164,30 @@ class ExerciseService {
       }
     })
 
-    const voteCount = await this.findNumberVoteByFolderId(id)
-    const isAlreadyVote = await this.isAlreadyVote(id, userId)
+    const [voteCount, isAlreadyVote, commentCount] = await Promise.all([
+      await this.findNumberVoteByFolderId(id),
+      await this.isAlreadyVote(id, userId),
+      await this.findNumberCommentByFolderId(id)
+    ])
 
     return {
       ...foundFolder,
       voteCount,
+      commentCount,
       isAlreadyVote
     }
   }
 
   findNumberVoteByFolderId = async (id: number) => {
     return Vote.countBy({
+      folder: {
+        id
+      }
+    })
+  }
+
+  findNumberCommentByFolderId = async (id: number) => {
+    return Comment.countBy({
       folder: {
         id
       }
@@ -244,6 +261,62 @@ class ExerciseService {
       folder: {
         id: folderId
       }
+    })
+  }
+
+  commentFolder = async ({ content, folderId, userId, parentId = null }: CreateCommentBodyReq) => {
+    const comment = Comment.create({
+      content,
+      createdBy: { id: userId },
+      parentComment: {
+        id: parentId
+      } as Comment,
+      folder: {
+        id: folderId
+      }
+    })
+
+    return await comment.save()
+  }
+
+  updateCommentFolder = async ({ content, folderId, userId, commentId }: UpdateCommentBodyReq) => {
+    const foundComment = await Comment.findOne({
+      where: {
+        id: commentId,
+        folder: {
+          id: folderId
+        },
+        createdBy: {
+          id: userId
+        }
+      }
+    })
+
+    if (!foundComment) throw new BadRequestError({ message: 'Comment not found!' })
+
+    //mapping
+    foundComment.content = content
+
+    return await foundComment.save()
+  }
+
+  async checkOwnComment(userId: number, commentId: number) {
+    const foundComment = await Comment.exists({
+      where: {
+        id: commentId,
+        createdBy: {
+          id: userId
+        }
+      }
+    })
+
+    if (!foundComment) throw new BadRequestError({ message: 'Unauthorize for this comment' })
+  }
+
+  deleteCommentFolder = async (userId: number, commentId: number) => {
+    this.checkOwnComment(userId, commentId)
+    return await Comment.getRepository().softDelete({
+      id: commentId
     })
   }
 }
