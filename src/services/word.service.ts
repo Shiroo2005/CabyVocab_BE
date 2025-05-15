@@ -13,13 +13,13 @@ class WordService {
   createWords = async (words: WordBody[]) => {
     const databaseService = DatabaseService.getInstance()
     const queryRunner = databaseService.appDataSource.createQueryRunner()
-    
+
     try {
-      await queryRunner.connect() 
+      await queryRunner.connect()
       await queryRunner.startTransaction()
-      
+
       const createdWords = []
-      
+
       for (const word of words) {
         // Create the word
         const newWord = Word.create({
@@ -28,28 +28,27 @@ class WordService {
           pronunciation: word.pronunciation,
           audio: word.audio,
           image: word.image,
-          rank: word.rank,
           position: word.position,
           example: word.example,
           translateExample: word.translateExample
         })
-        
+
         // Save the word
         const savedWord = await queryRunner.manager.save(newWord)
-        
+
         // Create word-topic associations if needed
         if (word.topicIds && word.topicIds.length > 0) {
-          const wordTopics = word.topicIds.map(topicId => ({
+          const wordTopics = word.topicIds.map((topicId) => ({
             wordId: savedWord.id,
             topicId: topicId
           }))
-          
+
           await queryRunner.manager.getRepository(WordTopic).save(wordTopics)
         }
-        
+
         createdWords.push(savedWord)
       }
-      
+
       await queryRunner.commitTransaction()
       return createdWords
     } catch (err) {
@@ -65,27 +64,16 @@ class WordService {
 
   updateWord = async (
     id: number,
-    {
-      content,
-      meaning,
-      pronunciation,
-      audio,
-      example,
-      image,
-      position,
-      rank,
-      translateExample,
-      topicIds
-    }: UpdateWordBodyReq
+    { content, meaning, pronunciation, audio, example, image, position, translateExample, topicIds }: UpdateWordBodyReq
   ) => {
     const word = await Word.findOne({
       where: { id }
     })
-  
+
     if (!word) {
       throw new NotFoundRequestError('Word not found with the provided ID')
     }
-  
+
     return Word.updateWord(word, {
       content,
       meaning,
@@ -94,7 +82,6 @@ class WordService {
       example,
       image,
       position,
-      rank,
       translateExample,
       topicIds
     })
@@ -118,7 +105,6 @@ class WordService {
     meaning,
     position,
     pronunciation,
-    rank,
     translateExample,
     sort
   }: wordQueryReq) => {
@@ -134,7 +120,6 @@ class WordService {
         meaning,
         position,
         pronunciation,
-        rank,
         translateExample
       },
       order: sort,
@@ -147,7 +132,6 @@ class WordService {
         meaning: true,
         position: true,
         pronunciation: true,
-        rank: true,
         translateExample: true
       }
     })
@@ -169,7 +153,7 @@ class WordService {
 
   restoreWordById = async ({ id }: { id: number }) => {
     const restoreWord = await Word.getRepository().restore(id)
-    
+
     return restoreWord
   }
 

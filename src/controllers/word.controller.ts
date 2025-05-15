@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
-import { getWordPosition, getWorkRank } from '~/constants/word'
+import { getWordPosition } from '~/constants/word'
 import { CREATED, SuccessResponse } from '~/core/success.response'
 import { CreateWordBodyReq } from '~/dto/req/word/createWordBody.req'
 import { UpdateWordBodyReq } from '~/dto/req/word/updateWordBody.req'
@@ -32,14 +32,14 @@ class WordController {
     }).send(res)
   }
 
-  getWorkRankList = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
-    return new SuccessResponse({
-      message: 'Get word rank successful!',
-      metaData: {
-        data: getWorkRank()
-      }
-    }).send(res)
-  }
+  // getWorkRankList = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+  //   return new SuccessResponse({
+  //     message: 'Get word rank successful!',
+  //     metaData: {
+  //       data: getWorkRank()
+  //     }
+  //   }).send(res)
+  // }
 
   getWordPosition = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     return new SuccessResponse({

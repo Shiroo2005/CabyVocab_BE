@@ -241,8 +241,7 @@ class WordProgressService {
           image: true,
           pronunciation: true,
           example: true,
-          translateExample: true,
-          rank: true
+          translateExample: true
         }
       }
     })

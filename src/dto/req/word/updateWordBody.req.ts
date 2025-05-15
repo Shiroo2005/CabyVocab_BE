@@ -1,4 +1,4 @@
-import { WordPosition, WordRank } from '~/constants/word'
+import { WordPosition } from '~/constants/word'
 
 export interface UpdateWordBodyReq {
   content?: string
@@ -7,7 +7,6 @@ export interface UpdateWordBodyReq {
   position?: WordPosition
   audio?: string
   image?: string
-  rank?: WordRank
   example?: string
   translateExample?: string
   topicIds: number[]

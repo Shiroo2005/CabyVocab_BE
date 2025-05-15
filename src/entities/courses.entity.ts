@@ -13,7 +13,6 @@ import {
   UpdateDateColumn
 } from 'typeorm'
 import { Topic } from './topic.entity'
-import { WordRank } from '~/constants/word'
 import { CourseProgress } from './courseProgress.entity'
 import { CourseTopic } from './courseTopic.entity'
 import { CourseLevel } from '~/constants/course'

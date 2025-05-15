@@ -1,7 +1,7 @@
 import { checkSchema } from 'express-validator'
 import { isLength, isString } from '../common.middlewares'
 import { isValidEnumValue } from '~/utils'
-import { WordPosition, WordRank } from '~/constants/word'
+import { WordPosition } from '~/constants/word'
 import { BadRequestError } from '~/core/error.response'
 import { validate } from '../validation.middlewares'
 
@@ -46,16 +46,6 @@ export const updateWordValidation = validate(
       optional: true,
       ...isString('image'),
       ...isLength({ fieldName: 'image', min: 1, max: 255 })
-    },
-    rank: {
-      optional: true,
-      custom: {
-        options: (value) => {
-          if (!isValidEnumValue(value, WordRank))
-            throw new BadRequestError({ message: 'rank must be in enum WORD Rank!' })
-          return true
-        }
-      }
     },
     example: {
       trim: true,

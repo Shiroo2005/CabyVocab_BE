@@ -39,12 +39,12 @@ wordRouter.get(
   wrapRequestHandler(wordController.getAllWords)
 )
 
-/**
- * @description : Get word rank
- * @method : GET
- * @path : /rank-list
- */
-wordRouter.get('/:rank-list', wrapRequestHandler(wordController.getWorkRankList))
+// /**
+//  * @description : Get word rank
+//  * @method : GET
+//  * @path : /rank-list
+//  */
+// wordRouter.get('/:rank-list', wrapRequestHandler(wordController.getWorkRankList))
 
 /**
  * @description : Get word position

@@ -1,7 +1,7 @@
 import { isLength, isRequired, isString, isEnum } from '../common.middlewares'
 import { isValidEnumValue } from '~/utils'
 import { checkSchema } from 'express-validator'
-import { WordPosition, WordRank } from '~/constants/word'
+import { WordPosition } from '~/constants/word'
 import { BadRequestError } from '~/core/error.response'
 import { validate } from '../validation.middlewares'
 import { Topic } from '~/entities/topic.entity'
@@ -58,10 +58,6 @@ export const createWordValidation = validate(
         ...isString('image'),
         ...isLength({ fieldName: 'image', min: 1, max: 255 })
       },
-      'words.*.rank': {
-        optional: true,
-        ...isEnum(WordRank, 'wordRank')
-      },
       'words.*.example': {
         trim: true,
         optional: true,
@@ -86,10 +82,10 @@ export const createWordValidation = validate(
             })
 
             if (topics.length !== value.length) {
-              const existingTopicIds = topics.map(topic => topic.id)
-              const nonExistingTopicIds = value.filter(id => !existingTopicIds.includes(id))
-              throw new BadRequestError({ 
-                message: `The following topic IDs do not exist: ${nonExistingTopicIds.join(', ')}` 
+              const existingTopicIds = topics.map((topic) => topic.id)
+              const nonExistingTopicIds = value.filter((id) => !existingTopicIds.includes(id))
+              throw new BadRequestError({
+                message: `The following topic IDs do not exist: ${nonExistingTopicIds.join(', ')}`
               })
             }
             return true

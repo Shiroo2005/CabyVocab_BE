@@ -16,13 +16,12 @@ export async function checkIdDeleteTopicMiddleware(
 
   const topic = await Topic.findOne({
     where: { id: TopicId },
-    relations: ['words']
+    relations: ['wordTopics']
   })
 
-  console.log('words' + topic?.words?.length)
   if (!topic) {
     res.status(404).json({ message: 'Không tồn tại topic!' })
-  } else if (topic.words && topic.words.length > 0) {
+  } else if (topic.wordTopics && topic.wordTopics.length > 0) {
     res.status(400).json({ message: 'Tồn tại từ vựng thuộc topic' })
   } else next()
 }

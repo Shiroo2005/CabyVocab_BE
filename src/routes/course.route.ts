@@ -50,6 +50,20 @@ courseRouter.get('/level-list', wrapRequestHandler(courseController.getCourseLev
  */
 courseRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(courseController.getCourseByID))
 
+/**
+ * @description : Get course topics
+ * @method : GET
+ * @path : /:id/topics
+ * @param : id
+ * @header : Authorization
+ */
+courseRouter.get(
+  '/:id/topics',
+  checkIdParamMiddleware,
+  checkQueryMiddleware(),
+  wrapRequestHandler(courseController.getCourseTopics)
+)
+
 //POST
 /**
  * @description : Create new courses
@@ -114,20 +128,5 @@ courseRouter.patch('/:id/restore', checkIdParamMiddleware, wrapRequestHandler(co
  * @header : Authorization
  */
 courseRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(courseController.deleteCourse))
-
-//GET
-/**
- * @description : Get course topics
- * @method : GET
- * @path : /:id/topics
- * @param : id
- * @header : Authorization
- */
-courseRouter.get(
-  '/:id/topics',
-  checkIdParamMiddleware,
-  checkQueryMiddleware(),
-  wrapRequestHandler(courseController.getCourseTopics)
-)
 
 export default courseRouter

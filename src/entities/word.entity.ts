@@ -5,15 +5,11 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  In,
-  JoinTable,
-  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
-import { WordPosition, WordRank } from '~/constants/word'
-import { Topic } from './topic.entity'
+import { WordPosition } from '~/constants/word'
 import { WordProgress } from './wordProgress.entity'
 import { WordTopic } from './wordTopic.entity'
 
@@ -49,11 +45,6 @@ export class Word extends BaseEntity {
   @Column('varchar', { default: 'N/A' })
   @IsOptional()
   image?: string
-
-  @Column('varchar', { default: WordRank.A1 })
-  @IsEnum(WordRank, { message: 'rank must be in enum WordRank' })
-  @IsOptional()
-  rank?: WordRank
 
   @Column('varchar', { default: 'N/A' })
   @IsOptional()
@@ -91,7 +82,6 @@ export class Word extends BaseEntity {
     pronunciation,
     audio,
     image,
-    rank,
     position,
     example,
     translateExample,
@@ -104,7 +94,6 @@ export class Word extends BaseEntity {
     newWord.meaning = meaning
     newWord.audio = audio
     newWord.image = image
-    newWord.rank = rank
     newWord.example = example
     newWord.translateExample = translateExample
 
@@ -133,7 +122,6 @@ export class Word extends BaseEntity {
       pronunciation,
       audio,
       image,
-      rank,
       position,
       example,
       translateExample,
@@ -145,7 +133,6 @@ export class Word extends BaseEntity {
       position?: WordPosition
       audio?: string
       image?: string
-      rank?: WordRank
       example?: string
       translateExample?: string
       topicIds: number[]
@@ -156,7 +143,6 @@ export class Word extends BaseEntity {
     if (pronunciation) word.pronunciation = pronunciation
     if (audio) word.audio = audio
     if (image) word.image = image
-    if (rank) word.rank = rank
     if (position) word.position = position
     if (example) word.example = example
     if (translateExample) word.translateExample = translateExample

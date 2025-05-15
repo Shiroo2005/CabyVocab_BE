@@ -236,10 +236,20 @@ class TopicService {
   }
 
   deleteTopic = async ({ id }: { id: number }) => {
+    await CourseTopic.getRepository().softDelete({
+      topic: {
+        id
+      }
+    })
     return await Topic.getRepository().softDelete(id)
   }
 
   restoreTopic = async ({ id }: { id: number }) => {
+    await CourseTopic.getRepository().restore({
+      topic: {
+        id
+      }
+    })
     return await Topic.getRepository().restore(id)
   }
 
