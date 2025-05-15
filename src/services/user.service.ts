@@ -1,3 +1,4 @@
+import { Like } from 'typeorm'
 import { CreateUserBodyReq, UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
 import { userQueryReq } from '~/dto/req/user/userQuery.req'
 import { Role } from '~/entities/role.entity'
@@ -54,8 +55,8 @@ class UserService {
       take: limit,
       relations: ['role'],
       where: {
-        email,
-        username,
+        email: Like(`%${email || ''}%`),
+        username: Like(`%${username || ''}%`),
         role: { name: roleName },
         status
       },

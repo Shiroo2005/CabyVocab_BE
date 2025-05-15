@@ -7,6 +7,8 @@ export const validate = (validate: ValidationChain[]) => {
     try {
       await Promise.all(validate.map((validation) => validation.run(req)))
       const errors = validationResult(req)
+      console.log(errors)
+
       if (!errors.isEmpty()) {
         const errorMessages = errors.array().map((error) => error.msg)
         next(
