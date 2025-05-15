@@ -146,12 +146,18 @@ class WordService {
 
   deleteWordById = async ({ id }: { id: number }) => {
     //soft delete
+    await WordTopic.getRepository().softDelete({
+      wordId: id
+    })
     const result = await Word.getRepository().softDelete(id)
 
     return result
   }
 
   restoreWordById = async ({ id }: { id: number }) => {
+    await WordTopic.getRepository().restore({
+      wordId: id
+    })
     const restoreWord = await Word.getRepository().restore(id)
 
     return restoreWord
