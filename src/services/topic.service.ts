@@ -13,6 +13,7 @@ import { DatabaseService } from './database.service'
 import { wordProgressService } from './wordProgress.service'
 import { WordTopic } from '~/entities/wordTopic.entity'
 import { CourseTopic } from '~/entities/courseTopic.entity'
+import { User } from '~/entities/user.entity'
 
 class TopicService {
   createTopics = async (topicsBody: TopicBody[]) => {
@@ -119,7 +120,7 @@ class TopicService {
     return result
   }
 
-  getAllTopics = async ({ page = 1, limit = 10, title, description, type, sort }: topicQueryReq) => {
+  getAllTopics = async (user: User, { page = 1, limit = 10, title, description, type, sort }: topicQueryReq) => {
     const skip = (page - 1) * limit
 
     const [topics, total] = await Topic.findAndCount({
@@ -140,8 +141,32 @@ class TopicService {
       }
     })
 
+    const topicIds = topics.map((topic) => topic.id as number)
+
+    //find topic complete by user
+    const completeTopics = await CompletedTopic.find({
+      where: {
+        topic: {
+          id: In(topicIds)
+        },
+        user: {
+          id: user.id
+        }
+      },
+      relations: ['topic']
+    })
+
+    const topicsData = topics.map((topic) => {
+      const alreadyLearned = completeTopics.filter((completeTopic) => completeTopic.topic.id == topic.id).length > 0
+
+      return {
+        ...topic,
+        alreadyLearned
+      }
+    })
+
     return {
-      topics,
+      topics: topicsData,
       total,
       currentPage: page,
       totalPages: Math.ceil(total / limit)

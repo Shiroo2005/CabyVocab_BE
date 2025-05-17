@@ -4,6 +4,7 @@ import { getTopicTypeList } from '~/constants/topic'
 import { CREATED, SuccessResponse } from '~/core/success.response'
 import { CreateTopicBodyReq } from '~/dto/req/topic/createTopicBody.req'
 import { UpdateTopicBodyReq } from '~/dto/req/topic/updateTopicBody.req'
+import { User } from '~/entities/user.entity'
 import { topicService } from '~/services/topic.service'
 
 class TopicController {
@@ -33,9 +34,15 @@ class TopicController {
   }
 
   getAllTopics = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    const user = req.user as User
+
     return new SuccessResponse({
       message: 'Get all topics successful!',
-      metaData: await topicService.getAllTopics({ ...req.query, ...req.parseQueryPagination, sort: req.sortParsed })
+      metaData: await topicService.getAllTopics(user, {
+        ...req.query,
+        ...req.parseQueryPagination,
+        sort: req.sortParsed
+      })
     }).send(res)
   }
 
