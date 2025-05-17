@@ -6,6 +6,7 @@ import {
   updateWordProgressController
 } from '~/controllers/userProgress.controller'
 import { accessTokenValidation } from '~/middlewares/auth.middlewares'
+import { checkQueryMiddleware } from '~/middlewares/common.middlewares'
 import { completeTopicValidation } from '~/middlewares/userProgress/completeTopic.middleware'
 import { updateWordProgressValidation } from '~/middlewares/userProgress/updateWordProgress.middleware'
 import { wrapRequestHandler } from '~/utils/handler'
@@ -21,7 +22,7 @@ userProgressRouter.use(accessTokenValidation)
  * @path : /
  * @header : Authorization
  */
-userProgressRouter.get('/word-review', wrapRequestHandler(getWordReviewController))
+userProgressRouter.get('/word-review', checkQueryMiddleware(), wrapRequestHandler(getWordReviewController))
 
 /**
  * @description : Get user progress summary
@@ -55,8 +56,4 @@ userProgressRouter.post('/complete-topic', completeTopicValidation, wrapRequestH
  *   }
  * ]
  */
-userProgressRouter.put(
-  '/word',
-  ...updateWordProgressValidation, 
-  wrapRequestHandler(updateWordProgressController) 
-)
+userProgressRouter.put('/word', ...updateWordProgressValidation, wrapRequestHandler(updateWordProgressController))

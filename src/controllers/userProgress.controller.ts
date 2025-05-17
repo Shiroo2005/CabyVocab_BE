@@ -29,12 +29,12 @@ export const updateWordProgressController = async (
   }).send(res)
 }
 
-export const getWordReviewController = async (req: Request, res: Response) => {
+export const getWordReviewController = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
   const user = (req as Request).user as User
 
   return new SuccessResponse({
     message: 'Get word review successful!',
-    metaData: await wordProgressService.getWordReview({ userId: user.id as number })
+    metaData: await wordProgressService.getWordReview({ userId: user.id as number, ...req.parseQueryPagination })
   }).send(res)
 }
 

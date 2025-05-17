@@ -12,6 +12,7 @@ import { User } from '~/entities/user.entity'
 import { WordProgress } from '~/entities/wordProgress.entity'
 import { DatabaseService } from './database.service'
 import { BadRequestError, NotFoundRequestError } from '~/core/error.response'
+import { DEFAULT_LIMIT, DEFAULT_PAGE } from '~/constants/pagination'
 
 // Get database service for transactions
 const databaseService = DatabaseService.getInstance()
@@ -216,14 +217,24 @@ class WordProgressService {
     }
   }
 
-  getWordReview = async ({ userId }: { userId: number }) => {
+  getWordReview = async ({
+    userId,
+    page = DEFAULT_PAGE,
+    limit = DEFAULT_LIMIT
+  }: {
+    userId: number
+    page?: number
+    limit?: number
+  }) => {
+    const skip = (page - 1) * limit
+
     // Use Active Record pattern
-    const wordReview = await WordProgress.find({
+    const [wordReview, total] = await WordProgress.findAndCount({
       where: {
         user: {
           id: userId
-        },
-        nextReviewDate: LessThan(new Date(now()))
+        }
+        // nextReviewDate: LessThan(new Date(now()))
       },
       relations: ['word'],
       select: {
@@ -243,15 +254,24 @@ class WordProgressService {
           example: true,
           translateExample: true
         }
-      }
+      },
+      skip,
+      take: limit
     })
 
-    return wordReview.map((progress) => ({
+    const words = wordReview.map((progress) => ({
       word: progress.word,
       masteryLevel: progress.masteryLevel,
       reviewCount: progress.reviewCount,
       nextReviewDate: progress.nextReviewDate
     }))
+
+    return {
+      words,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit)
+    }
   }
 
   getSummary = async ({ userId }: { userId: number }) => {

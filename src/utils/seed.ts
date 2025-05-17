@@ -9,6 +9,7 @@ import { Topic } from '~/entities/topic.entity'
 import { topicSeedData } from '~/core/data/topic.data'
 import { Course } from '~/entities/courses.entity'
 import { courseSeedData } from '~/core/data/course.data'
+import { WordTopic } from '~/entities/wordTopic.entity'
 
 async function seedRole() {
   const count = await Role.count()
@@ -92,7 +93,26 @@ async function seedTopics() {
   if (!words) return
 
   console.log('✅ Seeded Topics successfully!')
-  return await Topic.save(topicSeedData(words))
+  const topics = await Topic.save(topicSeedData(words))
+
+  //save topic word
+  for (let i = 0; i < topics.length; i++) {
+    const topic = topics[i]
+    const wordIds = (topic.wordTopics as WordTopic[]).map((item) => item.wordId) || []
+
+    // Handle word associations
+    if (wordIds && wordIds.length > 0) {
+      // Create word-topic associations in bulk
+      const wordTopics = wordIds.map((wordId) => ({
+        topicId: topic.id as number,
+        wordId: wordId
+      })) as WordTopic[]
+
+      await WordTopic.save(wordTopics)
+    }
+  }
+
+  return topics
 }
 
 async function seedCourse() {
