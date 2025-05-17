@@ -10,6 +10,7 @@ import { topicSeedData } from '~/core/data/topic.data'
 import { Course } from '~/entities/courses.entity'
 import { courseSeedData } from '~/core/data/course.data'
 import { WordTopic } from '~/entities/wordTopic.entity'
+import { CourseTopic } from '~/entities/courseTopic.entity'
 
 async function seedRole() {
   const count = await Role.count()
@@ -124,7 +125,22 @@ async function seedCourse() {
   const topics = await seedTopics()
   if (!topics) return
 
-  await Course.save(courseSeedData(topics))
+  const courses = await Course.save(courseSeedData(topics))
+
+  for (let index = 0; index < courses.length; index++) {
+    const course = courses[index]
+    const { courseTopics } = course
+    await CourseTopic.save(
+      courseTopics.map((item) => {
+        return {
+          ...item,
+          course: {
+            id: course.id
+          }
+        } as CourseTopic
+      })
+    )
+  }
   console.log('✅ Seeded Course successfully!')
 }
 

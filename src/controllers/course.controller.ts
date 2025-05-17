@@ -4,6 +4,7 @@ import { getCourseLevel } from '~/constants/course'
 import { CREATED, SuccessResponse } from '~/core/success.response'
 import { CreateCoursesReqBody } from '~/dto/req/course/createCourseBody.req'
 import { UpdateCourseBodyReq } from '~/dto/req/course/updateCourseBody,req'
+import { User } from '~/entities/user.entity'
 import { courseService } from '~/services/course.service'
 
 class CourseController {
@@ -24,9 +25,11 @@ class CourseController {
   }
 
   getAllCourses = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    const user = req.user as User
+
     new CREATED({
       message: 'Get all courses success',
-      metaData: await courseService.getAllCourse({
+      metaData: await courseService.getAllCourse(user, {
         ...req.query,
         ...req.parseQueryPagination,
         sort: req.sortParsed
@@ -72,16 +75,16 @@ class CourseController {
     }).send(res)
   }
   getCourseTopics = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
-    const courseId = parseInt(req.params?.id);
-
+    const courseId = parseInt(req.params?.id)
+    const user = req.user as User
     new SuccessResponse({
       message: 'Get course topics successful!',
-      metaData: await courseService.getCourseTopics({
+      metaData: await courseService.getCourseTopics(user, {
         courseId,
         ...req.parseQueryPagination,
         sort: req.sortParsed
       })
-    }).send(res);
+    }).send(res)
   }
 }
 

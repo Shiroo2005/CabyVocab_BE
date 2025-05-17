@@ -7,6 +7,9 @@ import { courseQueryReq } from '~/dto/req/course/courseQueryReq.req'
 import { unGetData } from '~/utils'
 import { BadRequestError } from '~/core/error.response'
 import { DatabaseService } from './database.service'
+import { CompletedTopic } from '~/entities/completedTopic.entity'
+import { In } from 'typeorm'
+import { User } from '~/entities/user.entity'
 
 class CourseService {
   createCourse = async (coursesBody: CourseBody[]) => {
@@ -127,13 +130,16 @@ class CourseService {
     }
   }
 
-  getAllCourse = async ({ page = 1, limit = 10, title, target, level, description, sort }: courseQueryReq) => {
+  getAllCourse = async (
+    user: User,
+    { page = 1, limit = 10, title, target, level, description, sort }: courseQueryReq
+  ) => {
     const skip = (page - 1) * limit
 
     const [courses, total] = await Course.findAndCount({
       skip,
       take: limit,
-      relations: ['courseTopics'],
+      relations: ['courseTopics', 'courseTopics.topic'],
       where: {
         title,
         target,
@@ -147,12 +153,24 @@ class CourseService {
         target: true,
         level: true,
         description: true,
-        courseTopics: true
+        courseTopics: {
+          id: true,
+          topic: {
+            id: true
+          }
+        }
       }
     })
 
     return {
-      courses,
+      courses: await Promise.all(
+        courses.map(async (course) => {
+          return {
+            ...course,
+            alreadyLearned: await this.alreadyLearnCourse(user.id as number, course)
+          }
+        })
+      ),
       total,
       currentPage: page,
       totalPages: Math.ceil(total / limit)
@@ -242,17 +260,20 @@ class CourseService {
     return res
   }
 
-  getCourseTopics = async ({
-    courseId,
-    page = 1,
-    limit = 10,
-    sort
-  }: {
-    courseId: number
-    page?: number
-    limit?: number
-    sort?: any
-  }) => {
+  getCourseTopics = async (
+    user: User,
+    {
+      courseId,
+      page = 1,
+      limit = 10,
+      sort
+    }: {
+      courseId: number
+      page?: number
+      limit?: number
+      sort?: any
+    }
+  ) => {
     const skip = (page - 1) * limit
 
     // Find all course-topic relationships for this course
@@ -269,11 +290,32 @@ class CourseService {
       where: { course: { id: courseId } }
     })
 
+    const topicIds = courseTopics.map((item) => item.topic?.id as number)
+
+    //find topic complete by user
+    const completeTopics = await CompletedTopic.find({
+      where: {
+        topic: {
+          id: In(topicIds)
+        },
+        user: {
+          id: user.id
+        }
+      },
+      relations: ['topic']
+    })
+
     // Map the results to return topic data with display order
-    const topics = courseTopics.map((courseTopic) => ({
-      ...courseTopic.topic,
-      displayOrder: courseTopic.displayOrder
-    }))
+    const topics = courseTopics.map((courseTopic) => {
+      const alreadyLearned =
+        completeTopics.filter((completeTopic) => completeTopic.topic.id == (courseTopic.topic as Topic).id).length > 0
+
+      return {
+        ...courseTopic.topic,
+        displayOrder: courseTopic.displayOrder,
+        alreadyLearned
+      }
+    })
 
     return {
       topics,
@@ -281,6 +323,22 @@ class CourseService {
       currentPage: page,
       totalPages: Math.ceil(total / limit)
     }
+  }
+
+  alreadyLearnCourse = async (userId: number, course: Course) => {
+    //find complete topic in course with user
+    const completeTopics = CompletedTopic.find({
+      where: {
+        topic: {
+          id: In(course.courseTopics.map((item) => item.topic?.id))
+        },
+        user: {
+          id: userId
+        }
+      }
+    })
+
+    return (await completeTopics).length === course.courseTopics.length
   }
 }
 
