@@ -99,12 +99,12 @@ class ExerciseController {
     req: Request<ParamsDictionary, any, { content: string; parentId: number }>,
     res: Response
   ) => {
-    const parentId = parseInt(req.params?.parentId)
+    const parentId = req.params?.parentId == 'null' ? null : parseInt(req.params?.parentId)
     const topicId = parseInt(req.params?.id)
 
     return new SuccessResponse({
       message: 'Get child comment by id successful!',
-      metaData: await commentService.findChildComment(parentId, topicId)
+      metaData: await commentService.findChildComment(topicId, parentId)
     }).send(res)
   }
 

@@ -9,7 +9,8 @@ export const getChildCommentValidation = (req: Request, res: Response, next: Nex
   if (id && !isValidNumber(id)) {
     throw new BadRequestError({ message: 'Id invalid!' })
   }
-  if (parentId && !isValidNumber(parentId)) {
+
+  if (parentId != 'null' && !isValidNumber(parentId)) {
     throw new BadRequestError({ message: 'Parent id invalid!' })
   }
 

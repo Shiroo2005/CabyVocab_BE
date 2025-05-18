@@ -14,6 +14,7 @@ import { Quiz } from '~/entities/quiz.entity'
 import { User } from '~/entities/user.entity'
 import { Vote } from '~/entities/vote.entity'
 import { generatedUuid, unGetData } from '~/utils'
+import { commentService } from './comment.service'
 
 class ExerciseService {
   createNewFolder = async ({ name }: CreateFolderBodyReq, userId: number) => {
@@ -170,11 +171,15 @@ class ExerciseService {
       await this.findNumberCommentByFolderId(id)
     ])
 
+    //get comment
+    const comments = await commentService.findChildComment(id, null)
+
     return {
       ...foundFolder,
       voteCount,
       commentCount,
-      isAlreadyVote
+      isAlreadyVote,
+      comments
     }
   }
 

@@ -1,14 +1,29 @@
 import { Comment } from '~/entities/comment.entity'
 
 class CommentService {
-  findChildComment = async (parentId: number, folderId: number) => {
-    const childComments = await Comment.findBy({
-      parentComment: {
-        id: parentId
+  findChildComment = async (folderId: number, parentId: number | null) => {
+    const where: any = {
+      folder: { id: folderId }
+    }
+
+    if (parentId !== null) {
+      where.parentComment = { id: parentId }
+    }
+
+    const childComments = await Comment.find({
+      where,
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        createdBy: {
+          id: true
+        },
+        parentComment: {
+          id: true
+        }
       },
-      folder: {
-        id: folderId
-      }
+      relations: ['createdBy']
     })
 
     return childComments
