@@ -1,4 +1,5 @@
 import { Like } from 'typeorm'
+import { BadRequestError } from '~/core/error.response'
 import { CreateUserBodyReq, UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
 import { userQueryReq } from '~/dto/req/user/userQuery.req'
 import { Role } from '~/entities/role.entity'
@@ -143,6 +144,21 @@ class UserService {
 
   restoreUser = async (id: number) => {
     return User.getRepository().restore(id)
+  }
+
+  updateBalance = async (userId: number, increaseBalance: number) => {
+    const foundUser = await User.findOne({
+      where: {
+        id: userId
+      }
+    })
+
+    if (!foundUser) throw new BadRequestError({ message: 'User not found' })
+
+    //update balance
+    foundUser.balance += increaseBalance
+
+    foundUser.save()
   }
 }
 

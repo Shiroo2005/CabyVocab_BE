@@ -1,4 +1,4 @@
-import { Equal, In, Like } from 'typeorm'
+import { Equal, FindOptionsOrder, In, Like } from 'typeorm'
 import { lengthCode } from '~/constants/folder'
 import { BadRequestError } from '~/core/error.response'
 import { CreateCommentBodyReq } from '~/dto/req/exercise/comment/createCommentBody.req'
@@ -15,6 +15,8 @@ import { User } from '~/entities/user.entity'
 import { Vote } from '~/entities/vote.entity'
 import { generatedUuid, unGetData } from '~/utils'
 import { commentService } from './comment.service'
+import { Order } from '~/entities/order.entity'
+import { OrderQueryReq } from '~/dto/req/exercise/order/orderQuery.req'
 
 class ExerciseService {
   createNewFolder = async ({ name, price }: CreateFolderBodyReq, userId: number) => {
@@ -31,7 +33,7 @@ class ExerciseService {
   }
 
   checkOwn = async (userId: number, folderId: number) => {
-    if (folderId != userId) throw new BadRequestError({ message: 'Can not update this folder!' })
+    if (folderId != userId) throw new BadRequestError({ message: 'User not owner for this folder!' })
   }
 
   getAllFolder = async (userId: number, { page = 1, limit = 10, name, sort, code }: folderQueryReq) => {
@@ -334,6 +336,48 @@ class ExerciseService {
         id
       }
     })
+  }
+
+  getOrderHistoryByExerciseId = async (
+    userId: number,
+    id: number,
+    { page = 1, limit = 10, bankName = '', email = '', username = '', sort }: OrderQueryReq
+  ) => {
+    const skip = (page - 1) * limit
+
+    const [orders, total] = await Order.findAndCount({
+      where: {
+        id,
+        createdBy: { id: userId },
+        bankTranNo: Like(`%${bankName}%`),
+        ...(username && { 'createdBy.username': Like(`%${username}%`) }),
+        ...(email && { 'createdBy.email': Like(`%${email}%`) })
+      },
+      relations: ['createdBy'],
+      skip,
+      take: limit,
+      select: {
+        id: true,
+        amount: true,
+        bankTranNo: true,
+        nameBank: true,
+        status: true,
+        createdBy: {
+          id: true,
+          avatar: true,
+          username: true,
+          email: true
+        }
+      },
+      order: sort
+    })
+
+    return {
+      orders,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit)
+    }
   }
 }
 

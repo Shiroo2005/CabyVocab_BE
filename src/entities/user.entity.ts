@@ -60,6 +60,9 @@ export class User extends BaseEntity {
   @ManyToOne(() => Role, (role) => role.users)
   role?: Role
 
+  @Column('double', { default: 0 })
+  balance: number
+
   @DeleteDateColumn()
   deletedAt?: Date
 

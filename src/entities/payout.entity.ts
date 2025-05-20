@@ -9,35 +9,28 @@ import {
   UpdateDateColumn
 } from 'typeorm'
 import { User } from './user.entity'
-import { OrderStatus } from '~/constants/order'
 import { Folder } from './folder.entity'
-import { now } from 'lodash'
+import { PayoutStatus } from '~/constants/transaction'
 
 @Entity()
-export class Order extends BaseEntity {
+export class Payout extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number
 
   @Column('double')
   amount: number
 
-  @Column('varchar', { default: OrderStatus.PENDING })
-  status: OrderStatus
+  @Column('varchar', { default: PayoutStatus.PERNDING })
+  status: PayoutStatus
 
   @ManyToOne(() => User)
   createdBy: User
 
-  @ManyToOne(() => Folder)
-  folder: Folder
-
-  @Column('varchar', { default: 'N/A' })
+  @Column('varchar')
   bankTranNo: string
 
-  @Column('varchar', { default: 'N/A' })
+  @Column('varchar')
   nameBank: string
-
-  @Column('datetime', { default: () => 'CURRENT_TIMESTAMP' })
-  payDate: Date
 
   @DeleteDateColumn()
   deletedAt?: Date
@@ -47,6 +40,4 @@ export class Order extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt?: Date
-
-  static allowSortList = ['id', 'amount', 'status']
 }

@@ -13,7 +13,7 @@ class VnPayService {
       // req.ip,
       vnp_TxnRef: order.id.toString(),
       vnp_OrderInfo: `Thanh toan don hang ${order.id}`,
-      vnp_ReturnUrl: 'http://localhost:3000/vnpay-return', // Đường dẫn nên là của frontend
+      vnp_ReturnUrl: 'http://localhost:8081/orders/vnpay-return', // Đường dẫn nên là của frontend
       vnp_Locale: VnpLocale.VN
     })
 

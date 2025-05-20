@@ -47,6 +47,9 @@ export const checkQueryMiddleware = ({
       page: toNumberWithDefaultValue(req.query.page, defaultPage)
     }
 
+    if ((req.parseQueryPagination.page as number) <= 0) throw new BadRequestError({ message: 'Page invalid!' })
+    if ((req.parseQueryPagination.limit as number) <= 0) throw new BadRequestError({ message: 'Limit invalid!' })
+
     //check max limit & max page
     if ((req.parseQueryPagination.limit as number) > maxLimit) req.parseQueryPagination.limit = defaultLimit
     next()

@@ -55,6 +55,7 @@
     "bcrypt": "^5.1.1",
     "class-validator": "^0.14.1",
     "compression": "^1.8.0",
+    "date-fns": "^4.1.0",
     "deepmerge": "^4.3.1",
     "dotenv": "^16.4.7",
     "ejs": "^3.1.10",

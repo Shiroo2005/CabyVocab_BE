@@ -1,6 +1,7 @@
 import express from 'express'
 import { exerciseController } from '~/controllers/exercise.controller'
 import { Folder } from '~/entities/folder.entity'
+import { Order } from '~/entities/order.entity'
 import { accessTokenValidation } from '~/middlewares/auth.middlewares'
 import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '~/middlewares/common.middlewares'
 import { createCommentValidation } from '~/middlewares/exercise/comment/createComment.middlewares'
@@ -52,6 +53,27 @@ exerciseRouter.get(
   wrapRequestHandler(exerciseController.getChildComment)
 )
 
+/**
+ * @description : get order history list
+ * @method : GET
+ * @path : /order-history/:id
+ *  * @query : {limit: number, page:number, bankName, sort: string}
+ * sort like id | -id
+ * sort field must be in [id, fullName, username, email]
+ * filter field must be in [
+ *  
+    username?: string
+    roleName?: string
+    status?: UserStatus
+ * ]
+ */
+exerciseRouter.get(
+  '/order-history/:id',
+  checkQueryMiddleware(),
+  wrapRequestHandler(parseSort({ allowSortList: Order.allowSortList })),
+  wrapRequestHandler(exerciseController.getOrderHistoryFolder)
+)
+
 //POST
 /**
  * @description : Create new folder
@@ -59,6 +81,7 @@ exerciseRouter.get(
  * @path : /:new-folder
  * @body : {
  *  name: string
+ *  price: number
  * }
  */
 exerciseRouter.post('/new-folder', createExerciseValidation, wrapRequestHandler(exerciseController.create))

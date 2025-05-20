@@ -10,6 +10,7 @@ import { emailRouter } from './email.route'
 import uploadRouter from './upload.route'
 import { userProgressRouter } from './userProgress.route'
 import { exerciseRouter } from './exercise.route'
+import { orderRouter } from './order.route'
 
 const router = express.Router()
 
@@ -24,5 +25,6 @@ router.use('/progress', userProgressRouter)
 router.use('/emails', emailRouter)
 router.use('/upload', uploadRouter)
 router.use('/exercise', exerciseRouter)
+router.use('/orders', orderRouter)
 
 export default router

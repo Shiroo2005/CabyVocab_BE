@@ -214,6 +214,8 @@ export const accessTokenValidation = validate(
                 ;(req as Request).user = foundUser as User
                 ;(req as Request).decodedAuthorization = decodedAuthorization
               }
+
+              console.log(foundUser)
             } catch (error) {
               if (error instanceof jwt.TokenExpiredError) {
                 throw new BadRequestError({

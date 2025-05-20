@@ -111,6 +111,20 @@ class ExerciseController {
     }).send(res)
   }
 
+  getOrderHistoryFolder = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    const user = req.user as User
+
+    const id = parseInt(req.params.id)
+
+    return new SuccessResponse({
+      message: 'Get order history successful!',
+      metaData: await exerciseService.getOrderHistoryByExerciseId(user.id as number, id, {
+        ...req.query,
+        sort: req.sortParsed
+      })
+    }).send(res)
+  }
+
   updateComment = async (req: Request<ParamsDictionary, any, { content: string; parentId: number }>, res: Response) => {
     const folderId = parseInt(req.params?.id)
 
@@ -149,8 +163,6 @@ class ExerciseController {
     const user = req.user as User
 
     const ipUser = getIpUser(req) || '127.0.0.1'
-
-    console.log(ipUser)
 
     const folderId = parseInt(req.params.id)
 

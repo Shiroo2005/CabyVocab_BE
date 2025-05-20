@@ -1,4 +1,3 @@
-import { CreateOrderFolderBodyReq } from '~/dto/req/exercise/order/createOrderFolderBody.req'
 import { exerciseService } from './exercise.service'
 import { BadRequestError } from '~/core/error.response'
 import { Order } from '~/entities/order.entity'
@@ -6,6 +5,9 @@ import { Folder } from '~/entities/folder.entity'
 import { User } from '~/entities/user.entity'
 import { vnPayService } from './vnpay.service'
 import { OrderStatus } from '~/constants/order'
+import { parse } from 'date-fns'
+import { VerifyReturnUrl } from 'vnpay'
+import { userService } from './user.service'
 
 class OrderService {
   //create order + return url vnpay
@@ -13,6 +15,19 @@ class OrderService {
     //find order
     const foundFolder = await exerciseService.findFolderById(folderId)
     if (!foundFolder) throw new BadRequestError({ message: 'Folder id invalid!' })
+
+    //check if order was create before
+    const foundOrder = await Order.findOne({
+      where: {
+        folder: {
+          id: folderId
+        },
+        createdBy: {
+          id: userId
+        }
+      }
+    })
+    if (foundOrder) throw new BadRequestError({ message: 'Order was exits' })
 
     //create order
     const order = await this.createOrder({ folder: foundFolder, userId })
@@ -49,6 +64,33 @@ class OrderService {
     order.amount = folder.price
 
     return await order.save()
+  }
+
+  updateOrder = async ({ isSuccess, vnp_BankCode, vnp_BankTranNo, vnp_PayDate, vnp_TxnRef }: VerifyReturnUrl) => {
+    //update status
+
+    const foundOrder = await Order.findOne({
+      where: {
+        id: parseInt(vnp_TxnRef)
+      },
+      relations: ['folder', 'folder.createdBy']
+    })
+
+    if (!foundOrder) throw new BadRequestError({ message: 'Order not exist!' })
+    if (isSuccess) {
+      //update order
+
+      foundOrder.bankTranNo = vnp_BankTranNo as string
+      foundOrder.nameBank = vnp_BankCode as string
+      foundOrder.status = OrderStatus.SUCCESS
+      foundOrder.payDate = parse(vnp_PayDate as string, 'yyyyMMddHHmmss', new Date())
+      foundOrder.save()
+
+      //update balance
+      await userService.updateBalance(foundOrder.folder.createdBy.id as number, foundOrder.amount)
+    }
+
+    return foundOrder
   }
 }
 
