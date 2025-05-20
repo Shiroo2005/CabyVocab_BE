@@ -24,6 +24,8 @@ DB_HOST=localhost
 
 # Server URL
 HOST_URL=
+HOST_FE=
+
 
 # JWT
 JWT_ACCESS_SECRET=
@@ -35,4 +37,9 @@ JWT_REFRESH_EXPIRE_TIME=7d
 # Email
 RESEND_API_KEY=re_dgTGCpsg_L7kKahscVMwF5R1uQA8uHDVB
 FROM_EMAIL=noreply@astrovocab.id.vn
+
+#VNPAY
+VNPAY_TMnCode=
+VNPAY_SecretKey=
+VNPAY_HOST=
 ```
