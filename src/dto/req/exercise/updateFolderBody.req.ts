@@ -5,4 +5,5 @@ export class updateFolderBodyReq {
   name?: string
   quizzes?: quizBodyData[]
   flashCards?: flashCardBody[]
+  price?: number
 }

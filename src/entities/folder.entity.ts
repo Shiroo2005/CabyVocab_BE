@@ -1,6 +1,5 @@
 import {
   BaseEntity,
-  BeforeInsert,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
@@ -13,8 +12,6 @@ import {
 import { User } from './user.entity'
 import { Quiz } from './quiz.entity'
 import { FlashCard } from './flashCard.entity'
-import { generatedUuid } from '~/utils'
-import { lengthCode } from '~/constants/folder'
 import { Vote } from './vote.entity'
 import { Comment } from './comment.entity'
 
@@ -28,6 +25,9 @@ export class Folder extends BaseEntity {
 
   @Column('nvarchar')
   name: string
+
+  @Column('double')
+  price: number
 
   @ManyToOne(() => User)
   createdBy: User

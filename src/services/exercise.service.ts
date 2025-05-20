@@ -17,13 +17,14 @@ import { generatedUuid, unGetData } from '~/utils'
 import { commentService } from './comment.service'
 
 class ExerciseService {
-  createNewFolder = async ({ name }: CreateFolderBodyReq, userId: number) => {
+  createNewFolder = async ({ name, price }: CreateFolderBodyReq, userId: number) => {
     const createdFolder = await Folder.save({
       name,
       code: generatedUuid(lengthCode),
       createdBy: {
         id: userId
-      }
+      },
+      price
     })
 
     return createdFolder
@@ -75,7 +76,7 @@ class ExerciseService {
     }
   }
 
-  updateFolder = async (user: User, id: number, { name, quizzes, flashCards }: updateFolderBodyReq) => {
+  updateFolder = async (user: User, id: number, { name, quizzes, flashCards, price }: updateFolderBodyReq) => {
     const foundFolder = await Folder.findOne({
       where: {
         id
@@ -104,6 +105,8 @@ class ExerciseService {
 
     //mapping data
     if (name) foundFolder.name = name
+
+    if (price) foundFolder.price = price
 
     //if quizzes was update
     if (quizzes) {
@@ -322,6 +325,14 @@ class ExerciseService {
     this.checkOwnComment(userId, commentId)
     return await Comment.getRepository().softDelete({
       id: commentId
+    })
+  }
+
+  findFolderById = async (id: number) => {
+    return Folder.findOne({
+      where: {
+        id
+      }
     })
   }
 }

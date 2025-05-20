@@ -64,6 +64,16 @@ exerciseRouter.get(
 exerciseRouter.post('/new-folder', createExerciseValidation, wrapRequestHandler(exerciseController.create))
 
 /**
+ * @description : Create new order
+ * @method : POST
+ * @path : /:new-order
+ * @body : {
+ *  name: string
+ * }
+ */
+exerciseRouter.post('/:id/new-order', wrapRequestHandler(exerciseController.createOrderExercise))
+
+/**
  * @description : Vote topic
  * @method : POST
  * @path : /:id/like

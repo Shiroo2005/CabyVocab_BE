@@ -1,3 +1,4 @@
+import { Request } from 'express'
 import _, { parseInt, toNumber } from 'lodash'
 import { nanoid } from 'nanoid'
 
@@ -34,6 +35,10 @@ export const unGetData = ({ fields = [], object = {} }: { fields?: Array<string>
 
 export const isValidEnumValue = <T extends object>(value: string, enumObj: T): boolean => {
   return Object.values(enumObj).includes(value as T[keyof T])
+}
+
+export const getIpUser = (req: Request) => {
+  return req.headers['x-forwarded-for'] as string
 }
 
 // // export const unGetSelectData = (select = []) => {

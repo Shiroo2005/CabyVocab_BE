@@ -3,10 +3,13 @@ import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
 import { BadRequestError } from '~/core/error.response'
 import { CREATED, SuccessResponse } from '~/core/success.response'
 import { CreateFolderBodyReq } from '~/dto/req/exercise/createFolderBody.req'
+import { CreateOrderFolderBodyReq } from '~/dto/req/exercise/order/createOrderFolderBody.req'
 import { updateFolderBodyReq } from '~/dto/req/exercise/updateFolderBody.req'
 import { User } from '~/entities/user.entity'
 import { commentService } from '~/services/comment.service'
 import { exerciseService } from '~/services/exercise.service'
+import { orderService } from '~/services/order.service'
+import { getIpUser } from '~/utils'
 
 class ExerciseController {
   create = async (req: Request<ParamsDictionary, any, CreateFolderBodyReq>, res: Response, next: NextFunction) => {
@@ -139,6 +142,21 @@ class ExerciseController {
     return new SuccessResponse({
       message: 'Delete comment successful!',
       metaData: await exerciseService.deleteCommentFolder(user.id as number, commentId)
+    }).send(res)
+  }
+
+  createOrderExercise = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    const user = req.user as User
+
+    const ipUser = getIpUser(req) || '127.0.0.1'
+
+    console.log(ipUser)
+
+    const folderId = parseInt(req.params.id)
+
+    return new SuccessResponse({
+      message: 'Create new order successful!',
+      metaData: await orderService.createNewOrderFolder(user.id as number, folderId, ipUser)
     }).send(res)
   }
 }
