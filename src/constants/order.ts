@@ -3,3 +3,5 @@ export enum OrderStatus {
   FAILED,
   PENDING
 }
+
+export const PROFIT_RATE = 0.2

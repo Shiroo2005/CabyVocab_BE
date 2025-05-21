@@ -4,10 +4,11 @@ import { Order } from '~/entities/order.entity'
 import { Folder } from '~/entities/folder.entity'
 import { User } from '~/entities/user.entity'
 import { vnPayService } from './vnpay.service'
-import { OrderStatus } from '~/constants/order'
+import { OrderStatus, PROFIT_RATE } from '~/constants/order'
 import { parse } from 'date-fns'
 import { VerifyReturnUrl } from 'vnpay'
 import { userService } from './user.service'
+import { systemEarningService } from './systemEarning.service'
 
 class OrderService {
   //create order + return url vnpay
@@ -86,11 +87,19 @@ class OrderService {
       foundOrder.payDate = parse(vnp_PayDate as string, 'yyyyMMddHHmmss', new Date())
       foundOrder.save()
 
-      //update balance
-      await userService.updateBalance(foundOrder.folder.createdBy.id as number, foundOrder.amount)
+      await this.updateSystemEarningAndBalanceUser(foundOrder.amount, foundOrder)
     }
 
     return foundOrder
+  }
+
+  updateSystemEarningAndBalanceUser = async (amount: number, foundOrder: Order) => {
+    const systemEarningAmount = amount * PROFIT_RATE
+    return await Promise.all([
+      //update balance
+      await userService.updateBalance(foundOrder.folder.createdBy.id as number, foundOrder.amount),
+      systemEarningService.addAmount(systemEarningAmount, foundOrder.id)
+    ])
   }
 }
 

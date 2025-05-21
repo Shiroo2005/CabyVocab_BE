@@ -49,9 +49,15 @@ class ExerciseService {
       select: {
         id: true,
         name: true,
-        createdBy: true,
+        createdBy: {
+          id: true,
+          username: true,
+          avatar: true,
+          email: true
+        },
         code: true
-      }
+      },
+      relations: ['createdBY']
     })
 
     const data = await Promise.all(
@@ -146,11 +152,12 @@ class ExerciseService {
   }
 
   getFolderById = async (userId: number, id: number) => {
+    if (!this.isAbleToUseFolder) throw new BadRequestError({ message: 'User can not able to use this folder' })
     const foundFolder = await Folder.findOne({
       where: {
         id
       },
-      relations: ['flashCards', 'quizzes'],
+      relations: ['flashCards', 'quizzes', 'createdBy'],
       select: {
         id: true,
         name: true,
@@ -166,6 +173,12 @@ class ExerciseService {
           id: true,
           question: true,
           title: true
+        },
+        createdBy: {
+          id: true,
+          avatar: true,
+          email: true,
+          username: true
         }
       }
     })
@@ -378,6 +391,28 @@ class ExerciseService {
       currentPage: page,
       totalPages: Math.ceil(total / limit)
     }
+  }
+
+  isAbleToUseFolder = async (folderId: number, userId: number) => {
+    const folder = await Folder.findOneBy({ id: folderId })
+    if (folder) {
+      //free
+      if (folder.price == 0) return true
+
+      //not free
+      const order = await Order.findOneBy({
+        createdBy: {
+          id: userId
+        },
+        folder: {
+          id: folderId
+        }
+      })
+
+      if (!order) return false
+    }
+
+    return true
   }
 }
 
