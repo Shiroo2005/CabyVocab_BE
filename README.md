@@ -39,7 +39,7 @@ RESEND_API_KEY=re_dgTGCpsg_L7kKahscVMwF5R1uQA8uHDVB
 FROM_EMAIL=noreply@astrovocab.id.vn
 
 #VNPAY
-VNPAY_TMnCode=
-VNPAY_SecretKey=
-VNPAY_HOST=
+VNPAY_TMnCode=9E7HMEQ7
+VNPAY_SecretKey=FC52YAR0TS03CVGB8NKE4X61XNXB3069
+VNPAY_HOST=https://sandbox.vnpayment.vn
 ```
