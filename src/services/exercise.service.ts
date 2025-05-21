@@ -1,4 +1,4 @@
-import { Equal, In, Like } from 'typeorm'
+import { Equal, FindOptionsOrder, In, Like } from 'typeorm'
 import { lengthCode } from '~/constants/folder'
 import { BadRequestError } from '~/core/error.response'
 import { CreateCommentBodyReq } from '~/dto/req/exercise/comment/createCommentBody.req'
@@ -15,22 +15,25 @@ import { User } from '~/entities/user.entity'
 import { Vote } from '~/entities/vote.entity'
 import { generatedUuid, unGetData } from '~/utils'
 import { commentService } from './comment.service'
+import { Order } from '~/entities/order.entity'
+import { OrderQueryReq } from '~/dto/req/exercise/order/orderQuery.req'
 
 class ExerciseService {
-  createNewFolder = async ({ name }: CreateFolderBodyReq, userId: number) => {
+  createNewFolder = async ({ name, price }: CreateFolderBodyReq, userId: number) => {
     const createdFolder = await Folder.save({
       name,
       code: generatedUuid(lengthCode),
       createdBy: {
         id: userId
-      }
+      },
+      price
     })
 
     return createdFolder
   }
 
   checkOwn = async (userId: number, folderId: number) => {
-    if (folderId != userId) throw new BadRequestError({ message: 'Can not update this folder!' })
+    if (folderId != userId) throw new BadRequestError({ message: 'User not owner for this folder!' })
   }
 
   getAllFolder = async (userId: number, { page = 1, limit = 10, name, sort, code }: folderQueryReq) => {
@@ -46,9 +49,15 @@ class ExerciseService {
       select: {
         id: true,
         name: true,
-        createdBy: true,
+        createdBy: {
+          id: true,
+          username: true,
+          avatar: true,
+          email: true
+        },
         code: true
-      }
+      },
+      relations: ['createdBY']
     })
 
     const data = await Promise.all(
@@ -75,7 +84,7 @@ class ExerciseService {
     }
   }
 
-  updateFolder = async (user: User, id: number, { name, quizzes, flashCards }: updateFolderBodyReq) => {
+  updateFolder = async (user: User, id: number, { name, quizzes, flashCards, price }: updateFolderBodyReq) => {
     const foundFolder = await Folder.findOne({
       where: {
         id
@@ -104,6 +113,8 @@ class ExerciseService {
 
     //mapping data
     if (name) foundFolder.name = name
+
+    if (price) foundFolder.price = price
 
     //if quizzes was update
     if (quizzes) {
@@ -141,11 +152,13 @@ class ExerciseService {
   }
 
   getFolderById = async (userId: number, id: number) => {
+    if (!(await this.isAbleToUseFolder(id, userId)))
+      throw new BadRequestError({ message: 'User can not able to use this folder' })
     const foundFolder = await Folder.findOne({
       where: {
         id
       },
-      relations: ['flashCards', 'quizzes'],
+      relations: ['flashCards', 'quizzes', 'createdBy'],
       select: {
         id: true,
         name: true,
@@ -161,6 +174,12 @@ class ExerciseService {
           id: true,
           question: true,
           title: true
+        },
+        createdBy: {
+          id: true,
+          avatar: true,
+          email: true,
+          username: true
         }
       }
     })
@@ -323,6 +342,79 @@ class ExerciseService {
     return await Comment.getRepository().softDelete({
       id: commentId
     })
+  }
+
+  findFolderById = async (id: number) => {
+    return Folder.findOne({
+      where: {
+        id
+      }
+    })
+  }
+
+  getOrderHistoryByExerciseId = async (
+    userId: number,
+    id: number,
+    { page = 1, limit = 10, bankName = '', email = '', username = '', sort }: OrderQueryReq
+  ) => {
+    const skip = (page - 1) * limit
+
+    const [orders, total] = await Order.findAndCount({
+      where: {
+        id,
+        createdBy: { id: userId },
+        bankTranNo: Like(`%${bankName}%`),
+        ...(username && { 'createdBy.username': Like(`%${username}%`) }),
+        ...(email && { 'createdBy.email': Like(`%${email}%`) })
+      },
+      relations: ['createdBy'],
+      skip,
+      take: limit,
+      select: {
+        id: true,
+        amount: true,
+        bankTranNo: true,
+        nameBank: true,
+        status: true,
+        createdBy: {
+          id: true,
+          avatar: true,
+          username: true,
+          email: true
+        }
+      },
+      order: sort
+    })
+
+    return {
+      orders,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit)
+    }
+  }
+
+  isAbleToUseFolder = async (folderId: number, userId: number) => {
+    const folder = await Folder.findOneBy({ id: folderId })
+
+    if (folder) {
+      //free
+      if (folder.price == 0) return true
+
+      //not free
+      const order = await Order.findOneBy({
+        createdBy: {
+          id: userId
+        },
+        folder: {
+          id: folderId
+        }
+      })
+
+      if (!order) return false
+    }
+
+    return true
   }
 }
 

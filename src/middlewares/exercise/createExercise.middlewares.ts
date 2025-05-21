@@ -6,6 +6,9 @@ export const createExerciseValidation = validate(
   checkSchema({
     name: {
       ...isString('name')
+    },
+    price: {
+      isNumeric: true
     }
   })
 )

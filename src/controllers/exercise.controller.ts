@@ -7,6 +7,8 @@ import { updateFolderBodyReq } from '~/dto/req/exercise/updateFolderBody.req'
 import { User } from '~/entities/user.entity'
 import { commentService } from '~/services/comment.service'
 import { exerciseService } from '~/services/exercise.service'
+import { orderService } from '~/services/order.service'
+import { getIpUser } from '~/utils'
 
 class ExerciseController {
   create = async (req: Request<ParamsDictionary, any, CreateFolderBodyReq>, res: Response, next: NextFunction) => {
@@ -108,6 +110,20 @@ class ExerciseController {
     }).send(res)
   }
 
+  getOrderHistoryFolder = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    const user = req.user as User
+
+    const id = parseInt(req.params.id)
+
+    return new SuccessResponse({
+      message: 'Get order history successful!',
+      metaData: await exerciseService.getOrderHistoryByExerciseId(user.id as number, id, {
+        ...req.query,
+        sort: req.sortParsed
+      })
+    }).send(res)
+  }
+
   updateComment = async (req: Request<ParamsDictionary, any, { content: string; parentId: number }>, res: Response) => {
     const folderId = parseInt(req.params?.id)
 
@@ -139,6 +155,19 @@ class ExerciseController {
     return new SuccessResponse({
       message: 'Delete comment successful!',
       metaData: await exerciseService.deleteCommentFolder(user.id as number, commentId)
+    }).send(res)
+  }
+
+  createOrderExercise = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    const user = req.user as User
+
+    const ipUser = getIpUser(req) || '127.0.0.1'
+
+    const folderId = parseInt(req.params.id)
+
+    return new SuccessResponse({
+      message: 'Create new order successful!',
+      metaData: await orderService.createNewOrderFolder(user.id as number, folderId, ipUser)
     }).send(res)
   }
 }

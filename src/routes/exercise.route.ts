@@ -1,7 +1,9 @@
 import express from 'express'
+import { Resource } from '~/constants/access'
 import { exerciseController } from '~/controllers/exercise.controller'
 import { Folder } from '~/entities/folder.entity'
-import { accessTokenValidation } from '~/middlewares/auth.middlewares'
+import { Order } from '~/entities/order.entity'
+import { accessTokenValidation, checkPermission, checkVerifyUser } from '~/middlewares/auth.middlewares'
 import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '~/middlewares/common.middlewares'
 import { createCommentValidation } from '~/middlewares/exercise/comment/createComment.middlewares'
 import { getChildCommentValidation } from '~/middlewares/exercise/comment/getChildComment.middlewares'
@@ -14,6 +16,7 @@ export const exerciseRouter = express.Router()
 
 //accesstoken
 exerciseRouter.use(accessTokenValidation)
+exerciseRouter.use(checkVerifyUser)
 
 //GET
 /**
@@ -21,7 +24,12 @@ exerciseRouter.use(accessTokenValidation)
  * @method : GET
  * @path : /:id
  */
-exerciseRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(exerciseController.getById))
+exerciseRouter.get(
+  '/:id',
+  wrapRequestHandler(checkPermission('readAny', Resource.EXERCISE)),
+  checkIdParamMiddleware,
+  wrapRequestHandler(exerciseController.getById)
+)
 
 /**
  * @description : Get all exercise
@@ -36,6 +44,7 @@ exerciseRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(exerciseCo
  */
 exerciseRouter.get(
   '/',
+  wrapRequestHandler(checkPermission('readAny', Resource.EXERCISE)),
   checkQueryMiddleware(),
   wrapRequestHandler(parseSort({ allowSortList: Folder.allowSortList })),
   wrapRequestHandler(exerciseController.getAll)
@@ -52,6 +61,27 @@ exerciseRouter.get(
   wrapRequestHandler(exerciseController.getChildComment)
 )
 
+/**
+ * @description : get order history list
+ * @method : GET
+ * @path : /order-history/:id
+ *  * @query : {limit: number, page:number, bankName, sort: string}
+ * sort like id | -id
+ * sort field must be in [id, fullName, username, email]
+ * filter field must be in [
+ *  
+    username?: string
+    roleName?: string
+    status?: UserStatus
+ * ]
+ */
+exerciseRouter.get(
+  '/order-history/:id',
+  checkQueryMiddleware(),
+  wrapRequestHandler(parseSort({ allowSortList: Order.allowSortList })),
+  wrapRequestHandler(exerciseController.getOrderHistoryFolder)
+)
+
 //POST
 /**
  * @description : Create new folder
@@ -59,9 +89,20 @@ exerciseRouter.get(
  * @path : /:new-folder
  * @body : {
  *  name: string
+ *  price: number
  * }
  */
 exerciseRouter.post('/new-folder', createExerciseValidation, wrapRequestHandler(exerciseController.create))
+
+/**
+ * @description : Create new order
+ * @method : POST
+ * @path : /:new-order
+ * @body : {
+ *  name: string
+ * }
+ */
+exerciseRouter.post('/:id/new-order', wrapRequestHandler(exerciseController.createOrderExercise))
 
 /**
  * @description : Vote topic

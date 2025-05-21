@@ -6,7 +6,6 @@ import { Course } from '~/entities/courses.entity'
 import { courseController } from '~/controllers/course.controller'
 import { createCourseValidation } from '~/middlewares/course/createCourse.middlewares'
 import { updateCourseValidation } from '~/middlewares/course/updateCourse.middlewares'
-import { Topic } from '~/entities/topic.entity'
 
 const courseRouter = express.Router()
 

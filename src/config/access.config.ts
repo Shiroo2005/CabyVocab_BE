@@ -8,15 +8,16 @@ ac.grant(RoleName.USER)
   .updateOwn(Resource.USER)
   .readAny(Resource.COURSE)
   .readAny(Resource.TOPIC)
-
-  //premium user
-  .grant(RoleName.PREMIUM)
-  .extend(RoleName.USER)
-  .readAny(Resource.WORD)
+  .readAny(Resource.EXERCISE)
+  .updateOwn(Resource.EXERCISE)
+  .deleteOwn(Resource.EXERCISE)
+  .createOwn(Resource.EXERCISE)
 
   //admin
   .grant(RoleName.ADMIN)
+  .extend(RoleName.USER)
   .createAny(Resource.USER)
   .createAny(Resource.WORD)
   .createAny(Resource.TOPIC)
   .createAny(Resource.COURSE)
+  .readAny(Resource.SYSTEM_EARNING)

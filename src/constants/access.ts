@@ -4,10 +4,11 @@ export enum Resource {
   PERMISSION = 'permission',
   WORD = 'word',
   TOPIC = 'topic',
-  COURSE = 'course'
+  COURSE = 'course',
+  EXERCISE = 'exercise',
+  SYSTEM_EARNING = 'system earning'
 }
 export enum RoleName {
   USER = 'USER',
-  PREMIUM = 'PREMIUM',
   ADMIN = 'ADMIN'
 }

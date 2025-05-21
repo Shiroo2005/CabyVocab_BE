@@ -16,6 +16,7 @@ import { Permission, Query } from 'accesscontrol'
 import { ac } from '~/config/access.config'
 import { isRequired } from './common.middlewares'
 import { EmailVerificationToken } from '~/entities/emailVerificationToken.entity'
+import { UserStatus } from '~/constants/userStatus'
 
 async function checkUserExistence(userId: number) {
   const userRepository = await DatabaseService.getInstance().getRepository(User)
@@ -214,6 +215,8 @@ export const accessTokenValidation = validate(
                 ;(req as Request).user = foundUser as User
                 ;(req as Request).decodedAuthorization = decodedAuthorization
               }
+
+              console.log(foundUser)
             } catch (error) {
               if (error instanceof jwt.TokenExpiredError) {
                 throw new BadRequestError({
@@ -273,3 +276,13 @@ export const verifyEmailTokenValidation = validate(
     ['body']
   )
 )
+
+export const checkVerifyUser = (req: Request, res: Response, next: NextFunction) => {
+  const user = req.user as User
+  if (user.status == UserStatus.NOT_VERIFIED)
+    throw new BadRequestError({
+      message: 'User was not verified!'
+    })
+
+  next()
+}
