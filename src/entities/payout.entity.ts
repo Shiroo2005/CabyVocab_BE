@@ -27,7 +27,7 @@ export class Payout extends BaseEntity {
   createdBy: User
 
   @Column('varchar')
-  bankTranNo: string
+  numberAccount: string
 
   @Column('varchar')
   nameBank: string
@@ -40,4 +40,6 @@ export class Payout extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt?: Date
+
+  static sortAllowList = ['amount', 'status', 'nameBank']
 }

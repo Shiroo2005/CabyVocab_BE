@@ -12,6 +12,7 @@ import { userProgressRouter } from './userProgress.route'
 import { exerciseRouter } from './exercise.route'
 import { orderRouter } from './order.route'
 import { systemEarningRouter } from './systemEarning.route'
+import { payoutRouter } from './payout.route'
 
 const router = express.Router()
 
@@ -28,5 +29,6 @@ router.use('/upload', uploadRouter)
 router.use('/exercise', exerciseRouter)
 router.use('/orders', orderRouter)
 router.use('/system-earning', systemEarningRouter)
+router.use('/payout', payoutRouter)
 
 export default router

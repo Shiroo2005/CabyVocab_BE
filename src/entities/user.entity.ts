@@ -87,7 +87,7 @@ export class User extends BaseEntity {
   @BeforeInsert()
   @BeforeUpdate()
   hashPassword?() {
-    if (this.password) return
+    if (!this.password) return
     this.password = hashData(this.password)
   }
 

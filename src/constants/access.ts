@@ -6,7 +6,8 @@ export enum Resource {
   TOPIC = 'topic',
   COURSE = 'course',
   EXERCISE = 'exercise',
-  SYSTEM_EARNING = 'system earning'
+  SYSTEM_EARNING = 'system earning',
+  PAYOUT = 'payout'
 }
 export enum RoleName {
   USER = 'USER',

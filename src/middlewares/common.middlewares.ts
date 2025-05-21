@@ -148,3 +148,10 @@ export const parseSort = ({ allowSortList }: { allowSortList: string[] }) => {
     next()
   }
 }
+
+export function requireJsonContent(req: Request, res: Response, next: NextFunction) {
+  if (!req.is('application/json')) {
+    throw new BadRequestError({ message: 'Content-Type phải là application/json' })
+  }
+  next()
+}
