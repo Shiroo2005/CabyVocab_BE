@@ -1,7 +1,8 @@
 import express from 'express'
+import { Resource } from '~/constants/access'
 import { systemEarningController } from '~/controllers/systemEarning.controller'
 import { SystemEarning } from '~/entities/systemEarning.entity'
-import { accessTokenValidation } from '~/middlewares/auth.middlewares'
+import { accessTokenValidation, checkPermission } from '~/middlewares/auth.middlewares'
 import { checkQueryMiddleware, parseSort } from '~/middlewares/common.middlewares'
 import { wrapRequestHandler } from '~/utils/handler'
 
@@ -27,6 +28,7 @@ systemEarningRouter.use(accessTokenValidation)
  */
 systemEarningRouter.get(
   '/',
+  wrapRequestHandler(checkPermission('readAny', Resource.SYSTEM_EARNING)),
   checkQueryMiddleware(),
   wrapRequestHandler(parseSort({ allowSortList: SystemEarning.allowSortList })),
   wrapRequestHandler(systemEarningController.getSystemEarning)
