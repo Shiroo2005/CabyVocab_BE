@@ -152,7 +152,8 @@ class ExerciseService {
   }
 
   getFolderById = async (userId: number, id: number) => {
-    if (!this.isAbleToUseFolder) throw new BadRequestError({ message: 'User can not able to use this folder' })
+    if (!(await this.isAbleToUseFolder(id, userId)))
+      throw new BadRequestError({ message: 'User can not able to use this folder' })
     const foundFolder = await Folder.findOne({
       where: {
         id
@@ -395,6 +396,7 @@ class ExerciseService {
 
   isAbleToUseFolder = async (folderId: number, userId: number) => {
     const folder = await Folder.findOneBy({ id: folderId })
+
     if (folder) {
       //free
       if (folder.price == 0) return true

@@ -1,8 +1,9 @@
 import express from 'express'
+import { Resource } from '~/constants/access'
 import { exerciseController } from '~/controllers/exercise.controller'
 import { Folder } from '~/entities/folder.entity'
 import { Order } from '~/entities/order.entity'
-import { accessTokenValidation } from '~/middlewares/auth.middlewares'
+import { accessTokenValidation, checkPermission, checkVerifyUser } from '~/middlewares/auth.middlewares'
 import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '~/middlewares/common.middlewares'
 import { createCommentValidation } from '~/middlewares/exercise/comment/createComment.middlewares'
 import { getChildCommentValidation } from '~/middlewares/exercise/comment/getChildComment.middlewares'
@@ -15,6 +16,7 @@ export const exerciseRouter = express.Router()
 
 //accesstoken
 exerciseRouter.use(accessTokenValidation)
+exerciseRouter.use(checkVerifyUser)
 
 //GET
 /**
@@ -22,7 +24,12 @@ exerciseRouter.use(accessTokenValidation)
  * @method : GET
  * @path : /:id
  */
-exerciseRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(exerciseController.getById))
+exerciseRouter.get(
+  '/:id',
+  wrapRequestHandler(checkPermission('readAny', Resource.EXERCISE)),
+  checkIdParamMiddleware,
+  wrapRequestHandler(exerciseController.getById)
+)
 
 /**
  * @description : Get all exercise
@@ -37,6 +44,7 @@ exerciseRouter.get('/:id', checkIdParamMiddleware, wrapRequestHandler(exerciseCo
  */
 exerciseRouter.get(
   '/',
+  wrapRequestHandler(checkPermission('readAny', Resource.EXERCISE)),
   checkQueryMiddleware(),
   wrapRequestHandler(parseSort({ allowSortList: Folder.allowSortList })),
   wrapRequestHandler(exerciseController.getAll)

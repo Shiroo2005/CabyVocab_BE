@@ -8,7 +8,10 @@ class OrderController {
   vnpayReturn = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     const verify = vnpay.verifyReturnUrl(req.query as ReturnQueryFromVNPay)
     await orderService.updateOrder(verify)
-    res.redirect(`${process.env.HOST_FE}`)
+
+    console.log(process.env.HOST_FE)
+
+    return res.redirect(`${process.env.HOST_FE}`)
   }
 }
 
