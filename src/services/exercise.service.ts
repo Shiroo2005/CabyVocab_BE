@@ -55,7 +55,8 @@ class ExerciseService {
           avatar: true,
           email: true
         },
-        code: true
+        code: true,
+        price: true
       },
       relations: ['createdBY']
     })

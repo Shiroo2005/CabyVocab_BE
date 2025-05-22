@@ -233,8 +233,8 @@ class WordProgressService {
       where: {
         user: {
           id: userId
-        }
-        // nextReviewDate: LessThan(new Date(now()))
+        },
+        nextReviewDate: LessThan(new Date(now()))
       },
       relations: ['word'],
       select: {
@@ -256,7 +256,10 @@ class WordProgressService {
         }
       },
       skip,
-      take: limit
+      take: limit,
+      order: {
+        masteryLevel: 'ASC'
+      }
     })
 
     const words = wordReview.map((progress) => ({

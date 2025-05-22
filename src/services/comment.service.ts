@@ -17,7 +17,10 @@ class CommentService {
         content: true,
         createdAt: true,
         createdBy: {
-          id: true
+          id: true,
+          username: true,
+          email: true,
+          avatar: true
         },
         parentComment: {
           id: true
