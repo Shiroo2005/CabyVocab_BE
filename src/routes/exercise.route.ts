@@ -105,22 +105,6 @@ exerciseRouter.post('/new-folder', createExerciseValidation, wrapRequestHandler(
 exerciseRouter.post('/:id/new-order', wrapRequestHandler(exerciseController.createOrderExercise))
 
 /**
- * @description : Vote topic
- * @method : POST
- * @path : /:id/like
- * @header : Authorization
- */
-exerciseRouter.post('/:id/like', checkIdParamMiddleware, wrapRequestHandler(exerciseController.voteFolder))
-
-/**
- * @description : UnVote topic
- * @method : POST
- * @path : /:id/unlinke
- * @header : Authorization
- */
-exerciseRouter.post('/:id/unlike', checkIdParamMiddleware, wrapRequestHandler(exerciseController.unVoteFolder))
-
-/**
  * @description : Comment
  * @method : POST
  * @path : /:id/comment/
@@ -199,3 +183,11 @@ exerciseRouter.delete('/:id', checkIdParamMiddleware, wrapRequestHandler(exercis
  * @path : /:id
  */
 exerciseRouter.delete('/:id/comment/:commentId', wrapRequestHandler(exerciseController.deleteComment))
+
+/**
+ * @description : UnVote topic
+ * @method : DELETE
+ * @path : /:id/unlinke
+ * @header : Authorization
+ */
+exerciseRouter.delete('/:id/unlike', checkIdParamMiddleware, wrapRequestHandler(exerciseController.unVoteFolder))

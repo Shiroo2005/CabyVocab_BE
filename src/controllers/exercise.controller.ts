@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
+import { TargetType } from '~/constants/target'
 import { BadRequestError } from '~/core/error.response'
 import { CREATED, SuccessResponse } from '~/core/success.response'
 import { CreateFolderBodyReq } from '~/dto/req/exercise/createFolderBody.req'
@@ -8,6 +9,7 @@ import { User } from '~/entities/user.entity'
 import { commentService } from '~/services/comment.service'
 import { exerciseService } from '~/services/exercise.service'
 import { orderService } from '~/services/order.service'
+import { voteService } from '~/services/vote.service'
 import { getIpUser } from '~/utils'
 
 class ExerciseController {
@@ -71,7 +73,7 @@ class ExerciseController {
 
     return new SuccessResponse({
       message: 'Vote folder by id successful!',
-      metaData: await exerciseService.voteFolder({ userId: user.id as number, folderId })
+      metaData: await voteService.vote({ userId: user.id as number, targetId: folderId, targetType: TargetType.FOLDER })
     }).send(res)
   }
 
@@ -82,7 +84,11 @@ class ExerciseController {
 
     return new SuccessResponse({
       message: 'Unvote folder by id successful!',
-      metaData: await exerciseService.unVoteFolder({ userId: user.id as number, folderId })
+      metaData: await voteService.unVote({
+        userId: user.id as number,
+        targetId: folderId,
+        targetType: TargetType.FOLDER
+      })
     }).send(res)
   }
 
@@ -93,7 +99,12 @@ class ExerciseController {
 
     return new SuccessResponse({
       message: 'Create comment successful!',
-      metaData: await exerciseService.commentFolder({ userId: user.id as number, folderId, ...req.body })
+      metaData: await commentService.comment({
+        userId: user.id as number,
+        targetId: folderId,
+        targetType: TargetType.FOLDER,
+        ...req.body
+      })
     }).send(res)
   }
 
@@ -106,7 +117,7 @@ class ExerciseController {
 
     return new SuccessResponse({
       message: 'Get child comment by id successful!',
-      metaData: await commentService.findChildComment(topicId, parentId)
+      metaData: await commentService.findChildComment(topicId, parentId, TargetType.FOLDER)
     }).send(res)
   }
 
@@ -135,9 +146,10 @@ class ExerciseController {
 
     return new SuccessResponse({
       message: 'Update comment successful!',
-      metaData: await exerciseService.updateCommentFolder({
+      metaData: await commentService.updateComment({
         userId: user.id as number,
-        folderId,
+        targetId: folderId,
+        targetType: TargetType.FOLDER,
         commentId,
 
         ...req.body

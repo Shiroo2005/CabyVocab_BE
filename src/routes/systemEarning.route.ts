@@ -12,7 +12,7 @@ systemEarningRouter.use(accessTokenValidation)
 
 //GET
 /**
- * @description : get all courses
+ * @description : get all system earnings
  * @method : GET
  * @path : /
  * @Query :

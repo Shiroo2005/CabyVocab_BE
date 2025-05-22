@@ -1,19 +1,16 @@
-import { Equal, FindOptionsOrder, In, Like } from 'typeorm'
+import { In, Like } from 'typeorm'
 import { lengthCode } from '~/constants/folder'
 import { BadRequestError } from '~/core/error.response'
-import { CreateCommentBodyReq } from '~/dto/req/exercise/comment/createCommentBody.req'
-import { UpdateCommentBodyReq } from '~/dto/req/exercise/comment/updateCommentBody.req'
 import { CreateFolderBodyReq } from '~/dto/req/exercise/createFolderBody.req'
 import { folderQueryReq } from '~/dto/req/exercise/folderQuery.req'
 import { updateFolderBodyReq } from '~/dto/req/exercise/updateFolderBody.req'
-import { VoteFolder } from '~/dto/req/exercise/voteFolder.req'
 import { Comment } from '~/entities/comment.entity'
 import { FlashCard } from '~/entities/flashCard.entity'
 import { Folder } from '~/entities/folder.entity'
 import { Quiz } from '~/entities/quiz.entity'
 import { User } from '~/entities/user.entity'
 import { Vote } from '~/entities/vote.entity'
-import { generatedUuid, unGetData } from '~/utils'
+import { generatedUuid } from '~/utils'
 import { commentService } from './comment.service'
 import { Order } from '~/entities/order.entity'
 import { OrderQueryReq } from '~/dto/req/exercise/order/orderQuery.req'
@@ -46,7 +43,7 @@ class ExerciseService {
         name: Like(`%${name || ''}%`),
         code
       },
-      order: sort,
+      order: { ...sort, createdAt: 'desc' },
       select: {
         id: true,
         name: true,
@@ -254,88 +251,8 @@ class ExerciseService {
     })
   }
 
-  voteFolder = async ({ folderId, userId }: VoteFolder) => {
-    const foundVote = await Vote.findOne({
-      where: {
-        createdBy: { id: userId },
-        targetId: folderId
-      },
-      withDeleted: true
-    })
-
-    if (!foundVote) {
-      const newVote = Vote.create({
-        createdBy: { id: userId },
-        targetId: folderId,
-        targetType: TargetType.FOLDER
-      })
-
-      return unGetData({ fields: ['createdBy', 'folder'], object: await newVote.save() })
-    }
-
-    await Vote.getRepository().restore({ id: foundVote.id })
-    return foundVote
-  }
-
-  unVoteFolder = async ({ folderId, userId }: VoteFolder) => {
-    return await Vote.getRepository().softDelete({
-      createdBy: {
-        id: userId
-      },
-      targetId: folderId,
-      targetType: TargetType.FOLDER
-    })
-  }
-
-  commentFolder = async ({ content, folderId, userId, parentId = null }: CreateCommentBodyReq) => {
-    const comment = Comment.create({
-      content,
-      createdBy: { id: userId },
-      parentComment: {
-        id: parentId
-      } as Comment,
-      targetId: folderId,
-      targetType: TargetType.FOLDER
-    })
-
-    return await comment.save()
-  }
-
-  updateCommentFolder = async ({ content, folderId, userId, commentId }: UpdateCommentBodyReq) => {
-    const foundComment = await Comment.findOne({
-      where: {
-        id: commentId,
-        targetId: folderId,
-        targetType: TargetType.FOLDER,
-        createdBy: {
-          id: userId
-        }
-      }
-    })
-
-    if (!foundComment) throw new BadRequestError({ message: 'Comment not found!' })
-
-    //mapping
-    foundComment.content = content
-
-    return await foundComment.save()
-  }
-
-  async checkOwnComment(userId: number, commentId: number) {
-    const foundComment = await Comment.exists({
-      where: {
-        id: commentId,
-        createdBy: {
-          id: userId
-        }
-      }
-    })
-
-    if (!foundComment) throw new BadRequestError({ message: 'Unauthorize for this comment' })
-  }
-
   deleteCommentFolder = async (userId: number, commentId: number) => {
-    this.checkOwnComment(userId, commentId)
+    commentService.checkOwnComment(userId, commentId)
     return await Comment.getRepository().softDelete({
       id: commentId
     })

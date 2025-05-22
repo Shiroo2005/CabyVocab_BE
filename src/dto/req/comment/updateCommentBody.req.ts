@@ -1,6 +1,9 @@
+import { TargetType } from '~/constants/target'
+
 export class UpdateCommentBodyReq {
   content: string
   userId: number
-  folderId: number
+  targetId: number
+  targetType: TargetType
   commentId: number
 }

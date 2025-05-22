@@ -1,11 +1,14 @@
 import { FindOptionsWhere } from 'typeorm'
 import { TargetType } from '~/constants/target'
+import { BadRequestError } from '~/core/error.response'
+import { CreateCommentBodyReq } from '~/dto/req/comment/createCommentBody.req'
+import { UpdateCommentBodyReq } from '~/dto/req/comment/updateCommentBody.req'
 import { Comment } from '~/entities/comment.entity'
 
 class CommentService {
-  findChildComment = async (folderId: number, parentId: number | null, targetType: TargetType) => {
+  findChildComment = async (targetId: number, parentId: number | null, targetType: TargetType) => {
     const where: FindOptionsWhere<Comment> = {
-      targetId: folderId,
+      targetId: targetId,
       targetType
     }
 
@@ -35,6 +38,53 @@ class CommentService {
     })
 
     return childComments
+  }
+
+  comment = async ({ content, targetId, targetType, userId, parentId = null }: CreateCommentBodyReq) => {
+    const comment = Comment.create({
+      content,
+      createdBy: { id: userId },
+      parentComment: {
+        id: parentId
+      } as Comment,
+      targetId,
+      targetType
+    })
+
+    return await comment.save()
+  }
+
+  updateComment = async ({ content, targetId, targetType, userId, commentId }: UpdateCommentBodyReq) => {
+    const foundComment = await Comment.findOne({
+      where: {
+        id: commentId,
+        targetId,
+        targetType,
+        createdBy: {
+          id: userId
+        }
+      }
+    })
+
+    if (!foundComment) throw new BadRequestError({ message: 'Comment not found!' })
+
+    //mapping
+    foundComment.content = content
+
+    return await foundComment.save()
+  }
+
+  async checkOwnComment(userId: number, commentId: number) {
+    const foundComment = await Comment.exists({
+      where: {
+        id: commentId,
+        createdBy: {
+          id: userId
+        }
+      }
+    })
+
+    if (!foundComment) throw new BadRequestError({ message: 'Unauthorize for this comment' })
   }
 }
 
