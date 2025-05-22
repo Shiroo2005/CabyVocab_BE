@@ -31,7 +31,13 @@ class ExerciseService {
   }
 
   checkOwn = async (userId: number, folderId: number) => {
-    if (folderId != userId) throw new BadRequestError({ message: 'User not owner for this folder!' })
+    const foundFolder = await Folder.findOne({
+      where: {
+        id: folderId
+      },
+      relations: ['createdBy']
+    })
+    if (foundFolder?.createdBy.id != userId) throw new BadRequestError({ message: 'User not owner for this folder!' })
   }
 
   getAllFolder = async (userId: number, { page = 1, limit = 10, name, sort, code }: folderQueryReq) => {
