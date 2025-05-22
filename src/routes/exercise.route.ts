@@ -117,6 +117,14 @@ exerciseRouter.post(
   wrapRequestHandler(exerciseController.createComment)
 )
 
+/**
+ * @description : Vote exercise
+ * @method : POST
+ * @path : /:id/like
+ * @header : Authorization
+ */
+exerciseRouter.post('/:id/like', checkIdParamMiddleware, wrapRequestHandler(exerciseController.voteFolder))
+
 //PUT
 
 //PATCH

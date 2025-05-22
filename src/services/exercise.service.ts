@@ -95,7 +95,7 @@ class ExerciseService {
       where: {
         id
       },
-      relations: ['createdBy', 'quizzes', 'votes', 'votes.createdBy'],
+      relations: ['createdBy', 'quizzes'],
       select: {
         id: true,
         name: true,
