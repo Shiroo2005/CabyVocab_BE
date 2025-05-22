@@ -47,11 +47,5 @@ export class Folder extends BaseEntity {
   @UpdateDateColumn()
   updatedAt?: Date
 
-  @OneToMany(() => Vote, (vote) => vote.folder)
-  votes: Vote[]
-
-  @OneToMany(() => Comment, (comment) => comment.folder)
-  comments: Comment[]
-
   static allowSortList = ['name']
 }

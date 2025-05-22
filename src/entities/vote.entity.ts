@@ -2,6 +2,7 @@ import { User } from './user.entity'
 import { Topic } from './topic.entity'
 import {
   BaseEntity,
+  Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
@@ -11,10 +12,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
-import { Folder } from './folder.entity'
+import { TargetType } from '~/constants/target'
 
 @Entity()
-@Index(['createdBy', 'folder'], { unique: true })
+@Index(['createdBy', 'targetId', 'targetType'], { unique: true })
 export class Vote extends BaseEntity {
   @PrimaryGeneratedColumn()
   id?: number
@@ -23,8 +24,11 @@ export class Vote extends BaseEntity {
   @JoinColumn({ name: 'createdBy' })
   createdBy: User
 
-  @ManyToOne(() => Folder)
-  folder: Folder
+  @Column('varchar')
+  targetType: TargetType
+
+  @Column('int')
+  targetId: number
 
   @DeleteDateColumn()
   deletedAt?: Date

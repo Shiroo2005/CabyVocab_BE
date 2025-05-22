@@ -12,6 +12,7 @@ import {
   UpdateDateColumn
 } from 'typeorm'
 import { Folder } from './folder.entity'
+import { TargetType } from '~/constants/target'
 
 @Entity()
 export class Comment extends BaseEntity {
@@ -28,8 +29,11 @@ export class Comment extends BaseEntity {
   @JoinColumn({ name: 'createdBy' })
   createdBy: User
 
-  @ManyToOne(() => Folder)
-  folder: Folder
+  @Column('varchar')
+  targetType: TargetType
+
+  @Column('int')
+  targetId: number
 
   @DeleteDateColumn()
   deletedAt?: Date

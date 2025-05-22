@@ -17,6 +17,7 @@ import { generatedUuid, unGetData } from '~/utils'
 import { commentService } from './comment.service'
 import { Order } from '~/entities/order.entity'
 import { OrderQueryReq } from '~/dto/req/exercise/order/orderQuery.req'
+import { TargetType } from '~/constants/target'
 
 class ExerciseService {
   createNewFolder = async ({ name, price }: CreateFolderBodyReq, userId: number) => {
@@ -58,7 +59,7 @@ class ExerciseService {
         code: true,
         price: true
       },
-      relations: ['createdBY']
+      relations: ['createdBy']
     })
 
     const data = await Promise.all(
@@ -192,7 +193,7 @@ class ExerciseService {
     ])
 
     //get comment
-    const comments = await commentService.findChildComment(id, null)
+    const comments = await commentService.findChildComment(id, null, TargetType.FOLDER)
 
     return {
       ...foundFolder,
@@ -205,17 +206,15 @@ class ExerciseService {
 
   findNumberVoteByFolderId = async (id: number) => {
     return Vote.countBy({
-      folder: {
-        id
-      }
+      targetId: id,
+      targetType: TargetType.FOLDER
     })
   }
 
   findNumberCommentByFolderId = async (id: number) => {
     return Comment.countBy({
-      folder: {
-        id
-      }
+      targetId: id,
+      targetType: TargetType.FOLDER
     })
   }
 
@@ -225,9 +224,8 @@ class ExerciseService {
         createdBy: {
           id: userId
         },
-        folder: {
-          id: folderId
-        }
+        targetId: folderId,
+        targetType: TargetType.FOLDER
       },
       relations: ['createdBy'],
       withDeleted: false
@@ -260,7 +258,7 @@ class ExerciseService {
     const foundVote = await Vote.findOne({
       where: {
         createdBy: { id: userId },
-        folder: { id: folderId }
+        targetId: folderId
       },
       withDeleted: true
     })
@@ -268,7 +266,8 @@ class ExerciseService {
     if (!foundVote) {
       const newVote = Vote.create({
         createdBy: { id: userId },
-        folder: { id: folderId }
+        targetId: folderId,
+        targetType: TargetType.FOLDER
       })
 
       return unGetData({ fields: ['createdBy', 'folder'], object: await newVote.save() })
@@ -283,9 +282,8 @@ class ExerciseService {
       createdBy: {
         id: userId
       },
-      folder: {
-        id: folderId
-      }
+      targetId: folderId,
+      targetType: TargetType.FOLDER
     })
   }
 
@@ -296,9 +294,8 @@ class ExerciseService {
       parentComment: {
         id: parentId
       } as Comment,
-      folder: {
-        id: folderId
-      }
+      targetId: folderId,
+      targetType: TargetType.FOLDER
     })
 
     return await comment.save()
@@ -308,9 +305,8 @@ class ExerciseService {
     const foundComment = await Comment.findOne({
       where: {
         id: commentId,
-        folder: {
-          id: folderId
-        },
+        targetId: folderId,
+        targetType: TargetType.FOLDER,
         createdBy: {
           id: userId
         }
@@ -399,6 +395,14 @@ class ExerciseService {
     const folder = await Folder.findOneBy({ id: folderId })
 
     if (folder) {
+      //check own
+      try {
+        await this.checkOwn(userId, folderId)
+        return true
+      } catch (error) {
+        /* empty */
+      }
+
       //free
       if (folder.price == 0) return true
 

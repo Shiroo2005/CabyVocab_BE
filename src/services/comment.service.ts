@@ -1,9 +1,12 @@
+import { FindOptionsWhere } from 'typeorm'
+import { TargetType } from '~/constants/target'
 import { Comment } from '~/entities/comment.entity'
 
 class CommentService {
-  findChildComment = async (folderId: number, parentId: number | null) => {
-    const where: any = {
-      folder: { id: folderId }
+  findChildComment = async (folderId: number, parentId: number | null, targetType: TargetType) => {
+    const where: FindOptionsWhere<Comment> = {
+      targetId: folderId,
+      targetType
     }
 
     if (parentId !== null) {
@@ -24,7 +27,9 @@ class CommentService {
         },
         parentComment: {
           id: true
-        }
+        },
+        targetId: true,
+        targetType: true
       },
       relations: ['createdBy']
     })
