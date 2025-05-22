@@ -54,7 +54,8 @@ class ExerciseService {
           email: true
         },
         code: true,
-        price: true
+        price: true,
+        createdAt: true
       },
       relations: ['createdBy']
     })
