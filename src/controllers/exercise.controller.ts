@@ -100,7 +100,7 @@ class ExerciseController {
     return new SuccessResponse({
       message: 'Create comment successful!',
       metaData: await commentService.comment({
-        userId: user.id as number,
+        user,
         targetId: folderId,
         targetType: TargetType.FOLDER,
         ...req.body
@@ -147,7 +147,7 @@ class ExerciseController {
     return new SuccessResponse({
       message: 'Update comment successful!',
       metaData: await commentService.updateComment({
-        userId: user.id as number,
+        user,
         targetId: folderId,
         targetType: TargetType.FOLDER,
         commentId,

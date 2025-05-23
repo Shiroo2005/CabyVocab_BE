@@ -4,6 +4,7 @@ import { BadRequestError } from '~/core/error.response'
 import { CreateCommentBodyReq } from '~/dto/req/comment/createCommentBody.req'
 import { UpdateCommentBodyReq } from '~/dto/req/comment/updateCommentBody.req'
 import { Comment } from '~/entities/comment.entity'
+import { unGetData } from '~/utils'
 
 class CommentService {
   findChildComment = async (targetId: number, parentId: number | null, targetType: TargetType) => {
@@ -40,10 +41,15 @@ class CommentService {
     return childComments
   }
 
-  comment = async ({ content, targetId, targetType, userId, parentId = null }: CreateCommentBodyReq) => {
+  comment = async ({ content, targetId, targetType, user, parentId = null }: CreateCommentBodyReq) => {
     const comment = Comment.create({
       content,
-      createdBy: { id: userId },
+      createdBy: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        avatar: user.avatar
+      },
       parentComment: {
         id: parentId
       } as Comment,
@@ -54,16 +60,17 @@ class CommentService {
     return await comment.save()
   }
 
-  updateComment = async ({ content, targetId, targetType, userId, commentId }: UpdateCommentBodyReq) => {
+  updateComment = async ({ content, targetId, targetType, user, commentId }: UpdateCommentBodyReq) => {
     const foundComment = await Comment.findOne({
       where: {
         id: commentId,
         targetId,
         targetType,
         createdBy: {
-          id: userId
+          id: user.id
         }
-      }
+      },
+      relations: ['createdBy']
     })
 
     if (!foundComment) throw new BadRequestError({ message: 'Comment not found!' })
@@ -71,7 +78,20 @@ class CommentService {
     //mapping
     foundComment.content = content
 
-    return await foundComment.save()
+    return unGetData({
+      object: await foundComment.save(),
+      fields: [
+        'createdBy.password',
+        'createdBy.status',
+        'createdBy.streak',
+        'createdBy.lastStudyDate',
+        'createdBy.totalStudyDay',
+        'createdBy.balance',
+        'createdBy.deletedAt',
+        'createdBy.createdAt',
+        'createdBy.updatedAt'
+      ]
+    })
   }
 
   async checkOwnComment(userId: number, commentId: number) {
