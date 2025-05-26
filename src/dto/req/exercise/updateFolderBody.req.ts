@@ -6,4 +6,5 @@ export class updateFolderBodyReq {
   quizzes?: quizBodyData[]
   flashCards?: flashCardBody[]
   price?: number
+  isPublic?: boolean
 }

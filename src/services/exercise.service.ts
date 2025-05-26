@@ -17,14 +17,15 @@ import { OrderQueryReq } from '~/dto/req/exercise/order/orderQuery.req'
 import { TargetType } from '~/constants/target'
 
 class ExerciseService {
-  createNewFolder = async ({ name, price }: CreateFolderBodyReq, userId: number) => {
+  createNewFolder = async ({ name, price, isPublic }: CreateFolderBodyReq, userId: number) => {
     const createdFolder = await Folder.save({
       name,
       code: generatedUuid(lengthCode),
       createdBy: {
         id: userId
       },
-      price
+      price,
+      isPublic
     })
 
     return createdFolder
@@ -47,7 +48,8 @@ class ExerciseService {
       take: limit,
       where: {
         name: Like(`%${name || ''}%`),
-        code
+        code,
+        isPublic: true
       },
       order: { ...sort, createdAt: 'desc' },
       select: {
@@ -90,7 +92,11 @@ class ExerciseService {
     }
   }
 
-  updateFolder = async (user: User, id: number, { name, quizzes, flashCards, price }: updateFolderBodyReq) => {
+  updateFolder = async (
+    user: User,
+    id: number,
+    { name, quizzes, flashCards, price, isPublic }: updateFolderBodyReq
+  ) => {
     const foundFolder = await Folder.findOne({
       where: {
         id
@@ -151,6 +157,10 @@ class ExerciseService {
       })
 
       foundFolder.flashCards = mappedFlashCard
+    }
+
+    if (isPublic != null) {
+      foundFolder.isPublic = isPublic
     }
 
     await foundFolder.save()
@@ -268,7 +278,8 @@ class ExerciseService {
   findFolderById = async (id: number) => {
     return Folder.findOne({
       where: {
-        id
+        id,
+        isPublic: true
       }
     })
   }
@@ -326,6 +337,9 @@ class ExerciseService {
       } catch (error) {
         /* empty */
       }
+
+      //if folder not public and folder was not own by this user
+      if (!folder.isPublic) return false
 
       //free
       if (folder.price == 0) return true
