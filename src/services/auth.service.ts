@@ -9,6 +9,8 @@ import { sendVerifyEmail } from './email.service'
 import { EmailVerificationToken } from '~/entities/emailVerificationToken.entity'
 import { UserStatus } from '~/constants/userStatus'
 import { Role } from '~/entities/role.entity'
+import { UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
+import { userService } from './user.service'
 
 dotenv.config()
 
@@ -128,6 +130,10 @@ class AuthService {
 
     //return info user before update
     return this.getAccount({ userId: userId })
+  }
+
+  changeProfile = async (id: number, { avatar, email, username }: UpdateUserBodyReq) => {
+    return await userService.updateUserByID(id, { avatar, email, username })
   }
 }
 

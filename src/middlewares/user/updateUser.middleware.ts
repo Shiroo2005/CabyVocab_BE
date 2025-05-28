@@ -11,11 +11,13 @@ import { toNumber } from 'lodash'
 export const updateUserByIdValidation = validate(
   checkSchema({
     username: {
+      optional: true,
       ...isUsername,
       ...isLength({ fieldName: 'username' })
     },
 
     email: {
+      optional: true,
       ...isEmail,
       custom: {
         options: async (value, { req }) => {
@@ -33,10 +35,12 @@ export const updateUserByIdValidation = validate(
     },
 
     avatar: {
+      optional: true,
       trim: true
     },
 
     status: {
+      optional: true,
       trim: true,
       isIn: {
         options: [Object.values(UserStatus)]
@@ -44,6 +48,7 @@ export const updateUserByIdValidation = validate(
     },
 
     roleId: {
+      optional: true,
       trim: true,
       custom: {
         options: async (value, { req }) => {

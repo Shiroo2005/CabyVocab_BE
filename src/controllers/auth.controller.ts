@@ -3,6 +3,7 @@ import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
 import { CREATED, SuccessResponse } from '~/core/success.response'
 import { TokenPayload } from '~/dto/common.dto'
 import { LogoutBodyReq } from '~/dto/req/auth/LogoutBody.req'
+import { UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
 import { User } from '~/entities/user.entity'
 import { authService } from '~/services/auth.service'
 
@@ -64,6 +65,15 @@ class AuthController {
     return new SuccessResponse({
       message: 'Verify email!',
       metaData: await authService.verifyEmail({ userId: user.id as number })
+    }).send(res)
+  }
+
+  updateProfile = async (req: Request<ParamsDictionary, any, UpdateUserBodyReq>, res: Response) => {
+    const user = req.user as User
+
+    return new SuccessResponse({
+      message: 'Update profile successful',
+      metaData: await authService.changeProfile(user.id as number, req.body)
     }).send(res)
   }
 }

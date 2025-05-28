@@ -8,6 +8,7 @@ import {
   registerValidation,
   verifyEmailTokenValidation
 } from '~/middlewares/auth.middlewares'
+import { updateUserByIdValidation } from '~/middlewares/user/updateUser.middleware'
 const authRouter = express.Router()
 
 // GET
@@ -33,6 +34,12 @@ authRouter.post(
 )
 
 // PUT
+/**
+ * @description : Update profile
+ * @method : POST
+ * @path : /profile
+ */
+authRouter.put('/profile', updateUserByIdValidation, wrapRequestHandler(authController.updateProfile))
 
 // DELETE
 export default authRouter
