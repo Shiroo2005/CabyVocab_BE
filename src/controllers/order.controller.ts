@@ -11,7 +11,7 @@ class OrderController {
 
     console.log(process.env.HOST_FE)
 
-    return res.redirect(`${process.env.HOST_FE}`)
+    return res.json({}).status(200)
   }
 }
 
