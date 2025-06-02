@@ -8,7 +8,7 @@ import { unGetData } from '~/utils'
 import { BadRequestError } from '~/core/error.response'
 import { DatabaseService } from './database.service'
 import { CompletedTopic } from '~/entities/completedTopic.entity'
-import { In } from 'typeorm'
+import { In, Like } from 'typeorm'
 import { User } from '~/entities/user.entity'
 
 class CourseService {
@@ -141,7 +141,7 @@ class CourseService {
       take: limit,
       relations: ['courseTopics', 'courseTopics.topic'],
       where: {
-        title,
+        title: Like(`%${title}%`),
         target,
         level,
         description

@@ -7,7 +7,7 @@ import { Word } from '~/entities/word.entity'
 import { WordTopic } from '~/entities/wordTopic.entity'
 import { DatabaseService } from './database.service'
 import { Topic } from '~/entities/topic.entity'
-import { In } from 'typeorm'
+import { In, Like } from 'typeorm'
 
 class WordService {
   createWords = async (words: WordBody[]) => {
@@ -115,7 +115,7 @@ class WordService {
       skip,
       take: limit,
       where: {
-        content,
+        content: Like(`%${content}%`),
         example,
         meaning,
         position,

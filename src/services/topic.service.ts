@@ -5,7 +5,7 @@ import { Topic } from '~/entities/topic.entity'
 import { Word } from '~/entities/word.entity'
 import { wordService } from './word.service'
 import { validate } from 'class-validator'
-import { In } from 'typeorm'
+import { In, Like } from 'typeorm'
 import { CompletedTopic } from '~/entities/completedTopic.entity'
 import { BadRequestError } from '~/core/error.response'
 import { CompleteTopicBodyReq } from '~/dto/req/topic/completeTopicBody.req'
@@ -122,12 +122,11 @@ class TopicService {
 
   getAllTopics = async (user: User, { page = 1, limit = 10, title, description, type, sort }: topicQueryReq) => {
     const skip = (page - 1) * limit
-
     const [topics, total] = await Topic.findAndCount({
       skip,
       take: limit,
       where: {
-        title,
+        title: Like(`%${title}%`),
         description,
         type
       },
