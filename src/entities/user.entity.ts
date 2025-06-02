@@ -84,13 +84,6 @@ export class User extends BaseEntity {
   @OneToMany(() => CourseProgress, (courseProgress) => courseProgress.user)
   courseProgresses: CourseProgress[]
 
-  @BeforeInsert()
-  @BeforeUpdate()
-  hashPassword?() {
-    if (!this.password) return
-    this.password = hashData(this.password)
-  }
-
   static createUser = ({
     id,
     email,

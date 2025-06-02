@@ -5,6 +5,7 @@ import { userQueryReq } from '~/dto/req/user/userQuery.req'
 import { Role } from '~/entities/role.entity'
 import { User } from '~/entities/user.entity'
 import { unGetData } from '~/utils'
+import { hashData } from '~/utils/jwt'
 
 class UserService {
   createUser = async ({ email, username, password, roleId, avatar }: CreateUserBodyReq) => {
@@ -18,7 +19,7 @@ class UserService {
     const createUser = User.create({
       email,
       username,
-      password,
+      password: hashData(password),
       role,
       avatar: avatar || 'N/A'
     })

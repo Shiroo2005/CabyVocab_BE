@@ -1,7 +1,7 @@
 import { User } from '~/entities/user.entity'
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
-import { signAccessToken, signRefreshToken } from '~/utils/jwt'
+import { hashData, signAccessToken, signRefreshToken } from '~/utils/jwt'
 import { Token } from '~/entities/token.entity'
 import { unGetData } from '~/utils'
 import { LogoutBodyReq } from '~/dto/req/auth/LogoutBody.req'
@@ -27,7 +27,7 @@ class AuthService {
     const newUser = User.create({
       email,
       username,
-      password,
+      password: hashData(password),
       role: userRole
     })
 
