@@ -15,6 +15,7 @@ import { commentService } from './comment.service'
 import { Order } from '~/entities/order.entity'
 import { OrderQueryReq } from '~/dto/req/exercise/order/orderQuery.req'
 import { TargetType } from '~/constants/target'
+import { UserAttempt } from '~/entities/userAttemp.entity'
 
 class ExerciseService {
   createNewFolder = async ({ name, price, isPublic }: CreateFolderBodyReq, userId: number) => {
@@ -244,13 +245,42 @@ class ExerciseService {
     //get comment
     const comments = await commentService.findChildComment(id, null, TargetType.FOLDER)
 
+    const countAttempt = await this.findCountAttemp(id, userId)
+
     return {
       ...foundFolder,
       voteCount,
       commentCount,
       isAlreadyVote,
-      comments
+      comments,
+      countAttempt
     }
+  }
+
+  findCountAttemp = async (folderId: number, userId: number) => {
+    const foundQuiz = await Folder.findOne({
+      where: {
+        id: folderId
+      },
+      relations: {
+        quizzes: true
+      }
+    })
+
+    if (foundQuiz) {
+      const foundAttempt = await UserAttempt.findOne({
+        where: {
+          quiz: {
+            id: foundQuiz.id
+          }
+        }
+      })
+
+      if (foundAttempt) return foundAttempt.count
+    }
+
+    //not do before
+    return 0
   }
 
   findNumberVoteByFolderId = async (id: number) => {
@@ -265,6 +295,50 @@ class ExerciseService {
       targetId: id,
       targetType: TargetType.FOLDER
     })
+  }
+
+  checkQuizIdValid = async (quizId: number) => {
+    const foundQuiz = await Quiz.findOneBy({ id: quizId })
+
+    if (foundQuiz != null) return true
+    return false
+  }
+
+  updateCountAttemptQuiz = async ({ quizId, userId }: { quizId: number; userId: number }) => {
+    //checkQuizId
+
+    if (!(await this.checkQuizIdValid(quizId))) throw new BadRequestError({ message: 'Quiz id invalid' })
+
+    const foundAttemptQuiz = await UserAttempt.findOne({
+      where: {
+        quiz: {
+          id: quizId
+        },
+        user: {
+          id: userId
+        }
+      }
+    })
+    //not found ==> first attempt
+    if (!foundAttemptQuiz) {
+      const newAttempt = new UserAttempt()
+      newAttempt.count = 1
+      newAttempt.user = {
+        id: userId
+      } as User
+
+      newAttempt.quiz = {
+        id: quizId
+      } as Quiz
+
+      await newAttempt.save()
+      return {}
+    }
+
+    //update
+    foundAttemptQuiz.count += 1
+    await foundAttemptQuiz.save()
+    return {}
   }
 
   isAlreadyVote = async (folderId: number, userId: number) => {

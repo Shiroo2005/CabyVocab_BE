@@ -55,6 +55,15 @@ class ExerciseController {
     }).send(res)
   }
 
+  finishAttempQuiz = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+    const user = req.user as User
+    const quizId = parseInt(req.params?.quizId)
+    return new SuccessResponse({
+      message: 'Update attempt quiz successful',
+      metaData: await exerciseService.updateCountAttemptQuiz({ quizId, userId: user.id as number })
+    }).send(res)
+  }
+
   updateById = async (req: Request<ParamsDictionary, any, updateFolderBodyReq>, res: Response, next: NextFunction) => {
     const user = req.user as User
     const id = parseInt(req.params.id)

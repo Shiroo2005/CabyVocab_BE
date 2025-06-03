@@ -179,6 +179,18 @@ exerciseRouter.put(
  */
 exerciseRouter.patch('/:id', updateExerciseValidation, wrapRequestHandler(exerciseController.updateById))
 
+/**
+ * @description : Update attempt quiz
+ * @method : PATCH
+ * @path : /:id/quiz/:quizId/finish/
+ * @header : Authorization
+ */
+exerciseRouter.patch(
+  '/:id/quiz/:quizId/finish',
+  wrapRequestHandler(checkIdParamMiddleware),
+  wrapRequestHandler(exerciseController.finishAttempQuiz)
+)
+
 //DELETE
 /**
  * @description : Delete folder by id
