@@ -11,6 +11,7 @@ import { Course } from '~/entities/courses.entity'
 import { courseSeedData } from '~/core/data/course.data'
 import { WordTopic } from '~/entities/wordTopic.entity'
 import { CourseTopic } from '~/entities/courseTopic.entity'
+import { hashData } from './jwt'
 
 async function seedRole() {
   const count = await Role.count()
@@ -49,7 +50,7 @@ async function seedUsers() {
       {
         email: 'Admin001@gmail.com',
         // fullName: 'Admin001',
-        password: 'Admin123',
+        password: hashData('Admin123'),
         role: adminRole,
         username: 'Admin001',
         status: UserStatus.VERIFIED
@@ -57,7 +58,7 @@ async function seedUsers() {
       {
         email: 'User001@gmail.com',
         // fullName: 'User001',
-        password: 'User1123',
+        password: hashData('User1123'),
         role: userRole,
         username: 'User001',
         status: UserStatus.VERIFIED

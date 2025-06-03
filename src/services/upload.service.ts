@@ -30,9 +30,9 @@ export const uploadImages = async (files: Record<string, Express.Multer.File[]>)
   const _files = await Promise.all(fileArray.map((file) => processAndSaveImage(file)))
 
   // delete temp files
-  fileArray.map((file) => {
-    unlinkAsync(file.path)
-  })
+  // fileArray.map((file) => {
+  //   unlinkAsync(file.path)
+  // })
 
   return _files
 }
@@ -95,7 +95,7 @@ export const uploadAudio = async (file: Express.Multer.File) => {
   const _file = await processAndSaveAudio(file)
 
   // delete temp files
-  unlinkAsync(file.path)
+  // unlinkAsync(file.path)
 
   return _file
 }
