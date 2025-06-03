@@ -120,7 +120,7 @@ class TopicService {
     return result
   }
 
-  getAllTopics = async (user: User, { page = 1, limit = 10, title, description, type, sort }: topicQueryReq) => {
+  getAllTopics = async (user: User, { page = 1, limit = 10, title = '', description, type, sort }: topicQueryReq) => {
     const skip = (page - 1) * limit
     const [topics, total] = await Topic.findAndCount({
       skip,

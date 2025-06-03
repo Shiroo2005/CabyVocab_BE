@@ -63,9 +63,15 @@ class ExerciseService {
         },
         code: true,
         price: true,
-        createdAt: true
+        createdAt: true,
+        flashCards: {
+          id: true
+        }
       },
-      relations: ['createdBy']
+      relations: {
+        createdBy: true,
+        flashCards: true
+      }
     })
 
     const data = await Promise.all(
@@ -167,6 +173,34 @@ class ExerciseService {
     return this.getFolderById(user.id as number, id)
   }
 
+  getOwnFolder = async (userId: number) => {
+    return await Folder.find({
+      where: {
+        createdBy: {
+          id: userId
+        }
+      },
+      select: {
+        id: true,
+        isPublic: true,
+        code: true,
+        flashCards: true,
+        name: true,
+        price: true,
+        createdAt: true,
+        quizzes: true,
+        createdBy: {
+          id: true
+        }
+      },
+      relations: {
+        createdBy: true,
+        flashCards: true,
+        quizzes: true
+      }
+    })
+  }
+
   getFolderById = async (userId: number, id: number) => {
     if (!(await this.isAbleToUseFolder(id, userId)))
       throw new BadRequestError({ message: 'User can not able to use this folder' })
@@ -196,7 +230,8 @@ class ExerciseService {
           avatar: true,
           email: true,
           username: true
-        }
+        },
+        price: true
       }
     })
 

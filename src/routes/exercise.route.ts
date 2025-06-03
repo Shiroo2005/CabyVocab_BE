@@ -19,6 +19,8 @@ exerciseRouter.use(accessTokenValidation)
 exerciseRouter.use(checkVerifyUser)
 
 //GET
+exerciseRouter.get('/me', wrapRequestHandler(exerciseController.getOwnFolders))
+
 /**
  * @description : Get exercise by id
  * @method : GET

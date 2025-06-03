@@ -132,7 +132,7 @@ class CourseService {
 
   getAllCourse = async (
     user: User,
-    { page = 1, limit = 10, title, target, level, description, sort }: courseQueryReq
+    { page = 1, limit = 10, title = '', target, level, description, sort }: courseQueryReq
   ) => {
     const skip = (page - 1) * limit
 

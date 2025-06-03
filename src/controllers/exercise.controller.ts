@@ -46,6 +46,15 @@ class ExerciseController {
     }).send(res)
   }
 
+  getOwnFolders = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+    const user = req.user as User
+
+    return new SuccessResponse({
+      message: 'Get own folder by user successful',
+      metaData: await exerciseService.getOwnFolder(user.id as number)
+    }).send(res)
+  }
+
   updateById = async (req: Request<ParamsDictionary, any, updateFolderBodyReq>, res: Response, next: NextFunction) => {
     const user = req.user as User
     const id = parseInt(req.params.id)

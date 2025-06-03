@@ -100,7 +100,7 @@ class WordService {
   getAllWords = async ({
     page = 1,
     limit = 10,
-    content,
+    content = '',
     example,
     meaning,
     position,
