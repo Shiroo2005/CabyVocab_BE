@@ -274,7 +274,7 @@ class ExerciseService {
     //get comment
     const comments = await commentService.findChildComment(id, null, TargetType.FOLDER)
 
-    const countAttempt = await this.findCountAttempt(id, userId)
+    const countAttempt = await this.getTotalAttemptFolder(id)
 
     return {
       ...foundFolder,
