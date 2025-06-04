@@ -95,17 +95,17 @@ export const registerValidation = validate(
         options: Regex.PASSWORD,
         errorMessage: 'Mật khẩu phải có ít nhất 6 ký tự và chứa ít nhất 1 chữ hoa!'
       }
-    },
-    fullName: {
-      notEmpty: true,
-      isLength: {
-        options: {
-          min: 5,
-          max: 20
-        },
-        errorMessage: 'Full name phải có độ dài từ 5 đến 20 ký tự'
-      }
     }
+    // fullName: {
+    //   notEmpty: true,
+    //   isLength: {
+    //     options: {
+    //       min: 5,
+    //       max: 20
+    //     },
+    //     errorMessage: 'Full name phải có độ dài từ 5 đến 20 ký tự'
+    //   }
+    // }
   })
 )
 

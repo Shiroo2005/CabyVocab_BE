@@ -44,14 +44,18 @@ class ExerciseService {
 
   getAllFolder = async (userId: number, { page = 1, limit = 10, name, sort, code }: folderQueryReq) => {
     const skip = (page - 1) * limit
+
     const [folders, total] = await Folder.findAndCount({
       skip,
       take: limit,
-      where: {
-        name: Like(`%${name || ''}%`),
-        code,
-        isPublic: true
-      },
+      where: [
+        {
+          name: Like(`%${name || ''}%`),
+          code,
+          isPublic: true
+        },
+        { name: Like(`%${name || ''}%`), code, createdBy: { id: userId } }
+      ],
       order: { ...sort, createdAt: 'desc' },
       select: {
         id: true,
@@ -67,7 +71,8 @@ class ExerciseService {
         createdAt: true,
         flashCards: {
           id: true
-        }
+        },
+        isPublic: true
       },
       relations: {
         createdBy: true,
@@ -77,16 +82,18 @@ class ExerciseService {
 
     const data = await Promise.all(
       folders.map(async (folder) => {
-        const [voteCount, isAlreadyVote, commentCount] = await Promise.all([
-          await this.findNumberVoteByFolderId(folder.id),
-          await this.isAlreadyVote(folder.id, userId),
-          await this.findNumberCommentByFolderId(folder.id)
+        const [voteCount, isAlreadyVote, commentCount, totalAttemptCount] = await Promise.all([
+          this.findNumberVoteByFolderId(folder.id),
+          this.isAlreadyVote(folder.id, userId),
+          this.findNumberCommentByFolderId(folder.id),
+          this.getTotalAttemptFolder(folder.id)
         ])
         return {
           ...folder,
           voteCount,
           commentCount,
-          isAlreadyVote
+          isAlreadyVote,
+          totalAttemptCount
         }
       })
     )
@@ -97,6 +104,28 @@ class ExerciseService {
       currentPage: page,
       totalPages: Math.ceil(total / limit)
     }
+  }
+
+  getTotalAttemptFolder = async (folderId: number) => {
+    const quiz = await Quiz.findOne({
+      where: {
+        folder: {
+          id: folderId
+        }
+      }
+    })
+
+    if (!quiz) return 0
+
+    const count = await UserAttempt.count({
+      where: {
+        quiz: {
+          id: quiz.id
+        }
+      }
+    })
+
+    return count
   }
 
   updateFolder = async (
@@ -245,7 +274,7 @@ class ExerciseService {
     //get comment
     const comments = await commentService.findChildComment(id, null, TargetType.FOLDER)
 
-    const countAttempt = await this.findCountAttemp(id, userId)
+    const countAttempt = await this.findCountAttempt(id, userId)
 
     return {
       ...foundFolder,
@@ -257,7 +286,7 @@ class ExerciseService {
     }
   }
 
-  findCountAttemp = async (folderId: number, userId: number) => {
+  findCountAttempt = async (folderId: number, userId: number) => {
     const foundQuiz = await Folder.findOne({
       where: {
         id: folderId
