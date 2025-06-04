@@ -261,7 +261,8 @@ class ExerciseService {
           email: true,
           username: true
         },
-        price: true
+        price: true,
+        isPublic: true
       }
     })
 
