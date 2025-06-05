@@ -266,19 +266,26 @@ class CourseService {
       courseId,
       page = 1,
       limit = 10,
-      sort
+      sort,
+      title = ''
     }: {
       courseId: number
       page?: number
       limit?: number
       sort?: any
+      title?: string
     }
   ) => {
     const skip = (page - 1) * limit
 
     // Find all course-topic relationships for this course
     const courseTopics = await CourseTopic.find({
-      where: { course: { id: courseId } },
+      where: {
+        course: { id: courseId },
+        topic: {
+          title: Like(`%${title}%`)
+        }
+      },
       relations: ['topic'],
       order: { displayOrder: 'ASC', ...sort },
       skip,
@@ -287,7 +294,12 @@ class CourseService {
 
     // Count total topics for this course
     const total = await CourseTopic.count({
-      where: { course: { id: courseId } }
+      where: {
+        course: { id: courseId },
+        topic: {
+          title: Like(`%${title}%`)
+        }
+      }
     })
 
     const topicIds = courseTopics.map((item) => item.topic?.id as number)
@@ -296,7 +308,8 @@ class CourseService {
     const completeTopics = await CompletedTopic.find({
       where: {
         topic: {
-          id: In(topicIds)
+          id: In(topicIds),
+          title: Like(`%${title}%`)
         },
         user: {
           id: user.id

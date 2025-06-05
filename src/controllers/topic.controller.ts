@@ -81,7 +81,8 @@ class TopicController {
       metaData: await topicService.getTopicWords({
         topicId,
         ...req.parseQueryPagination,
-        sort: req.sortParsed
+        sort: req.sortParsed,
+        ...req.query
       })
     }).send(res)
   }

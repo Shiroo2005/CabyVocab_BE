@@ -82,7 +82,8 @@ class CourseController {
       metaData: await courseService.getCourseTopics(user, {
         courseId,
         ...req.parseQueryPagination,
-        sort: req.sortParsed
+        sort: req.sortParsed,
+        ...req.query
       })
     }).send(res)
   }

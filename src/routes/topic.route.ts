@@ -1,7 +1,6 @@
 import express from 'express'
 import { topicController } from '~/controllers/topic.controller'
 import { Topic } from '~/entities/topic.entity'
-import { Word } from '~/entities/word.entity'
 import { accessTokenValidation } from '~/middlewares/auth.middlewares'
 import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '~/middlewares/common.middlewares'
 import { createTopicValidation } from '~/middlewares/topic/createTopic.middlewares'

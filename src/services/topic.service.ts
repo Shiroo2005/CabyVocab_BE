@@ -358,17 +358,24 @@ class TopicService {
     topicId,
     page = 1,
     limit = 10,
-    sort
+    sort,
+    content = ''
   }: {
     topicId: number
     page?: number
     limit?: number
     sort?: any
+    content?: string
   }) => {
     const skip = (page - 1) * limit
 
     const topicWords = await WordTopic.find({
-      where: { topic: { id: topicId } },
+      where: {
+        topic: { id: topicId },
+        word: {
+          content: Like(`%${content}%`)
+        }
+      },
       relations: ['word'],
       order: sort,
       skip,
@@ -376,7 +383,12 @@ class TopicService {
     })
 
     const total = await WordTopic.count({
-      where: { topic: { id: topicId } }
+      where: {
+        topic: { id: topicId },
+        word: {
+          content: Like(`%${content}%`)
+        }
+      }
     })
 
     const words = topicWords.map((topicWord) => ({
