@@ -38,6 +38,13 @@ class UserController {
     }).send(res)
   }
 
+  getUserStatisticsSummary = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+    return new SuccessResponse({
+      message: 'Get user statistics summary successful',
+      metaData: await userService.getUserStatistics()
+    }).send(res)
+  }
+
   updateUser = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     const id = parseInt(req.params?.id)
     return new SuccessResponse({

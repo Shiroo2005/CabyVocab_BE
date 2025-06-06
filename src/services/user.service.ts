@@ -1,4 +1,4 @@
-import { Like } from 'typeorm'
+import { Between, Like } from 'typeorm'
 import { BadRequestError } from '~/core/error.response'
 import { CreateUserBodyReq, UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
 import { userQueryReq } from '~/dto/req/user/userQuery.req'
@@ -6,6 +6,7 @@ import { Role } from '~/entities/role.entity'
 import { User } from '~/entities/user.entity'
 import { unGetData } from '~/utils'
 import { hashData } from '~/utils/jwt'
+import dayjs from 'dayjs'
 
 class UserService {
   createUser = async ({ email, username, password, roleId, avatar }: CreateUserBodyReq) => {
@@ -160,6 +161,77 @@ class UserService {
     foundUser.balance += increaseBalance
 
     foundUser.save()
+  }
+
+  async getUserStatistics() {
+    const total = await this.getTotalUsers()
+    const newUsers7Days = await this.getDailyNewUsers(7)
+    const newUsers30Days = await this.getDailyNewUsers(30)
+    const activeUsers7Days = await this.getDailyActiveUsers(7)
+    const activeUsers30Days = await this.getDailyActiveUsers(30)
+
+    return {
+      total,
+      newUsers7Days,
+      newUsers30Days,
+      activeUsers7Days,
+      activeUsers30Days
+    }
+  }
+
+  // ✅ Tổng số người dùng
+  private async getTotalUsers(): Promise<number> {
+    return await User.count()
+  }
+
+  // ✅ Người dùng đăng ký mới theo ngày (trong N ngày gần đây)
+  private async getDailyNewUsers(days: number): Promise<{ date: string; count: number }[]> {
+    const now = dayjs()
+    const result: { date: string; count: number }[] = []
+
+    for (let i = days - 1; i >= 0; i--) {
+      const date = now.subtract(i, 'day')
+      const start = date.startOf('day').toDate()
+      const end = date.endOf('day').toDate()
+
+      const count = await User.count({
+        where: {
+          createdAt: Between(start, end)
+        }
+      })
+
+      result.push({
+        date: date.format('YYYY-MM-DD'),
+        count
+      })
+    }
+
+    return result
+  }
+
+  // ✅ Người dùng active theo ngày (trong N ngày gần đây)
+  private async getDailyActiveUsers(days: number): Promise<{ date: string; count: number }[]> {
+    const now = dayjs()
+    const result: { date: string; count: number }[] = []
+
+    for (let i = days - 1; i >= 0; i--) {
+      const date = now.subtract(i, 'day')
+      const start = date.startOf('day').toDate()
+      const end = date.endOf('day').toDate()
+
+      const count = await User.count({
+        where: {
+          lastStudyDate: Between(start, end)
+        }
+      })
+
+      result.push({
+        date: date.format('YYYY-MM-DD'),
+        count
+      })
+    }
+
+    return result
   }
 }
 

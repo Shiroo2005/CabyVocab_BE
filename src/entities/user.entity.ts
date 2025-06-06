@@ -1,13 +1,10 @@
 import { IsEmail, IsNotEmpty, Length, Matches, validate } from 'class-validator'
 import {
   BaseEntity,
-  BeforeInsert,
-  BeforeUpdate,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -15,7 +12,6 @@ import {
 } from 'typeorm'
 import { UserStatus } from '~/constants/userStatus'
 import { Role } from './role.entity'
-import { hashData } from '~/utils/jwt'
 import { Token } from './token.entity'
 import { CompletedTopic } from './completedTopic.entity'
 import { WordProgress } from './wordProgress.entity'

@@ -52,10 +52,17 @@ userRouter.post(
  * ]
  */
 userRouter.get(
-  '/', 
+  '/',
   checkQueryMiddleware(),
   wrapRequestHandler(parseSort({ allowSortList: User.allowSortList })),
   wrapRequestHandler(userController.getAllUsers)
+)
+
+// Get user summary
+userRouter.get(
+  '/summary',
+  wrapRequestHandler(checkPermission('readAny', Resource.USER)),
+  wrapRequestHandler(userController.getUserStatisticsSummary)
 )
 
 /**
