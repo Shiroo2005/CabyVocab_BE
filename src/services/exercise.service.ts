@@ -1,4 +1,4 @@
-import { In, Like } from 'typeorm'
+import { In, Like, Not } from 'typeorm'
 import { lengthCode } from '~/constants/folder'
 import { BadRequestError } from '~/core/error.response'
 import { CreateFolderBodyReq } from '~/dto/req/exercise/createFolderBody.req'
@@ -497,6 +497,47 @@ class ExerciseService {
     }
 
     return true
+  }
+
+  getStatistics = async () => {
+    // Tổng số lượng folder
+    const totalFolders = await Folder.count()
+
+    // Số lượng folder miễn phí và có phí
+    const freeFolders = await Folder.count({ where: { price: 0 } })
+    const paidFolders = await Folder.count({ where: { price: Not(0) } })
+
+    // Giá trung bình của folder có phí
+    const paidFoldersData = await Folder.createQueryBuilder('folder')
+      .select('AVG(folder.price)', 'avgPrice')
+      .where('folder.price > 0')
+      .getRawOne()
+    const avgPrice = parseFloat(paidFoldersData?.avgPrice || '0')
+
+    // Top folder phổ biến theo số lần attempt
+    const rawTopFolders = await Folder.createQueryBuilder('folder')
+      .leftJoin('folder.quizzes', 'quiz')
+      .leftJoin(UserAttempt, 'attempt', 'quiz.id = attempt.quizId')
+      .select('folder.id', 'id')
+      .addSelect('folder.name', 'name')
+      .addSelect('COUNT(attempt.id)', 'attemptCount')
+      .groupBy('folder.id')
+      .orderBy('attemptCount', 'DESC')
+      .limit(5)
+      .getRawMany()
+
+    const topFolders = rawTopFolders.map((item) => ({
+      ...item,
+      attemptCount: parseInt(item.attemptCount, 10)
+    }))
+
+    return {
+      totalFolders,
+      freeFolders,
+      paidFolders,
+      avgPaidFolderPrice: avgPrice,
+      topFolders
+    }
   }
 }
 

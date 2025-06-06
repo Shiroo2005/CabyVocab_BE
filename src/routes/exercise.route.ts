@@ -21,6 +21,12 @@ exerciseRouter.use(checkVerifyUser)
 //GET
 exerciseRouter.get('/me', wrapRequestHandler(exerciseController.getOwnFolders))
 
+/**Get exercise summary */
+exerciseRouter.get(
+  '/summary',
+  wrapRequestHandler(checkPermission('readAny', Resource.EXERCISE)),
+  wrapRequestHandler(exerciseController.getExerciseSummary)
+)
 /**
  * @description : Get exercise by id
  * @method : GET

@@ -46,6 +46,13 @@ class ExerciseController {
     }).send(res)
   }
 
+  getExerciseSummary = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+    return new SuccessResponse({
+      message: 'Get folder exercise summary successful',
+      metaData: await exerciseService.getStatistics()
+    }).send(res)
+  }
+
   getOwnFolders = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     const user = req.user as User
 
