@@ -13,6 +13,7 @@ import { wordProgressService } from './wordProgress.service'
 import { WordTopic } from '~/entities/wordTopic.entity'
 import { CourseTopic } from '~/entities/courseTopic.entity'
 import { User } from '~/entities/user.entity'
+import { DEFAULT_LIMIT_AMOUNT_POPULAR_TOPIC } from '~/constants/topic'
 
 class TopicService {
   createTopics = async (topicsBody: TopicBody[]) => {
@@ -352,7 +353,7 @@ class TopicService {
       wordProgressSummary: progressSummary
     }
   }
-
+  /**Get topic word */
   getTopicWords = async ({
     topicId,
     page = 1,
@@ -399,6 +400,86 @@ class TopicService {
       total,
       currentPage: page,
       totalPages: Math.ceil(total / limit)
+    }
+  }
+
+  /**
+   *@response Topic Count
+   *@response Proportion of complete topic
+   *@response The most popular topics
+   */
+  getTopicSummary = async () => {
+    //topic count
+    const totalTopics = await Topic.count()
+
+    //proportion of complete topic
+    const progressStats = await this.calculateProportionCompleteTopic()
+    //top popular topic
+    const popularTopic = await this.getTopPopularTopic(DEFAULT_LIMIT_AMOUNT_POPULAR_TOPIC)
+
+    return {
+      totalTopics,
+      progressStats,
+      popularTopic
+    }
+  }
+
+  calculateProportionCompleteTopic = async () => {
+    const userCount = await User.count()
+    const topics = await Topic.find()
+
+    let completed = 0
+    let notCompleted = 100
+
+    //calculate progress
+    for (const topic of topics) {
+      const completeCount = await CompletedTopic.count({
+        where: {
+          topic: {
+            id: topic.id
+          }
+        }
+      })
+
+      completed += completeCount
+    }
+
+    //tranform to proportion
+    const total = userCount * topics.length
+    completed = parseFloat(((completed / total) * 100).toFixed(2))
+    notCompleted = parseFloat((100 - completed).toFixed(2))
+
+    return {
+      completed,
+      notCompleted
+    }
+  }
+
+  getTopPopularTopic = async (amount: number) => {
+    const topics = await Topic.find()
+
+    //get top popular topic
+    if (topics) {
+      //topic id list
+
+      const topicIds = topics.map((topic) => topic.id as number)
+
+      const topTopicsStats = []
+      //get number complete user for this each topic
+      for (let index = 0; index < topicIds.length; index++) {
+        const topicId = topicIds[index]
+
+        const learnerCount = await CompletedTopic.createQueryBuilder('ct')
+          .select('COUNT(DISTINCT ct.userId)', 'count')
+          .where('ct.topicId = :topicId', { topicId })
+          .getCount()
+
+        topTopicsStats.push({ topic: topicId, completeCount: learnerCount })
+      }
+
+      //sort and get top popular topic
+      const topTopics = topTopicsStats.sort((a, b) => b.completeCount - a.completeCount).slice(0, amount)
+      return topTopics
     }
   }
 }

@@ -1,7 +1,8 @@
 import express from 'express'
+import { Resource } from '~/constants/access'
 import { topicController } from '~/controllers/topic.controller'
 import { Topic } from '~/entities/topic.entity'
-import { accessTokenValidation } from '~/middlewares/auth.middlewares'
+import { accessTokenValidation, checkPermission } from '~/middlewares/auth.middlewares'
 import { checkIdParamMiddleware, checkQueryMiddleware, parseSort } from '~/middlewares/common.middlewares'
 import { createTopicValidation } from '~/middlewares/topic/createTopic.middlewares'
 import { updateTopicValidation } from '~/middlewares/topic/updateTopic.middleware'
@@ -42,6 +43,13 @@ topicRouter.get(
  * @params : id
  */
 topicRouter.get('/type-list', wrapRequestHandler(topicController.getTopicTypeList))
+
+/**Topic summary */
+topicRouter.get(
+  '/summary',
+  wrapRequestHandler(checkPermission('readAny', Resource.TOPIC)),
+  wrapRequestHandler(topicController.getTopicSummary)
+)
 
 /**
  * @description : Get topic by id

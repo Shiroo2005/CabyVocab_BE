@@ -86,6 +86,13 @@ class TopicController {
       })
     }).send(res)
   }
+
+  getTopicSummary = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    new SuccessResponse({
+      message: 'Get topic summary successful!',
+      metaData: await topicService.getTopicSummary()
+    }).send(res)
+  }
 }
 
 export const topicController = new TopicController()

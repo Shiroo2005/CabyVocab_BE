@@ -409,7 +409,6 @@ class CourseService {
       const topicIds = course.courseTopics?.map((ct) => ct.topic?.id)
       if (!topicIds || topicIds.length === 0) continue
 
-      // đếm số lượng user đã học bao nhiêu topic của khóa đó
       const userTopicProgress = await CompletedTopic.createQueryBuilder('ct')
         .select('ct.userId', 'userId')
         .addSelect('COUNT(DISTINCT ct.topicId)', 'completedCount')
@@ -425,9 +424,12 @@ class CourseService {
       inProgress += inProgressUsers
     }
 
-    const notStarted =
-      totalUsers -
-      new Set(await CompletedTopic.createQueryBuilder('ct').select('DISTINCT ct.userId', 'userId').getRawMany()).size
+    const total = allCourses.length * totalUsers
+
+    //tranform to %
+    completed = parseFloat(((completed / total) * 100.0).toFixed(2))
+    inProgress = parseFloat(((inProgress / total) * 100.0).toFixed(2))
+    const notStarted = parseFloat((100.0 - completed - inProgress).toFixed(2))
 
     const progressStats = {
       completed,
