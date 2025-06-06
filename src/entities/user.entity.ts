@@ -15,7 +15,6 @@ import { Role } from './role.entity'
 import { Token } from './token.entity'
 import { CompletedTopic } from './completedTopic.entity'
 import { WordProgress } from './wordProgress.entity'
-import { CourseProgress } from './courseProgress.entity'
 
 @Entity()
 export class User extends BaseEntity {
@@ -76,9 +75,6 @@ export class User extends BaseEntity {
 
   @OneToMany(() => WordProgress, (wordProgress) => wordProgress.user)
   wordProgresses: WordProgress[]
-
-  @OneToMany(() => CourseProgress, (courseProgress) => courseProgress.user)
-  courseProgresses: CourseProgress[]
 
   static createUser = ({
     id,

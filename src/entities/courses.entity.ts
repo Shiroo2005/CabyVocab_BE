@@ -1,19 +1,15 @@
-import { IsEnum, isEnum, IsNotEmpty, isNotEmpty, IsOptional, Length, Matches } from 'class-validator'
+import { IsEnum, IsNotEmpty, Length } from 'class-validator'
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
 import { Topic } from './topic.entity'
-import { CourseProgress } from './courseProgress.entity'
 import { CourseTopic } from './courseTopic.entity'
 import { CourseLevel } from '~/constants/course'
 import { UpdateCourseBodyReq } from '~/dto/req/course/updateCourseBody,req'
@@ -43,9 +39,6 @@ export class Course extends BaseEntity {
   @Column('varchar')
   @Length(1, 255, { message: 'Description must be between 1 and 255 chars long!' })
   description?: string
-
-  @OneToMany(() => CourseProgress, (courseProgress) => courseProgress.course)
-  courseProgresses: CourseProgress[]
 
   @OneToMany(() => CourseTopic, (courseTopic) => courseTopic.course)
   courseTopics: CourseTopic[]

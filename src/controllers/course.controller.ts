@@ -87,6 +87,13 @@ class CourseController {
       })
     }).send(res)
   }
+
+  getCourseStatisticsSummary = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    new SuccessResponse({
+      message: 'Get course statistics summary successful!',
+      metaData: await courseService.getCourseStatistics()
+    }).send(res)
+  }
 }
 
 export const courseController = new CourseController()
