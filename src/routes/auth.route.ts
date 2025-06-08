@@ -3,6 +3,7 @@ import { wrapRequestHandler } from '~/utils/handler'
 import { authController } from '~/controllers/auth.controller'
 import {
   accessTokenValidation,
+  changePasswordValidation,
   loginValidation,
   refreshTokenValidation,
   registerValidation,
@@ -40,6 +41,13 @@ authRouter.post(
  * @path : /profile
  */
 authRouter.put('/profile', updateUserByIdValidation, wrapRequestHandler(authController.updateProfile))
+
+authRouter.put(
+  '/change-password',
+  accessTokenValidation,
+  changePasswordValidation,
+  wrapRequestHandler(authController.changePassword)
+)
 
 // DELETE
 export default authRouter

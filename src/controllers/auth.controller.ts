@@ -6,6 +6,7 @@ import { OAUTH_PROVIDER } from '~/constants/oauth'
 import { BadRequestError } from '~/core/error.response'
 import { CREATED, SuccessResponse } from '~/core/success.response'
 import { TokenPayload } from '~/dto/common.dto'
+import { ChangePasswordBodyReq } from '~/dto/req/auth/changePasswordBody.req'
 import { LogoutBodyReq } from '~/dto/req/auth/LogoutBody.req'
 import { UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
 import { User } from '~/entities/user.entity'
@@ -107,6 +108,15 @@ class AuthController {
       const FE_URL = env.FE_URL as string
       res.redirect(`${FE_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}`)
     })(req, res)
+  }
+
+  changePassword = async (req: Request<ParamsDictionary, any, ChangePasswordBodyReq>, res: Response) => {
+    const user = req.user as User
+
+    return new SuccessResponse({
+      message: 'Change password for user successful',
+      metaData: await authService.changePasswordForUser(user, req.body)
+    }).send(res)
   }
 }
 export const authController = new AuthController()

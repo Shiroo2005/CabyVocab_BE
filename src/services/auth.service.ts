@@ -11,6 +11,8 @@ import { UserStatus } from '~/constants/userStatus'
 import { Role } from '~/entities/role.entity'
 import { UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
 import { userService } from './user.service'
+import { BadRequestError, NotFoundRequestError } from '~/core/error.response'
+import bcrypt from 'bcrypt'
 
 dotenv.config()
 
@@ -134,6 +136,48 @@ class AuthService {
 
   changeProfile = async (id: number, { avatar, email, username }: UpdateUserBodyReq) => {
     return await userService.updateUserByID(id, { avatar, email, username })
+  }
+
+  /**Change password
+   * @Step 1:validate old password must match
+   * @Step 2: change new password
+   * @Step 3: invalidate refresh token of user so far
+   */
+  changePasswordForUser = async (
+    foundUser: User,
+    { confirmPassword, newPassword }: { confirmPassword: string; newPassword: string }
+  ) => {
+    //validate changePassword
+    this.validateChangePassword(foundUser, confirmPassword)
+
+    //update new password
+    // delete refresh token of this user before
+    await Promise.all([
+      this.updatePassword(foundUser, newPassword),
+      this.deleteRefreshTokenByUser(foundUser.id as number)
+    ])
+
+    return {}
+  }
+
+  updatePassword = async (user: User, newPassword: string) => {
+    user.password = hashData(newPassword)
+
+    return await user.save()
+  }
+
+  validateChangePassword = async (foundUser: User, confirmPassword: string) => {
+    //compare password
+    if (!bcrypt.compare(confirmPassword, foundUser.password))
+      throw new BadRequestError({ message: 'Confirm password not match!' })
+  }
+
+  deleteRefreshTokenByUser = async (userId: number) => {
+    return await Token.getRepository().softDelete({
+      user: {
+        id: userId
+      }
+    })
   }
 }
 
