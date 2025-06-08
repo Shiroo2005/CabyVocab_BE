@@ -1,11 +1,16 @@
 import { Request, Response } from 'express'
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
+import passport from 'passport'
+import { env } from 'process'
+import { OAUTH_PROVIDER } from '~/constants/oauth'
+import { BadRequestError } from '~/core/error.response'
 import { CREATED, SuccessResponse } from '~/core/success.response'
 import { TokenPayload } from '~/dto/common.dto'
 import { LogoutBodyReq } from '~/dto/req/auth/LogoutBody.req'
 import { UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
 import { User } from '~/entities/user.entity'
 import { authService } from '~/services/auth.service'
+import { isValidEnumValue } from '~/utils'
 
 class AuthController {
   register = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
@@ -75,6 +80,33 @@ class AuthController {
       message: 'Update profile successful',
       metaData: await authService.changeProfile(user.id as number, req.body)
     }).send(res)
+  }
+
+  oauthLoginController = async (req: Request, res: Response) => {
+    const provider = req.params.provider
+    console.log(provider)
+
+    if (!provider || !isValidEnumValue(provider, OAUTH_PROVIDER))
+      throw new BadRequestError({ message: 'Provider invalid!' })
+
+    passport.authenticate(provider, { scope: ['profile', 'email'], session: false })(req, res)
+  }
+
+  oauthLoginCallbackController = async (req: Request, res: Response) => {
+    const provider = req.params.provider
+    if (!provider || !isValidEnumValue(provider, OAUTH_PROVIDER))
+      throw new BadRequestError({ message: 'Provider invalid!' })
+    passport.authenticate(provider, { session: false }, async (err: any, user: User, info: any) => {
+      if (err || !user) {
+        throw new BadRequestError({ message: 'Login failed!' })
+      }
+
+      const { accessToken, refreshToken } = await authService.login({
+        id: user.id as number
+      } as User)
+      const FE_URL = env.FE_URL as string
+      res.redirect(`${FE_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}`)
+    })(req, res)
   }
 }
 export const authController = new AuthController()

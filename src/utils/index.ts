@@ -1,6 +1,7 @@
 import { Request } from 'express'
 import _, { parseInt, toNumber } from 'lodash'
 import { nanoid } from 'nanoid'
+import { User } from '~/entities/user.entity'
 
 export const isValidNumber = (num: string) => !Number.isNaN(parseInt(num))
 export const toNumberWithDefaultValue = (num: any, defaultValue: number) => {
@@ -39,6 +40,19 @@ export const isValidEnumValue = <T extends object>(value: string, enumObj: T): b
 
 export const getIpUser = (req: Request) => {
   return req.headers['x-forwarded-for'] as string
+}
+
+export async function generateUniqueUsername(baseUsername: string): Promise<string> {
+  const finalUsername = baseUsername.toLowerCase().replace(/[^a-z0-9]/g, '')
+  let counter = 0
+  let usernameToCheck = finalUsername
+
+  while (await User.findOneBy({ username: usernameToCheck })) {
+    counter++
+    usernameToCheck = `${finalUsername}${counter}`
+  }
+
+  return usernameToCheck
 }
 
 // // export const unGetSelectData = (select = []) => {

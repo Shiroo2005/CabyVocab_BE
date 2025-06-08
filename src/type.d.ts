@@ -11,3 +11,9 @@ declare module 'express' {
     sortParsed?: Record<string, 'ASC' | 'DESC'>
   }
 }
+
+declare global {
+  namespace Express {
+    type User = AppUser
+  }
+}
