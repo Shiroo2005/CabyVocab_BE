@@ -5,8 +5,6 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn
@@ -41,7 +39,7 @@ export class Role extends BaseEntity {
 
   static createRole = ({ name, description, users, id }: Role) => {
     const newRole = new Role()
-    
+
     newRole.id = id
     newRole.name = name
     newRole.description = description
