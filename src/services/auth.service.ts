@@ -50,6 +50,7 @@ class AuthService {
     })
 
     return {
+      user: unGetData({ fields: ['password'], object: createdUser }),
       accessToken,
       refreshToken
     }
@@ -184,7 +185,8 @@ class AuthService {
     const foundUser = await User.findOne({
       where: {
         email
-      }
+      },
+      relations: ['role']
     })
 
     if (!foundUser) {
