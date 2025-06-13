@@ -11,6 +11,7 @@ import { LogoutBodyReq } from '~/dto/req/auth/LogoutBody.req'
 import { UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
 import { User } from '~/entities/user.entity'
 import { authService } from '~/services/auth.service'
+import { OauthGoogleService } from '~/services/oauth.service'
 import { isValidEnumValue } from '~/utils'
 
 class AuthController {
@@ -84,31 +85,39 @@ class AuthController {
   }
 
   oauthLoginController = async (req: Request, res: Response) => {
-    const provider = req.params.provider
-    console.log(provider)
+    const { idToken } = req.body
 
-    if (!provider || !isValidEnumValue(provider, OAUTH_PROVIDER))
-      throw new BadRequestError({ message: 'Provider invalid!' })
+    // 1. Verify ID token với Google
+    const ticket = await OauthGoogleService.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID
+    })
 
-    passport.authenticate(provider, { scope: ['profile', 'email'], session: false })(req, res)
+    const payload = ticket.getPayload()
+    const { email, sub: googleId, name, picture } = payload as any
+
+    return new SuccessResponse({
+      message: 'Login via google successful',
+      metaData: await authService.loginByGoogle(email)
+    }).send(res)
   }
 
-  oauthLoginCallbackController = async (req: Request, res: Response) => {
-    const provider = req.params.provider
-    if (!provider || !isValidEnumValue(provider, OAUTH_PROVIDER))
-      throw new BadRequestError({ message: 'Provider invalid!' })
-    passport.authenticate(provider, { session: false }, async (err: any, user: User, info: any) => {
-      if (err || !user) {
-        throw new BadRequestError({ message: 'Login failed!' })
-      }
+  // oauthLoginCallbackController = async (req: Request, res: Response) => {
+  //   const provider = req.params.provider
+  //   if (!provider || !isValidEnumValue(provider, OAUTH_PROVIDER))
+  //     throw new BadRequestError({ message: 'Provider invalid!' })
+  //   passport.authenticate(provider, { session: false }, async (err: any, user: User, info: any) => {
+  //     if (err || !user) {
+  //       throw new BadRequestError({ message: 'Login failed!' })
+  //     }
 
-      const { accessToken, refreshToken } = await authService.login({
-        id: user.id as number
-      } as User)
-      const FE_URL = env.FE_URL as string
-      res.redirect(`${FE_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}`)
-    })(req, res)
-  }
+  //     const { accessToken, refreshToken } = await authService.login({
+  //       id: user.id as number
+  //     } as User)
+  //     const FE_URL = env.FE_URL as string
+  //     res.redirect(`${FE_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}`)
+  //   })(req, res)
+  // }
 
   changePassword = async (req: Request<ParamsDictionary, any, ChangePasswordBodyReq>, res: Response) => {
     const user = req.user as User

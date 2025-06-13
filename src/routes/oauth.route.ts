@@ -4,6 +4,6 @@ import { wrapRequestHandler } from '~/utils/handler'
 
 export const oAuthRouter = express.Router()
 
-oAuthRouter.get('/:provider', wrapRequestHandler(authController.oauthLoginController))
+oAuthRouter.get('/:google', wrapRequestHandler(authController.oauthLoginController))
 
-oAuthRouter.get('/:provider/callback', wrapRequestHandler(authController.oauthLoginCallbackController))
+// oAuthRouter.get('/:google/callback', wrapRequestHandler(authController.oauthLoginCallbackController))

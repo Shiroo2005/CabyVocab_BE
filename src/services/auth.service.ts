@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import { hashData, signAccessToken, signRefreshToken } from '~/utils/jwt'
 import { Token } from '~/entities/token.entity'
-import { unGetData } from '~/utils'
+import { generateUniqueUsername, unGetData } from '~/utils'
 import { LogoutBodyReq } from '~/dto/req/auth/LogoutBody.req'
 import { sendVerifyEmail } from './email.service'
 import { EmailVerificationToken } from '~/entities/emailVerificationToken.entity'
@@ -178,6 +178,23 @@ class AuthService {
         id: userId
       }
     })
+  }
+
+  loginByGoogle = async (email: string) => {
+    const foundUser = await User.findOne({
+      where: {
+        email
+      }
+    })
+
+    if (!foundUser) {
+      return await this.register({
+        email,
+        username: await generateUniqueUsername(email.split('@')[0]),
+        password: email.split('@')[0]
+      })
+    }
+    return await this.login(foundUser)
   }
 }
 

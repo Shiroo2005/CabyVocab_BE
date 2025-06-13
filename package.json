@@ -65,6 +65,7 @@
     "ejs": "^3.1.10",
     "express": "^4.21.2",
     "express-validator": "^7.2.1",
+    "google-auth-library": "^10.1.0",
     "helmet": "^8.1.0",
     "http-status": "^2.1.0",
     "jsonwebtoken": "^9.0.2",
