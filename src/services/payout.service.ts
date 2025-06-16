@@ -162,6 +162,11 @@ class PayoutService {
     if (!foundPayout) throw new BadRequestError({ message: 'Payout id invalid!' })
 
     //if payout status was rejected, return amount for user
+
+    if (status == PayoutStatus.FAILED) {
+      return foundPayout
+    }
+
     const user = foundPayout.createdBy
     user.balance += foundPayout.amount
     await user.save()
