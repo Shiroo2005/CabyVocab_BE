@@ -51,7 +51,30 @@ class CommentService {
       targetType
     })
 
-    return await comment.save()
+    await comment.save()
+
+    const fullComment = await Comment.findOne({
+    where: { id: comment.id },
+    select: {
+      id: true,
+      content: true,
+      createdAt: true,
+      createdBy: {
+        id: true,
+        username: true,
+        email: true,
+        avatar: true
+      },
+      parentComment: {
+        id: true
+      },
+      targetId: true,
+      targetType: true
+    },
+    relations: ['createdBy', 'parentComment']
+    })
+    if (!fullComment) throw new BadRequestError({ message: 'Unauthorize for this comment' })
+    return fullComment || null
   }
 
   updateComment = async ({ content, targetId, targetType, userId, commentId }: UpdateCommentBodyReq) => {

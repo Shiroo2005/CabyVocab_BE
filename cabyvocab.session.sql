@@ -1,2 +1,1 @@
-select *
-FROM users
+select * from user

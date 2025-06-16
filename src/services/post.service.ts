@@ -15,7 +15,22 @@ class PostService {
     const foundPost = await Post.findOne({
       where: {
         id
-      }
+      },
+      select: {
+        id: true,
+        content: true,
+        tags: true,
+        thumbnails: true,
+        createdAt: true,
+        updatedAt: true,
+        createdBy: {
+          id: true,
+          username: true,
+          avatar: true,
+          email: true
+        }
+      },
+      relations: ['createdBy']
     })
 
     const [voteCount, isAlreadyVote, commentCount] = await Promise.all([
@@ -25,7 +40,7 @@ class PostService {
     ])
 
     //get comment
-    const comments = await commentService.findChildComment(id, null, TargetType.FOLDER)
+    const comments = await commentService.findChildComment(id, null, TargetType.POST)
 
     return {
       ...foundPost,
@@ -75,6 +90,8 @@ class PostService {
       relations: ['createdBy']
     })
 
+    
+
     const data = await Promise.all(
       posts.map(async (post) => {
         const [voteCount, isAlreadyVote, commentCount] = await Promise.all([
@@ -90,7 +107,6 @@ class PostService {
         }
       })
     )
-
     return {
       posts: data,
       total,
@@ -98,6 +114,8 @@ class PostService {
       totalPages: Math.ceil(total / limit)
     }
   }
+
+  
 
   create = async (userId: number, { content, tags = [], thumbnails = [] }: CreatePostBodyReq) => {
     const post = new Post()
@@ -166,7 +184,7 @@ class PostService {
   findNumberCommentByPostId = async (id: number) => {
     return Comment.countBy({
       targetId: id,
-      targetType: TargetType.FOLDER
+      targetType: TargetType.POST
     })
   }
 

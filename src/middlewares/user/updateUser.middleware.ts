@@ -43,23 +43,5 @@ export const updateUserByIdValidation = validate(
       }
     },
 
-    roleId: {
-      trim: true,
-      custom: {
-        options: async (value, { req }) => {
-          const foundRole = await Role.findOne({
-            where: {
-              id: value
-            }
-          })
-
-          if (!foundRole) {
-            throw new BadRequestError({ message: 'Role not exists!' })
-          }
-
-          return true
-        }
-      }
-    }
   })
 )
