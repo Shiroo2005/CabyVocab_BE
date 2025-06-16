@@ -102,7 +102,7 @@ class PostController {
     return new SuccessResponse({
       message: 'Update comment successful!',
       metaData: await commentService.updateComment({
-        userId: user.id as number,
+        user,
         targetId: postId,
         targetType: TargetType.POST,
         commentId,
@@ -148,7 +148,7 @@ class PostController {
     return new SuccessResponse({
       message: 'Create comment successful!',
       metaData: await commentService.comment({
-        userId: user.id as number,
+        user,
         targetId: postId,
         targetType: TargetType.POST,
         ...req.body

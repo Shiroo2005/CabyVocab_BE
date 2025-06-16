@@ -19,6 +19,14 @@ exerciseRouter.use(accessTokenValidation)
 exerciseRouter.use(checkVerifyUser)
 
 //GET
+exerciseRouter.get('/me', wrapRequestHandler(exerciseController.getOwnFolders))
+
+/**Get exercise summary */
+exerciseRouter.get(
+  '/summary',
+  wrapRequestHandler(checkPermission('readAny', Resource.EXERCISE)),
+  wrapRequestHandler(exerciseController.getExerciseSummary)
+)
 /**
  * @description : Get exercise by id
  * @method : GET
@@ -117,6 +125,14 @@ exerciseRouter.post(
   wrapRequestHandler(exerciseController.createComment)
 )
 
+/**
+ * @description : Vote exercise
+ * @method : POST
+ * @path : /:id/like
+ * @header : Authorization
+ */
+exerciseRouter.post('/:id/like', checkIdParamMiddleware, wrapRequestHandler(exerciseController.voteFolder))
+
 //PUT
 
 //PATCH
@@ -168,6 +184,18 @@ exerciseRouter.put(
 }
  */
 exerciseRouter.patch('/:id', updateExerciseValidation, wrapRequestHandler(exerciseController.updateById))
+
+/**
+ * @description : Update attempt quiz
+ * @method : PATCH
+ * @path : /:id/quiz/:quizId/finish/
+ * @header : Authorization
+ */
+exerciseRouter.patch(
+  '/:id/quiz/:quizId/finish',
+  wrapRequestHandler(checkIdParamMiddleware),
+  wrapRequestHandler(exerciseController.finishAttempQuiz)
+)
 
 //DELETE
 /**

@@ -81,8 +81,16 @@ class TopicController {
       metaData: await topicService.getTopicWords({
         topicId,
         ...req.parseQueryPagination,
-        sort: req.sortParsed
+        sort: req.sortParsed,
+        ...req.query
       })
+    }).send(res)
+  }
+
+  getTopicSummary = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    new SuccessResponse({
+      message: 'Get topic summary successful!',
+      metaData: await topicService.getTopicSummary()
     }).send(res)
   }
 }

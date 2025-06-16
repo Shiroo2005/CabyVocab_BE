@@ -11,11 +11,13 @@ import { toNumber } from 'lodash'
 export const updateUserByIdValidation = validate(
   checkSchema({
     username: {
+      optional: true,
       ...isUsername,
       ...isLength({ fieldName: 'username' })
     },
 
     email: {
+      optional: true,
       ...isEmail,
       custom: {
         options: async (value, { req }) => {
@@ -23,7 +25,7 @@ export const updateUserByIdValidation = validate(
             where: [{ email: value }, { username: req.body.username }]
           })
 
-          if (foundUser && (foundUser.id as number) != toNumber((req as Request).params.id)) {
+          if (foundUser && (foundUser.id as number) != toNumber((req.params as Request).params.id)) {
             throw new BadRequestError({ message: 'Email or username already in!' })
           }
 
@@ -33,15 +35,16 @@ export const updateUserByIdValidation = validate(
     },
 
     avatar: {
+      optional: true,
       trim: true
     },
 
     status: {
+      optional: true,
       trim: true,
       isIn: {
         options: [Object.values(UserStatus)]
       }
-    },
-
+    }
   })
 )

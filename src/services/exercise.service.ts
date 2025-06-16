@@ -1,4 +1,4 @@
-import { In, Like } from 'typeorm'
+import { In, Like, Not } from 'typeorm'
 import { lengthCode } from '~/constants/folder'
 import { BadRequestError } from '~/core/error.response'
 import { CreateFolderBodyReq } from '~/dto/req/exercise/createFolderBody.req'
@@ -15,34 +15,47 @@ import { commentService } from './comment.service'
 import { Order } from '~/entities/order.entity'
 import { OrderQueryReq } from '~/dto/req/exercise/order/orderQuery.req'
 import { TargetType } from '~/constants/target'
+import { UserAttempt } from '~/entities/userAttemp.entity'
 
 class ExerciseService {
-  createNewFolder = async ({ name, price }: CreateFolderBodyReq, userId: number) => {
+  createNewFolder = async ({ name, price, isPublic }: CreateFolderBodyReq, userId: number) => {
     const createdFolder = await Folder.save({
       name,
       code: generatedUuid(lengthCode),
       createdBy: {
         id: userId
       },
-      price
+      price,
+      isPublic
     })
 
     return createdFolder
   }
 
   checkOwn = async (userId: number, folderId: number) => {
-    if (folderId != userId) throw new BadRequestError({ message: 'User not owner for this folder!' })
+    const foundFolder = await Folder.findOne({
+      where: {
+        id: folderId
+      },
+      relations: ['createdBy']
+    })
+    if (foundFolder?.createdBy.id != userId) throw new BadRequestError({ message: 'User not owner for this folder!' })
   }
 
   getAllFolder = async (userId: number, { page = 1, limit = 10, name, sort, code }: folderQueryReq) => {
     const skip = (page - 1) * limit
+
     const [folders, total] = await Folder.findAndCount({
       skip,
       take: limit,
-      where: {
-        name: Like(`%${name || ''}%`),
-        code
-      },
+      where: [
+        {
+          name: Like(`%${name || ''}%`),
+          code,
+          isPublic: true
+        },
+        { name: Like(`%${name || ''}%`), code, createdBy: { id: userId } }
+      ],
       order: { ...sort, createdAt: 'desc' },
       select: {
         id: true,
@@ -54,23 +67,33 @@ class ExerciseService {
           email: true
         },
         code: true,
-        price: true
+        price: true,
+        createdAt: true,
+        flashCards: {
+          id: true
+        },
+        isPublic: true
       },
-      relations: ['createdBy']
+      relations: {
+        createdBy: true,
+        flashCards: true
+      }
     })
 
     const data = await Promise.all(
       folders.map(async (folder) => {
-        const [voteCount, isAlreadyVote, commentCount] = await Promise.all([
-          await this.findNumberVoteByFolderId(folder.id),
-          await this.isAlreadyVote(folder.id, userId),
-          await this.findNumberCommentByFolderId(folder.id)
+        const [voteCount, isAlreadyVote, commentCount, totalAttemptCount] = await Promise.all([
+          this.findNumberVoteByFolderId(folder.id),
+          this.isAlreadyVote(folder.id, userId),
+          this.findNumberCommentByFolderId(folder.id),
+          this.getTotalAttemptFolder(folder.id)
         ])
         return {
           ...folder,
           voteCount,
           commentCount,
-          isAlreadyVote
+          isAlreadyVote,
+          totalAttemptCount
         }
       })
     )
@@ -83,12 +106,38 @@ class ExerciseService {
     }
   }
 
-  updateFolder = async (user: User, id: number, { name, quizzes, flashCards, price }: updateFolderBodyReq) => {
+  getTotalAttemptFolder = async (folderId: number) => {
+    const quiz = await Quiz.findOne({
+      where: {
+        folder: {
+          id: folderId
+        }
+      }
+    })
+
+    if (!quiz) return 0
+
+    const count = await UserAttempt.count({
+      where: {
+        quiz: {
+          id: quiz.id
+        }
+      }
+    })
+
+    return count
+  }
+
+  updateFolder = async (
+    user: User,
+    id: number,
+    { name, quizzes, flashCards, price, isPublic }: updateFolderBodyReq
+  ) => {
     const foundFolder = await Folder.findOne({
       where: {
         id
       },
-      relations: ['createdBy', 'quizzes', 'votes', 'votes.createdBy'],
+      relations: ['createdBy', 'quizzes'],
       select: {
         id: true,
         name: true,
@@ -146,8 +195,40 @@ class ExerciseService {
       foundFolder.flashCards = mappedFlashCard
     }
 
+    if (isPublic != null) {
+      foundFolder.isPublic = isPublic
+    }
+
     await foundFolder.save()
     return this.getFolderById(user.id as number, id)
+  }
+
+  getOwnFolder = async (userId: number) => {
+    return await Folder.find({
+      where: {
+        createdBy: {
+          id: userId
+        }
+      },
+      select: {
+        id: true,
+        isPublic: true,
+        code: true,
+        flashCards: true,
+        name: true,
+        price: true,
+        createdAt: true,
+        quizzes: true,
+        createdBy: {
+          id: true
+        }
+      },
+      relations: {
+        createdBy: true,
+        flashCards: true,
+        quizzes: true
+      }
+    })
   }
 
   getFolderById = async (userId: number, id: number) => {
@@ -179,7 +260,9 @@ class ExerciseService {
           avatar: true,
           email: true,
           username: true
-        }
+        },
+        price: true,
+        isPublic: true
       }
     })
 
@@ -192,13 +275,42 @@ class ExerciseService {
     //get comment
     const comments = await commentService.findChildComment(id, null, TargetType.FOLDER)
 
+    const countAttempt = await this.getTotalAttemptFolder(id)
+
     return {
       ...foundFolder,
       voteCount,
       commentCount,
       isAlreadyVote,
-      comments
+      comments,
+      countAttempt
     }
+  }
+
+  findCountAttempt = async (folderId: number, userId: number) => {
+    const foundQuiz = await Folder.findOne({
+      where: {
+        id: folderId
+      },
+      relations: {
+        quizzes: true
+      }
+    })
+
+    if (foundQuiz) {
+      const foundAttempt = await UserAttempt.findOne({
+        where: {
+          quiz: {
+            id: foundQuiz.id
+          }
+        }
+      })
+
+      if (foundAttempt) return foundAttempt.count
+    }
+
+    //not do before
+    return 0
   }
 
   findNumberVoteByFolderId = async (id: number) => {
@@ -213,6 +325,50 @@ class ExerciseService {
       targetId: id,
       targetType: TargetType.FOLDER
     })
+  }
+
+  checkQuizIdValid = async (quizId: number) => {
+    const foundQuiz = await Quiz.findOneBy({ id: quizId })
+
+    if (foundQuiz != null) return true
+    return false
+  }
+
+  updateCountAttemptQuiz = async ({ quizId, userId }: { quizId: number; userId: number }) => {
+    //checkQuizId
+
+    if (!(await this.checkQuizIdValid(quizId))) throw new BadRequestError({ message: 'Quiz id invalid' })
+
+    const foundAttemptQuiz = await UserAttempt.findOne({
+      where: {
+        quiz: {
+          id: quizId
+        },
+        user: {
+          id: userId
+        }
+      }
+    })
+    //not found ==> first attempt
+    if (!foundAttemptQuiz) {
+      const newAttempt = new UserAttempt()
+      newAttempt.count = 1
+      newAttempt.user = {
+        id: userId
+      } as User
+
+      newAttempt.quiz = {
+        id: quizId
+      } as Quiz
+
+      await newAttempt.save()
+      return {}
+    }
+
+    //update
+    foundAttemptQuiz.count += 1
+    await foundAttemptQuiz.save()
+    return {}
   }
 
   isAlreadyVote = async (folderId: number, userId: number) => {
@@ -261,7 +417,8 @@ class ExerciseService {
   findFolderById = async (id: number) => {
     return Folder.findOne({
       where: {
-        id
+        id,
+        isPublic: true
       }
     })
   }
@@ -320,6 +477,9 @@ class ExerciseService {
         /* empty */
       }
 
+      //if folder not public and folder was not own by this user
+      if (!folder.isPublic) return false
+
       //free
       if (folder.price == 0) return true
 
@@ -337,6 +497,47 @@ class ExerciseService {
     }
 
     return true
+  }
+
+  getStatistics = async () => {
+    // Tổng số lượng folder
+    const totalFolders = await Folder.count()
+
+    // Số lượng folder miễn phí và có phí
+    const freeFolders = await Folder.count({ where: { price: 0 } })
+    const paidFolders = await Folder.count({ where: { price: Not(0) } })
+
+    // Giá trung bình của folder có phí
+    const paidFoldersData = await Folder.createQueryBuilder('folder')
+      .select('AVG(folder.price)', 'avgPrice')
+      .where('folder.price > 0')
+      .getRawOne()
+    const avgPrice = parseFloat(paidFoldersData?.avgPrice || '0')
+
+    // Top folder phổ biến theo số lần attempt
+    const rawTopFolders = await Folder.createQueryBuilder('folder')
+      .leftJoin('folder.quizzes', 'quiz')
+      .leftJoin(UserAttempt, 'attempt', 'quiz.id = attempt.quizId')
+      .select('folder.id', 'id')
+      .addSelect('folder.name', 'name')
+      .addSelect('COUNT(attempt.id)', 'attemptCount')
+      .groupBy('folder.id')
+      .orderBy('attemptCount', 'DESC')
+      .limit(5)
+      .getRawMany()
+
+    const topFolders = rawTopFolders.map((item) => ({
+      ...item,
+      attemptCount: parseInt(item.attemptCount, 10)
+    }))
+
+    return {
+      totalFolders,
+      freeFolders,
+      paidFolders,
+      avgPaidFolderPrice: avgPrice,
+      topFolders
+    }
   }
 }
 

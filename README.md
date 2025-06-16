@@ -42,4 +42,9 @@ FROM_EMAIL=noreply@astrovocab.id.vn
 VNPAY_TMnCode=9E7HMEQ7
 VNPAY_SecretKey=FC52YAR0TS03CVGB8NKE4X61XNXB3069
 VNPAY_HOST=https://sandbox.vnpayment.vn
+
+#GOOGLE
+GOOGLE_CLIENT_ID=220849696417-vqjq2u55rr2np5fbagreg616tirripbh.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
+GOOGLE_CALLBACK_URL=http://localhost:8081/oauth/google/callback
 ```

@@ -9,6 +9,8 @@ import swaggerUi from 'swagger-ui-express'
 import { swaggerSpec } from './swagger'
 import { DatabaseService } from './services/database.service'
 import { servingStaticConfig } from './config/static.config'
+import './config/passport.config'
+
 const app = express()
 const port = 8081
 config()

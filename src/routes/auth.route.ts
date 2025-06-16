@@ -3,11 +3,13 @@ import { wrapRequestHandler } from '~/utils/handler'
 import { authController } from '~/controllers/auth.controller'
 import {
   accessTokenValidation,
+  changePasswordValidation,
   loginValidation,
   refreshTokenValidation,
   registerValidation,
   verifyEmailTokenValidation
 } from '~/middlewares/auth.middlewares'
+import { updateUserByIdValidation } from '~/middlewares/user/updateUser.middleware'
 const authRouter = express.Router()
 
 // GET
@@ -33,6 +35,19 @@ authRouter.post(
 )
 
 // PUT
+/**
+ * @description : Update profile
+ * @method : POST
+ * @path : /profile
+ */
+authRouter.put('/profile', updateUserByIdValidation, wrapRequestHandler(authController.updateProfile))
+
+authRouter.put(
+  '/change-password',
+  accessTokenValidation,
+  changePasswordValidation,
+  wrapRequestHandler(authController.changePassword)
+)
 
 // DELETE
 export default authRouter

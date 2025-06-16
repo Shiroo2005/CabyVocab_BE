@@ -10,6 +10,13 @@ class SystemEarningController {
       metaData: await systemEarningService.getAllSystemEarning({ ...req.parseQueryPagination, ...req.query })
     }).send(res)
   }
+
+  getSystemEarningStatistics = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    return new SuccessResponse({
+      message: 'Get all system earning statistics successful!',
+      metaData: await systemEarningService.getRevenueStats()
+    }).send(res)
+  }
 }
 
 export const systemEarningController = new SystemEarningController()

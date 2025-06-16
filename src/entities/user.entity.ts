@@ -1,13 +1,10 @@
 import { IsEmail, IsNotEmpty, Length, Matches, validate } from 'class-validator'
 import {
   BaseEntity,
-  BeforeInsert,
-  BeforeUpdate,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -15,11 +12,9 @@ import {
 } from 'typeorm'
 import { UserStatus } from '~/constants/userStatus'
 import { Role } from './role.entity'
-import { hashData } from '~/utils/jwt'
 import { Token } from './token.entity'
 import { CompletedTopic } from './completedTopic.entity'
 import { WordProgress } from './wordProgress.entity'
-import { CourseProgress } from './courseProgress.entity'
 
 @Entity()
 export class User extends BaseEntity {
@@ -80,16 +75,6 @@ export class User extends BaseEntity {
 
   @OneToMany(() => WordProgress, (wordProgress) => wordProgress.user)
   wordProgresses: WordProgress[]
-
-  @OneToMany(() => CourseProgress, (courseProgress) => courseProgress.user)
-  courseProgresses: CourseProgress[]
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  hashPassword?() {
-    if (!this.password) return
-    this.password = hashData(this.password)
-  }
 
   static createUser = ({
     id,

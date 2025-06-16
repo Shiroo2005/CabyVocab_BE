@@ -33,3 +33,10 @@ systemEarningRouter.get(
   wrapRequestHandler(parseSort({ allowSortList: SystemEarning.allowSortList })),
   wrapRequestHandler(systemEarningController.getSystemEarning)
 )
+
+/**Get system earning summary */
+systemEarningRouter.get(
+  '/summary',
+  wrapRequestHandler(checkPermission('readAny', Resource.SYSTEM_EARNING)),
+  wrapRequestHandler(systemEarningController.getSystemEarningStatistics)
+)

@@ -82,8 +82,16 @@ class CourseController {
       metaData: await courseService.getCourseTopics(user, {
         courseId,
         ...req.parseQueryPagination,
-        sort: req.sortParsed
+        sort: req.sortParsed,
+        ...req.query
       })
+    }).send(res)
+  }
+
+  getCourseStatisticsSummary = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    new SuccessResponse({
+      message: 'Get course statistics summary successful!',
+      metaData: await courseService.getCourseStatistics()
     }).send(res)
   }
 }

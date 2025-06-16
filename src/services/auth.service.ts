@@ -1,14 +1,18 @@
 import { User } from '~/entities/user.entity'
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
-import { signAccessToken, signRefreshToken } from '~/utils/jwt'
+import { hashData, signAccessToken, signRefreshToken } from '~/utils/jwt'
 import { Token } from '~/entities/token.entity'
-import { unGetData } from '~/utils'
+import { generateUniqueUsername, unGetData } from '~/utils'
 import { LogoutBodyReq } from '~/dto/req/auth/LogoutBody.req'
 import { sendVerifyEmail } from './email.service'
 import { EmailVerificationToken } from '~/entities/emailVerificationToken.entity'
 import { UserStatus } from '~/constants/userStatus'
 import { Role } from '~/entities/role.entity'
+import { UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
+import { userService } from './user.service'
+import { BadRequestError, NotFoundRequestError } from '~/core/error.response'
+import bcrypt from 'bcrypt'
 
 dotenv.config()
 
@@ -25,7 +29,7 @@ class AuthService {
     const newUser = User.create({
       email,
       username,
-      password,
+      password: hashData(password),
       role: userRole
     })
 
@@ -46,6 +50,7 @@ class AuthService {
     })
 
     return {
+      user: unGetData({ fields: ['password'], object: createdUser }),
       accessToken,
       refreshToken
     }
@@ -128,6 +133,70 @@ class AuthService {
 
     //return info user before update
     return this.getAccount({ userId: userId })
+  }
+
+  changeProfile = async (id: number, { avatar, email, username }: UpdateUserBodyReq) => {
+    return await userService.updateUserByID(id, { avatar, email, username })
+  }
+
+  /**Change password
+   * @Step 1:validate old password must match
+   * @Step 2: change new password
+   * @Step 3: invalidate refresh token of user so far
+   */
+  changePasswordForUser = async (
+    foundUser: User,
+    { confirmPassword, newPassword }: { confirmPassword: string; newPassword: string }
+  ) => {
+    //validate changePassword
+    this.validateChangePassword(foundUser, confirmPassword)
+
+    //update new password
+    // delete refresh token of this user before
+    await Promise.all([
+      this.updatePassword(foundUser, newPassword),
+      this.deleteRefreshTokenByUser(foundUser.id as number)
+    ])
+
+    return {}
+  }
+
+  updatePassword = async (user: User, newPassword: string) => {
+    user.password = hashData(newPassword)
+
+    return await user.save()
+  }
+
+  validateChangePassword = async (foundUser: User, confirmPassword: string) => {
+    //compare password
+    if (!bcrypt.compare(confirmPassword, foundUser.password))
+      throw new BadRequestError({ message: 'Confirm password not match!' })
+  }
+
+  deleteRefreshTokenByUser = async (userId: number) => {
+    return await Token.getRepository().softDelete({
+      user: {
+        id: userId
+      }
+    })
+  }
+
+  loginByGoogle = async (email: string) => {
+    const foundUser = await User.findOne({
+      where: {
+        email
+      },
+      relations: ['role']
+    })
+
+    if (!foundUser) {
+      return await this.register({
+        email,
+        username: await generateUniqueUsername(email.split('@')[0]),
+        password: email.split('@')[0]
+      })
+    }
+    return await this.login(foundUser)
   }
 }
 

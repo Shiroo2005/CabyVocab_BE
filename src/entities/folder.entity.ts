@@ -12,8 +12,6 @@ import {
 import { User } from './user.entity'
 import { Quiz } from './quiz.entity'
 import { FlashCard } from './flashCard.entity'
-import { Vote } from './vote.entity'
-import { Comment } from './comment.entity'
 
 @Entity()
 export class Folder extends BaseEntity {
@@ -28,6 +26,9 @@ export class Folder extends BaseEntity {
 
   @Column('double')
   price: number
+
+  @Column('boolean', { default: true })
+  isPublic: boolean
 
   @ManyToOne(() => User)
   createdBy: User

@@ -8,8 +8,9 @@ import { unGetData } from '~/utils'
 import { BadRequestError } from '~/core/error.response'
 import { DatabaseService } from './database.service'
 import { CompletedTopic } from '~/entities/completedTopic.entity'
-import { In } from 'typeorm'
+import { In, Like } from 'typeorm'
 import { User } from '~/entities/user.entity'
+import { CourseLevel, DEFAULT_LIMIT_AMOUNT_POPULAR_COURSE } from '~/constants/course'
 
 class CourseService {
   createCourse = async (coursesBody: CourseBody[]) => {
@@ -132,7 +133,7 @@ class CourseService {
 
   getAllCourse = async (
     user: User,
-    { page = 1, limit = 10, title, target, level, description, sort }: courseQueryReq
+    { page = 1, limit = 10, title = '', target, level, description, sort }: courseQueryReq
   ) => {
     const skip = (page - 1) * limit
 
@@ -141,7 +142,7 @@ class CourseService {
       take: limit,
       relations: ['courseTopics', 'courseTopics.topic'],
       where: {
-        title,
+        title: Like(`%${title}%`),
         target,
         level,
         description
@@ -266,19 +267,26 @@ class CourseService {
       courseId,
       page = 1,
       limit = 10,
-      sort
+      sort,
+      title = ''
     }: {
       courseId: number
       page?: number
       limit?: number
       sort?: any
+      title?: string
     }
   ) => {
     const skip = (page - 1) * limit
 
     // Find all course-topic relationships for this course
     const courseTopics = await CourseTopic.find({
-      where: { course: { id: courseId } },
+      where: {
+        course: { id: courseId },
+        topic: {
+          title: Like(`%${title}%`)
+        }
+      },
       relations: ['topic'],
       order: { displayOrder: 'ASC', ...sort },
       skip,
@@ -287,7 +295,12 @@ class CourseService {
 
     // Count total topics for this course
     const total = await CourseTopic.count({
-      where: { course: { id: courseId } }
+      where: {
+        course: { id: courseId },
+        topic: {
+          title: Like(`%${title}%`)
+        }
+      }
     })
 
     const topicIds = courseTopics.map((item) => item.topic?.id as number)
@@ -296,7 +309,8 @@ class CourseService {
     const completeTopics = await CompletedTopic.find({
       where: {
         topic: {
-          id: In(topicIds)
+          id: In(topicIds),
+          title: Like(`%${title}%`)
         },
         user: {
           id: user.id
@@ -339,6 +353,126 @@ class CourseService {
     })
 
     return (await completeTopics).length === course.courseTopics.length
+  }
+
+  //total course
+  //course count each level
+  //get user progress for course
+  //get top popular course
+  getCourseStatistics = async () => {
+    const totalCourses = await Course.count()
+    const courseCountByLevel = await this.getCourseCountForEachLevel()
+    const progressStats = await this.getCourseProgressSummary()
+    const topCourses = await this.getTopPopularCourse(DEFAULT_LIMIT_AMOUNT_POPULAR_COURSE)
+
+    return {
+      totalCourses,
+      courseCountByLevel,
+      progressStats,
+      topCourses
+    }
+  }
+
+  getCourseCountForEachLevel = async () => {
+    const result = (await Course.createQueryBuilder('course')
+      .select('course.level', 'level')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy('course.level')
+      .getRawMany()) as { level: CourseLevel; count: number }[]
+    console.log(result)
+
+    //mapping
+    return Object.values(CourseLevel).map((level) => {
+      let count = 0
+      result.forEach((item) => {
+        if (item.level == level) {
+          count += +item.count
+        }
+      })
+
+      return {
+        level,
+        count
+      }
+    })
+  }
+
+  getCourseProgressSummary = async () => {
+    // 3. Progress Stats
+    const totalUsers = await User.count()
+    const allCourses = await Course.find({ relations: ['courseTopics', 'courseTopics.topic'] })
+
+    let completed = 0
+    let inProgress = 0
+
+    for (const course of allCourses) {
+      const topicIds = course.courseTopics?.map((ct) => ct.topic?.id)
+      if (!topicIds || topicIds.length === 0) continue
+
+      const userTopicProgress = await CompletedTopic.createQueryBuilder('ct')
+        .select('ct.userId', 'userId')
+        .addSelect('COUNT(DISTINCT ct.topicId)', 'completedCount')
+        .where('ct.topicId IN (:...topicIds)', { topicIds })
+        .groupBy('ct.userId')
+        .getRawMany()
+
+      const totalTopics = topicIds.length
+      const completedUsers = userTopicProgress.filter((u) => Number(u.completedCount) === totalTopics).length
+      const inProgressUsers = userTopicProgress.filter((u) => Number(u.completedCount) < totalTopics).length
+
+      completed += completedUsers
+      inProgress += inProgressUsers
+    }
+
+    const total = allCourses.length * totalUsers
+
+    //tranform to %
+    completed = parseFloat(((completed / total) * 100.0).toFixed(2))
+    inProgress = parseFloat(((inProgress / total) * 100.0).toFixed(2))
+    const notStarted = parseFloat((100.0 - completed - inProgress).toFixed(2))
+
+    const progressStats = {
+      completed,
+      inProgress,
+      notStarted
+    }
+    return progressStats
+  }
+
+  getTopPopularCourse = async (amount: number) => {
+    const courseTopicRelations = await CourseTopic.find({ relations: ['course', 'topic'] })
+
+    const courseIdToTopicIdsMap = courseTopicRelations.reduce(
+      (acc, ct) => {
+        if (!ct.course?.id || !ct.topic?.id) return acc
+        const courseId = ct.course.id
+        acc[courseId] = acc[courseId] || []
+        acc[courseId].push(ct.topic.id)
+        return acc
+      },
+      {} as Record<number, number[]>
+    )
+
+    const topCoursesStats = []
+
+    for (const [courseId, topicIds] of Object.entries(courseIdToTopicIdsMap)) {
+      const learnerCount = await CompletedTopic.createQueryBuilder('ct')
+        .select('COUNT(DISTINCT ct.userId)', 'count')
+        .where('ct.topicId IN (:...topicIds)', { topicIds })
+        .getRawOne()
+
+      topCoursesStats.push({
+        courseId: Number(courseId),
+        learnerCount: Number(learnerCount.count)
+      })
+    }
+
+    const topCourses = topCoursesStats.sort((a, b) => b.learnerCount - a.learnerCount).slice(0, amount)
+
+    // ✅ Tổng hợp
+    return {
+      topCourses
+    }
   }
 }
 
