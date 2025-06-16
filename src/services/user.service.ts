@@ -106,7 +106,7 @@ class UserService {
     return user || {}
   }
 
-  updateUserByID = async (id: number, { username, email, avatar, status, roleId }: UpdateUserBodyReq) => {
+  updateUserByID = async (id: number, update: UpdateUserBodyReq) => {
     const user = await User.findOne({
       where: { id },
       relations: ['role']
@@ -116,27 +116,13 @@ class UserService {
       throw new Error('Không tìm thấy user')
     }
 
-    let role
-
-    if (roleId) {
-      const userRole = await Role.findOne({ where: { id: roleId } })
-      role = userRole != null ? userRole : undefined
-    }
-
-    const updatedUser = User.updateUser(user, {
-      username,
-      email,
-      avatar,
-      status,
-      role
-    })
-
+    await User.update(id, update);
     // Save the updated user to the database
-    await User.save(updatedUser)
+    await User.save(user);
 
     return unGetData({
       fields: ['password', 'role.createdAt', 'role.updatedAt', 'role.deletedAt', 'role.description'],
-      object: updatedUser
+      object: user
     })
   }
 
