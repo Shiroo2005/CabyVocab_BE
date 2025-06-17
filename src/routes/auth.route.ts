@@ -13,7 +13,8 @@ import { updateUserByIdValidation } from '~/middlewares/user/updateUser.middlewa
 const authRouter = express.Router()
 
 // GET
-authRouter.get('/account', accessTokenValidation, wrapRequestHandler(authController.getAccount))
+
+authRouter.put('/change-password', changePasswordValidation, wrapRequestHandler(authController.changePassword))
 
 // POST
 authRouter.post('/register', registerValidation, wrapRequestHandler(authController.register))
@@ -22,6 +23,9 @@ authRouter.post('/refresh', refreshTokenValidation, wrapRequestHandler(authContr
 authRouter.post('/logout', accessTokenValidation, refreshTokenValidation, wrapRequestHandler(authController.logout))
 
 authRouter.use(accessTokenValidation)
+
+authRouter.get('/account', accessTokenValidation, wrapRequestHandler(authController.getAccount))
+
 /**
  * @description : Verify email token
  * @method : POST
@@ -41,13 +45,6 @@ authRouter.post(
  * @path : /profile
  */
 authRouter.put('/profile', updateUserByIdValidation, wrapRequestHandler(authController.updateProfile))
-
-authRouter.put(
-  '/change-password',
-  accessTokenValidation,
-  changePasswordValidation,
-  wrapRequestHandler(authController.changePassword)
-)
 
 // DELETE
 export default authRouter

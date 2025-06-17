@@ -1,5 +1,6 @@
 import { env } from 'process'
 import { Resend } from 'resend'
+import { Code } from 'typeorm'
 import { SendMailOptions } from '~/dto/res/email/emailOption.res'
 import { SendVerifyMailOptions } from '~/dto/res/email/verifyEmail.res'
 import { generateVerificationCode, renderEmailTemplate } from '~/utils/email'
@@ -27,4 +28,20 @@ export const sendVerifyEmail = async ({
   await sendEmail({ to, subject, template, variables: { code, name: body.name } })
 
   return code
+}
+
+export const sendChangePassword = async ({
+  to,
+  subject = 'Please verify email for Astro Vocab Website!',
+  template,
+  body
+}: {
+  to: string
+  subject?: string
+  template: string
+  body: { code: string; email: string }
+}) => {
+  await sendEmail({ to, subject, template, variables: { code: body.code, email: body.email } })
+
+  return body.code
 }

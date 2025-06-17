@@ -15,8 +15,9 @@ import { Token } from '~/entities/token.entity'
 import { Permission, Query } from 'accesscontrol'
 import { ac } from '~/config/access.config'
 import { isRequired } from './common.middlewares'
-import { EmailVerificationToken } from '~/entities/emailVerificationToken.entity'
+import { VerificationToken } from '~/entities/emailVerificationToken.entity'
 import { UserStatus } from '~/constants/userStatus'
+import { TokenType } from '~/constants/token'
 
 async function checkUserExistence(userId: number) {
   const userRepository = await DatabaseService.getInstance().getRepository(User)
@@ -264,8 +265,9 @@ export const verifyEmailTokenValidation = validate(
 
             if (!user) throw new BadRequestError({ message: 'Please log in again!' })
             //check is equaly
-            const tokenInDb = await EmailVerificationToken.findOne({ where: { user: { id: user?.id } } })
-            console.log(tokenInDb, code, tokenInDb != code)
+            const tokenInDb = await VerificationToken.findOne({
+              where: { user: { id: user?.id }, type: TokenType.emailVerifyToken }
+            })
 
             if (!tokenInDb || tokenInDb.code != code) throw new AuthRequestError('Wrong code')
             return true
@@ -293,12 +295,6 @@ export const changePasswordValidation = validate(
       matches: {
         options: Regex.PASSWORD,
         errorMessage: 'New password phải có ít nhất 6 ký tự và chứa ít nhất 1 chữ hoa!'
-      }
-    },
-    confirmPassword: {
-      matches: {
-        options: Regex.PASSWORD,
-        errorMessage: 'Confirm password phải có ít nhất 6 ký tự và chứa ít nhất 1 chữ hoa!'
       }
     }
   })

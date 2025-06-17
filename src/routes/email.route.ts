@@ -6,6 +6,8 @@ import { wrapRequestHandler } from '~/utils/handler'
 
 export const emailRouter = express.Router()
 
+emailRouter.post('/change-password', wrapRequestHandler(authController.sendVerificationChangePassword))
+
 emailRouter.use(accessTokenValidation)
 
 //GET

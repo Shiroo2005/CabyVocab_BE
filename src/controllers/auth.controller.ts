@@ -9,6 +9,7 @@ import { TokenPayload } from '~/dto/common.dto'
 import { ChangePasswordBodyReq } from '~/dto/req/auth/changePasswordBody.req'
 import { LogoutBodyReq } from '~/dto/req/auth/LogoutBody.req'
 import { UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
+import { VerificationToken } from '~/entities/emailVerificationToken.entity'
 import { User } from '~/entities/user.entity'
 import { authService } from '~/services/auth.service'
 import { OauthGoogleService } from '~/services/oauth.service'
@@ -66,6 +67,13 @@ class AuthController {
     return new SuccessResponse({ message: 'Send verification email successful!' }).send(res)
   }
 
+  sendVerificationChangePassword = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    const { email } = req.body
+    await authService.sendEmailChangePassword({ email })
+
+    return new SuccessResponse({ message: 'Send change password code successful!' }).send(res)
+  }
+
   verifyEmailTokenController = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
     const user = req.user as User
 
@@ -120,7 +128,27 @@ class AuthController {
   // }
 
   changePassword = async (req: Request<ParamsDictionary, any, ChangePasswordBodyReq>, res: Response) => {
-    const user = req.user as User
+    const code = req.query.code
+
+    const { email } = req.body
+
+    const user = await User.findOneBy({ email })
+
+    if (!user) throw new BadRequestError({ message: 'email invalid!' })
+
+    // check code
+    const codeInDb = await VerificationToken.findOne({
+      where: {
+        user: {
+          email
+        }
+      },
+      relations: {
+        user: true
+      }
+    })
+
+    if (!codeInDb || codeInDb.code != code) throw new BadRequestError({ message: 'Code not match!' })
 
     return new SuccessResponse({
       message: 'Change password for user successful',

@@ -9,9 +9,10 @@ import {
 } from 'typeorm'
 import { User } from './user.entity'
 import { IsNotEmpty } from 'class-validator'
+import { TokenType } from '~/constants/token'
 
 @Entity()
-export class EmailVerificationToken extends BaseEntity {
+export class VerificationToken extends BaseEntity {
   @PrimaryGeneratedColumn()
   id?: number
 
@@ -21,6 +22,9 @@ export class EmailVerificationToken extends BaseEntity {
 
   @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
   user: User
+
+  @Column('varchar')
+  type: TokenType
 
   @DeleteDateColumn()
   deletedAt?: Date

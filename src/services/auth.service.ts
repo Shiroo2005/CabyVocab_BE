@@ -5,14 +5,16 @@ import { hashData, signAccessToken, signRefreshToken } from '~/utils/jwt'
 import { Token } from '~/entities/token.entity'
 import { generateUniqueUsername, unGetData } from '~/utils'
 import { LogoutBodyReq } from '~/dto/req/auth/LogoutBody.req'
-import { sendVerifyEmail } from './email.service'
-import { EmailVerificationToken } from '~/entities/emailVerificationToken.entity'
+import { sendChangePassword, sendVerifyEmail } from './email.service'
+import { VerificationToken } from '~/entities/emailVerificationToken.entity'
 import { UserStatus } from '~/constants/userStatus'
 import { Role } from '~/entities/role.entity'
 import { UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
 import { userService } from './user.service'
 import { BadRequestError, NotFoundRequestError } from '~/core/error.response'
 import bcrypt from 'bcrypt'
+import { TokenType } from '~/constants/token'
+import { generateVerificationCode } from '~/utils/email'
 
 dotenv.config()
 
@@ -115,16 +117,45 @@ class AuthService {
 
   sendVerifyEmail = async ({ email, userId, name }: { email: string; userId: number; name: string }) => {
     //delete all code for user previously
-    await EmailVerificationToken.getRepository().softDelete({ user: { id: userId } })
+    await VerificationToken.getRepository().softDelete({ user: { id: userId }, type: TokenType.emailVerifyToken })
 
     //send email
     const code = await sendVerifyEmail({ to: email, template: 'welcome', body: { name, userId } })
 
     //save email token
-    const emailToken = EmailVerificationToken.create({ code, user: { id: userId } })
-    await EmailVerificationToken.save(emailToken)
+    const emailToken = VerificationToken.create({ code, user: { id: userId }, type: TokenType.emailVerifyToken })
+    await VerificationToken.save(emailToken)
 
     return code
+  }
+
+  sendEmailChangePassword = async ({ email }: { email: string }) => {
+    const code = generateVerificationCode()
+
+    const foundUser = await User.findOneBy({ email })
+
+    if (!foundUser) throw new BadRequestError({ message: 'email invalid!' })
+
+    //delete all code for user previously
+    await VerificationToken.getRepository().softDelete({
+      user: { id: foundUser.id },
+      type: TokenType.changePasswordToken
+    })
+
+    await sendChangePassword({
+      to: email,
+      body: { code, email },
+      template: 'changePassword',
+      subject: 'Change password verify'
+    })
+
+    //save email token
+    const changePasswordToken = VerificationToken.create({
+      code,
+      user: { id: foundUser.id },
+      type: TokenType.changePasswordToken
+    })
+    await VerificationToken.save(changePasswordToken)
   }
 
   verifyEmail = async ({ userId }: { userId: number }) => {
@@ -144,13 +175,7 @@ class AuthService {
    * @Step 2: change new password
    * @Step 3: invalidate refresh token of user so far
    */
-  changePasswordForUser = async (
-    foundUser: User,
-    { confirmPassword, newPassword }: { confirmPassword: string; newPassword: string }
-  ) => {
-    //validate changePassword
-    this.validateChangePassword(foundUser, confirmPassword)
-
+  changePasswordForUser = async (foundUser: User, { newPassword }: { newPassword: string }) => {
     //update new password
     // delete refresh token of this user before
     await Promise.all([

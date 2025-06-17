@@ -1,4 +1,4 @@
 export class ChangePasswordBodyReq {
-  confirmPassword: string
   newPassword: string
+  email: string
 }
