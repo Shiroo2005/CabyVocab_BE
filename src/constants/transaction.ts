@@ -1,5 +1,5 @@
 export enum PayoutStatus {
-  SUCCESS,
-  FAILED,
-  PERNDING
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+  PENDING = 'PENDING'
 }

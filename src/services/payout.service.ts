@@ -163,8 +163,9 @@ class PayoutService {
 
     //if payout status was rejected, return amount for user
 
-    if (status == PayoutStatus.FAILED) {
-      return foundPayout
+    if (status == PayoutStatus.SUCCESS) {
+      foundPayout.status = status
+      return await foundPayout.save()
     }
 
     const user = foundPayout.createdBy

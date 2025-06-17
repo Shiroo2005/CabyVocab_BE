@@ -20,7 +20,7 @@ export class Payout extends BaseEntity {
   @Column('double')
   amount: number
 
-  @Column('varchar', { default: PayoutStatus.PERNDING })
+  @Column('varchar', { default: PayoutStatus.PENDING })
   status: PayoutStatus
 
   @ManyToOne(() => User)
