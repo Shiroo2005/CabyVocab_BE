@@ -98,7 +98,7 @@ class ExerciseController {
 
     return new SuccessResponse({
       message: 'Vote folder by id successful!',
-      metaData: await voteService.vote({ userId: user.id as number, targetId: folderId, targetType: TargetType.FOLDER })
+      metaData: await voteService.vote({ user, targetId: folderId, targetType: TargetType.FOLDER })
     }).send(res)
   }
 
@@ -110,7 +110,7 @@ class ExerciseController {
     return new SuccessResponse({
       message: 'Unvote folder by id successful!',
       metaData: await voteService.unVote({
-        userId: user.id as number,
+        user,
         targetId: folderId,
         targetType: TargetType.FOLDER
       })

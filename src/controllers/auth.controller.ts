@@ -3,6 +3,7 @@ import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
 import passport from 'passport'
 import { env } from 'process'
 import { OAUTH_PROVIDER } from '~/constants/oauth'
+import { TokenType } from '~/constants/token'
 import { BadRequestError } from '~/core/error.response'
 import { CREATED, SuccessResponse } from '~/core/success.response'
 import { TokenPayload } from '~/dto/common.dto'
@@ -132,6 +133,8 @@ class AuthController {
 
     const { email } = req.body
 
+    if (!email) throw new BadRequestError({ message: 'Email invalid!' })
+
     const user = await User.findOneBy({ email })
 
     if (!user) throw new BadRequestError({ message: 'email invalid!' })
@@ -141,7 +144,8 @@ class AuthController {
       where: {
         user: {
           email
-        }
+        },
+        type: TokenType.changePasswordToken
       },
       relations: {
         user: true

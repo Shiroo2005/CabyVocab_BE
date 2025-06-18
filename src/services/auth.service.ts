@@ -15,6 +15,8 @@ import { BadRequestError, NotFoundRequestError } from '~/core/error.response'
 import bcrypt from 'bcrypt'
 import { TokenType } from '~/constants/token'
 import { generateVerificationCode } from '~/utils/email'
+import eventBus from '~/events/eventBus'
+import { EVENTS } from '~/events/constants'
 
 dotenv.config()
 
@@ -176,12 +178,16 @@ class AuthService {
    * @Step 3: invalidate refresh token of user so far
    */
   changePasswordForUser = async (foundUser: User, { newPassword }: { newPassword: string }) => {
+    if (!newPassword) throw new BadRequestError({ message: 'New Password invalid!' })
     //update new password
     // delete refresh token of this user before
     await Promise.all([
       this.updatePassword(foundUser, newPassword),
-      this.deleteRefreshTokenByUser(foundUser.id as number)
+      this.deleteRefreshTokenByUser(foundUser.id as number),
+      VerificationToken.getRepository().softDelete({ user: { id: foundUser.id }, type: TokenType.changePasswordToken })
     ])
+
+    eventBus.emit(EVENTS.CHANGE_PASSWORD, { userId: foundUser.id })
 
     return {}
   }

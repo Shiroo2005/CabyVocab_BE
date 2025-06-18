@@ -73,7 +73,7 @@ class PostController {
 
     return new SuccessResponse({
       message: 'Vote post by id successful!',
-      metaData: await voteService.vote({ userId: user.id as number, targetId: postId, targetType: TargetType.POST })
+      metaData: await voteService.vote({ user, targetId: postId, targetType: TargetType.POST })
     }).send(res)
   }
 
@@ -133,7 +133,7 @@ class PostController {
     return new SuccessResponse({
       message: 'Unvote post by id successful!',
       metaData: await voteService.unVote({
-        userId: user.id as number,
+        user,
         targetId: postId,
         targetType: TargetType.POST
       })

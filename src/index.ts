@@ -10,6 +10,9 @@ import { swaggerSpec } from './swagger'
 import { DatabaseService } from './services/database.service'
 import { servingStaticConfig } from './config/static.config'
 import './config/passport.config'
+import { initSocket } from './sockets'
+import { createServer } from 'http'
+import '../src/listeners'
 
 const app = express()
 const port = 8081
@@ -52,7 +55,12 @@ app.use(notFoundHandler)
 app.use(errorHandler)
 //////////////////////////////
 
-app.listen(port, () => {
+const server = createServer(app)
+
+//socket
+initSocket(server)
+
+server.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
   console.log('📚 Swagger Docs: http://localhost:8081/api-docs')
 })
