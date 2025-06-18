@@ -4,6 +4,8 @@ import { BadRequestError } from '~/core/error.response'
 import { CreateCommentBodyReq } from '~/dto/req/comment/createCommentBody.req'
 import { UpdateCommentBodyReq } from '~/dto/req/comment/updateCommentBody.req'
 import { Comment } from '~/entities/comment.entity'
+import { EVENTS } from '~/events/constants'
+import eventBus from '~/events/eventBus'
 import { unGetData } from '~/utils'
 
 class CommentService {
@@ -60,27 +62,41 @@ class CommentService {
     await comment.save()
 
     const fullComment = await Comment.findOne({
-    where: { id: comment.id },
-    select: {
-      id: true,
-      content: true,
-      createdAt: true,
-      createdBy: {
+      where: { id: comment.id },
+      select: {
         id: true,
-        username: true,
-        email: true,
-        avatar: true
+        content: true,
+        createdAt: true,
+        createdBy: {
+          id: true,
+          username: true,
+          email: true,
+          avatar: true
+        },
+        parentComment: {
+          id: true,
+          createdBy: {
+            id: true
+          }
+        },
+        targetId: true,
+        targetType: true
       },
-      parentComment: {
-        id: true
-      },
-      targetId: true,
-      targetType: true
-    },
-    relations: ['createdBy', 'parentComment']
+      relations: ['createdBy', 'parentComment', 'parentComment.createdBy']
     })
     if (!fullComment) throw new BadRequestError({ message: 'Unauthorize for this comment' })
-    return fullComment || null
+
+    //emit event
+    eventBus.emit(EVENTS.COMMENT, {
+      targetId,
+      targetType,
+      ownerId: fullComment.createdBy.id,
+      createdBy: user,
+      parentId,
+      parentCommentOwnerId: fullComment.parentComment?.createdBy.id
+    })
+
+    return fullComment
   }
 
   updateComment = async ({ content, targetId, targetType, user, commentId }: UpdateCommentBodyReq) => {

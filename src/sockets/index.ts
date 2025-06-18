@@ -30,3 +30,11 @@ export const initSocket = (server: HTTPServer) => {
 
 export const getIO = () => io
 export const getSocketIdByUserId = (userId: string) => connectedUsers.get(userId)
+
+export const sendMessage = ({ data, event, userId }: { event: string; userId: number; data: any }) => {
+  const io = getIO()
+  const socketId = getSocketIdByUserId(userId.toString())
+  if (socketId) {
+    io.to(socketId).emit(event, data)
+  }
+}

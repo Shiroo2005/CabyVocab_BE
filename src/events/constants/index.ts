@@ -1,4 +1,5 @@
 export const EVENTS = {
   CHANGE_PASSWORD: 'Change Password',
-  VOTE: 'Vote'
+  VOTE: 'Vote',
+  COMMENT: 'Comment'
 }
