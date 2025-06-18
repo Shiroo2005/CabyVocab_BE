@@ -74,7 +74,21 @@ class OrderService {
       where: {
         id: parseInt(vnp_TxnRef)
       },
-      relations: ['folder', 'folder.createdBy']
+      select: {
+        id: true,
+        amount: true,
+        bankTranNo: true,
+        folder: {
+          id: true,
+          createdBy: {
+            id: true
+          }
+        },
+        createdBy: {
+          id: true
+        }
+      },
+      relations: ['folder', 'folder.createdBy', 'createdBy']
     })
 
     if (!foundOrder) throw new BadRequestError({ message: 'Order not exist!' })

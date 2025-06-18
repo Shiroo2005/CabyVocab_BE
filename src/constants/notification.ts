@@ -1,7 +1,8 @@
 export enum NotificationType {
   CHANGE_PASSWORD = 'Change password',
   VOTE = 'Vote',
-  COMMENT = 'Comment'
+  COMMENT = 'Comment',
+  ORDER = 'Order'
 }
 
 export enum NotificationTarget {

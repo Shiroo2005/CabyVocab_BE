@@ -94,7 +94,7 @@ const createCommentNotification = async (
         }
       },
       NotificationTarget.ONLY_USER,
-      [ownerId]
+      [parentCommentOwnerId]
     )
   }
 
