@@ -292,6 +292,8 @@ export const checkVerifyUser = (req: Request, res: Response, next: NextFunction)
 export const changePasswordValidation = validate(
   checkSchema({
     newPassword: {
+      optional: true,
+
       matches: {
         options: Regex.PASSWORD,
         errorMessage: 'New password phải có ít nhất 6 ký tự và chứa ít nhất 1 chữ hoa!'
