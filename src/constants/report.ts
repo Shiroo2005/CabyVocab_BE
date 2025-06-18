@@ -1,5 +1,6 @@
 export enum ReportType {
-  EXERCISES = 'EXERCISES'
+  EXERCISES = 'EXERCISES',
+  POST = 'POST'
 }
 
 export enum ReportStatus {

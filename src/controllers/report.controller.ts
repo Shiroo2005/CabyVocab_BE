@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
-import { ReportStatus, ReportType } from '~/constants/report'
+import { ReportStatus } from '~/constants/report'
 import { CREATED, SuccessResponse } from '~/core/success.response'
 import { CreateReportBodyReq } from '~/dto/req/report/createReportBody.req'
 import { User } from '~/entities/user.entity'

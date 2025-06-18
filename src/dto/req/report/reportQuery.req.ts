@@ -1,5 +1,5 @@
 import { FindOptionsOrder } from 'typeorm'
-import { ReportStatus } from '~/constants/report'
+import { ReportStatus, ReportType } from '~/constants/report'
 import { Report } from '~/entities/report.entity'
 
 export class ReportQueryReq {
@@ -7,4 +7,5 @@ export class ReportQueryReq {
   limit?: number
   status?: ReportStatus
   sort?: FindOptionsOrder<Report>
+  type?: ReportType
 }
