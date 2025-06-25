@@ -81,11 +81,13 @@ class OrderService {
         folder: {
           id: true,
           createdBy: {
-            id: true
+            id: true,
+            username: true
           }
         },
         createdBy: {
-          id: true
+          id: true,
+          username: true
         }
       },
       relations: ['folder', 'folder.createdBy', 'createdBy']
