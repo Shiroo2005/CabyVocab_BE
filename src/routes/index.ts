@@ -16,6 +16,7 @@ import { payoutRouter } from './payout.route'
 import { postRouter } from './post.route'
 import { reportRouter } from './report.route'
 import { oAuthRouter } from './oauth.route'
+import notificationRoute from './notification.route'
 
 const router = express.Router()
 
@@ -36,5 +37,6 @@ router.use('/payout', payoutRouter)
 router.use('/posts', postRouter)
 router.use('/reports', reportRouter)
 router.use('/oauth', oAuthRouter)
+router.use('/notifications', notificationRoute)
 
 export default router

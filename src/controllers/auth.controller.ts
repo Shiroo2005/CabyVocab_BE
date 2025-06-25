@@ -1,8 +1,8 @@
+import { subMinutes } from 'date-fns'
 import { Request, Response } from 'express'
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
-import passport from 'passport'
-import { env } from 'process'
-import { OAUTH_PROVIDER } from '~/constants/oauth'
+import { lt } from 'lodash'
+import { MoreThan } from 'typeorm'
 import { TokenType } from '~/constants/token'
 import { BadRequestError } from '~/core/error.response'
 import { CREATED, SuccessResponse } from '~/core/success.response'
@@ -14,7 +14,6 @@ import { VerificationToken } from '~/entities/emailVerificationToken.entity'
 import { User } from '~/entities/user.entity'
 import { authService } from '~/services/auth.service'
 import { OauthGoogleService } from '~/services/oauth.service'
-import { isValidEnumValue } from '~/utils'
 
 class AuthController {
   register = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
