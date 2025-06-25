@@ -10,6 +10,10 @@ notificationRoute.use(accessTokenValidation)
 
 notificationRoute.get('', checkQueryMiddleware(), wrapRequestHandler(notificationController.getAll))
 
-notificationRoute.patch('/:id', checkIdParamMiddleware, wrapRequestHandler(notificationController.updateNotification))
+notificationRoute.patch(
+  '/:id/read',
+  checkIdParamMiddleware,
+  wrapRequestHandler(notificationController.updateReadNotification)
+)
 
 export default notificationRoute

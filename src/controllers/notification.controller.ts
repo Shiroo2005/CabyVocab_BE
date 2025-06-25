@@ -14,13 +14,13 @@ class NotificationController {
     }).send(res)
   }
 
-  updateNotification = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+  updateReadNotification = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     const notificationId = parseInt(req.params.id)
     const userId = req.user?.id as number
 
     return new CREATED({
       message: `Update user's notification successful`,
-      metaData: await notificationService.updateNotification(userId, notificationId, { ...req.body })
+      metaData: await notificationService.updateReadNotification(userId, notificationId)
     }).send(res)
   }
 }

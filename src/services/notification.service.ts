@@ -74,7 +74,7 @@ class NotificationService {
     }
   }
 
-  updateNotification = async (userId: number, notificationId: number, { read = false }: { read?: boolean }) => {
+  updateReadNotification = async (userId: number, notificationId: number) => {
     const foundNotifaction = await UserNotification.findOne({
       where: {
         id: notificationId,
@@ -103,7 +103,7 @@ class NotificationService {
     if (!foundNotifaction) throw new BadRequestError({ message: 'Notification not found' })
 
     //update
-    if (read && !foundNotifaction.alreadyRead) {
+    if (!foundNotifaction.alreadyRead) {
       foundNotifaction.alreadyRead = true
       foundNotifaction.readAt = new Date()
     }
