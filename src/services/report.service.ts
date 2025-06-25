@@ -22,8 +22,24 @@ class ReportService {
   }
 
   updateReport = async (reportId: number, status: ReportStatus) => {
-    const foundReport = await Report.findOneBy({
-      id: reportId
+    const foundReport = await Report.findOne({
+      where: {
+        id: reportId
+      },
+      relations: ['createdBy'],
+      select: {
+        id: true,
+        content: true,
+        type: true,
+        status: true,
+        createdAt: true,
+        createdBy: {
+          id: true,
+          avatar: true,
+          username: true,
+          email: true
+        }
+      }
     })
 
     if (!foundReport) throw new BadRequestError({ message: 'Report not found' })
@@ -47,7 +63,21 @@ class ReportService {
       skip,
       take: limit,
       order: sort,
-      where
+      where,
+      relations: ['createdBy'],
+      select: {
+        id: true,
+        content: true,
+        type: true,
+        status: true,
+        createdAt: true,
+        createdBy: {
+          id: true,
+          avatar: true,
+          username: true,
+          email: true
+        }
+      }
     })
     return {
       reports,
