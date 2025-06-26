@@ -18,7 +18,7 @@ export const sendEmail = async ({ to, subject, template, variables = {} }: SendM
 
 export const sendVerifyEmail = async ({
   to,
-  subject = 'Please verify email for Astro Vocab Website!',
+  subject = 'Please verify email for CapyVocab App!',
   template,
   body
 }: SendVerifyMailOptions) => {
@@ -32,7 +32,7 @@ export const sendVerifyEmail = async ({
 
 export const sendChangePassword = async ({
   to,
-  subject = 'Please verify email for Astro Vocab Website!',
+  subject = 'Please verify email for CapyVocab App!',
   template,
   body
 }: {

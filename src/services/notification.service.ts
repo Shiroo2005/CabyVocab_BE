@@ -48,6 +48,9 @@ class NotificationService {
           id: userId
         }
       },
+      order: {
+        createdAt: "DESC"
+      },
       select: {
         notification: true,
         alreadyRead: true,

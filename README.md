@@ -1,6 +1,6 @@
-# 🚀 AstroVocab - Ứng dụng học từ vựng
+# 🚀 Capyvocab - Ứng dụng học từ vựng
 
-AstroVocab là ứng dụng học từ vựng có phân quyền người dùng (`free` / `premium`), xác minh email qua link hoặc mã, và giới hạn tính năng linh hoạt.
+Capyvocab là ứng dụng học từ vựng dành cho Android, có các tính năng: học từ vựng theo chủ đề; ôn tập lại các từ đã học; giao lưu với người dùng khác qua cộng đồng; thử thách bản thân với các bài test do chính người dùng tạo ra; tạo các bài test để người dùng khác làm.
 
 ---
 

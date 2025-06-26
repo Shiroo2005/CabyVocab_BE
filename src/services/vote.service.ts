@@ -33,7 +33,7 @@ class VoteService {
     eventBus.emit(EVENTS.VOTE, {
       createdBy: user,
       ownerId: foundVote.createdBy.id,
-      targetId: foundVote.id,
+      targetId: foundVote.targetId,
       targetType: foundVote.targetType
     })
     return foundVote
