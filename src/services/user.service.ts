@@ -7,6 +7,7 @@ import { User } from '~/entities/user.entity'
 import { unGetData } from '~/utils'
 import { hashData } from '~/utils/jwt'
 import dayjs from 'dayjs'
+import bcrypt from 'bcrypt'
 
 class UserService {
   createUser = async ({ email, username, password, roleId, avatar }: CreateUserBodyReq) => {
@@ -106,7 +107,10 @@ class UserService {
     return user || {}
   }
 
-  updateUserByID = async (id: number, update: UpdateUserBodyReq) => {
+  updateUserByID = async (
+    id: number,
+    { avatar, email, status, username, newPassword, oldPassword }: UpdateUserBodyReq
+  ) => {
     const user = await User.findOne({
       where: { id },
       relations: ['role']
@@ -116,9 +120,23 @@ class UserService {
       throw new Error('Không tìm thấy user')
     }
 
-    await User.update(id, update);
+    //check old password
+    let password = user.password
+    if (oldPassword) {
+      if (!(await bcrypt.compare(oldPassword, password)))
+        throw new BadRequestError({ message: 'Confirm password not match!' })
+      password = newPassword as string
+    }
+
+    await User.update(id, {
+      avatar,
+      email,
+      status,
+      username,
+      password
+    })
     // Save the updated user to the database
-    await User.save(user);
+    await User.save(user)
 
     return unGetData({
       fields: ['password', 'role.createdAt', 'role.updatedAt', 'role.deletedAt', 'role.description'],

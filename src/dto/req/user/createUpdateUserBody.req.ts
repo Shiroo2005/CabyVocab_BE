@@ -14,4 +14,6 @@ export interface UpdateUserBodyReq {
   email?: string
   avatar?: string
   status?: UserStatus
+  oldPassword?: string
+  newPassword?: string
 }

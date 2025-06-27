@@ -1,5 +1,5 @@
 import { checkSchema } from 'express-validator'
-import { isEmail, isLength, isUsername } from '../common.middlewares'
+import { isEmail, isLength, isPassword, isUsername } from '../common.middlewares'
 import { BadRequestError } from '~/core/error.response'
 import { validate } from '../validation.middlewares'
 import { User } from '~/entities/user.entity'
@@ -45,6 +45,14 @@ export const updateUserByIdValidation = validate(
       isIn: {
         options: [Object.values(UserStatus)]
       }
+    },
+    oldPassword: {
+      optional: true,
+      isString: true
+    },
+    newPassword: {
+      optional: true,
+      ...isPassword
     }
   })
 )
