@@ -128,15 +128,13 @@ class UserService {
       password = newPassword as string
     }
 
-    await User.update(id, {
-      avatar,
-      email,
-      status,
-      username,
-      password
-    })
-    // Save the updated user to the database
-    await User.save(user)
+    if (avatar) user.avatar = avatar
+    if (status) user.status = status
+    if (email) user.email = email
+    if (username) user.username = username
+    user.password = password
+
+    await user.save()
 
     return unGetData({
       fields: ['password', 'role.createdAt', 'role.updatedAt', 'role.deletedAt', 'role.description'],

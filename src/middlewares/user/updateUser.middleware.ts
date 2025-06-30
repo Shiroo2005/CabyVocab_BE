@@ -25,7 +25,7 @@ export const updateUserByIdValidation = validate(
             where: [{ email: value }, { username: req.body.username }]
           })
 
-          if (foundUser && (foundUser.id as number) != toNumber((req.params as Request).params.id)) {
+          if (foundUser && (foundUser.id as number) != toNumber((req as Request).params.id)) {
             throw new BadRequestError({ message: 'Email or username already in!' })
           }
 
