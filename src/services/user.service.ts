@@ -132,7 +132,7 @@ class UserService {
     if (status) user.status = status
     if (email) user.email = email
     if (username) user.username = username
-    user.password = password
+    user.password = hashData(password)
     if (roleId)
       user.role = {
         id: roleId
