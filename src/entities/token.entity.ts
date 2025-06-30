@@ -11,7 +11,7 @@ import {
 import { User } from './user.entity'
 
 @Entity()
-export class Token extends BaseEntity {
+export class RefreshToken extends BaseEntity {
   @PrimaryGeneratedColumn()
   id?: number
 
@@ -31,7 +31,7 @@ export class Token extends BaseEntity {
   updatedAt?: Date
 
   static createToken = ({ refreshToken, user }: { refreshToken: string; user: User }) => {
-    const newToken = new Token()
+    const newToken = new RefreshToken()
     newToken.refreshToken = refreshToken
     newToken.user = user
     return newToken

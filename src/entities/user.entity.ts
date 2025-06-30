@@ -12,7 +12,7 @@ import {
 } from 'typeorm'
 import { UserStatus } from '~/constants/userStatus'
 import { Role } from './role.entity'
-import { Token } from './token.entity'
+import { RefreshToken } from './token.entity'
 import { CompletedTopic } from './completedTopic.entity'
 import { WordProgress } from './wordProgress.entity'
 
@@ -67,8 +67,8 @@ export class User extends BaseEntity {
   @UpdateDateColumn()
   updatedAt?: Date
 
-  @OneToMany(() => Token, (token) => token.user)
-  tokens?: Token[]
+  @OneToMany(() => RefreshToken, (token) => token.user)
+  tokens?: RefreshToken[]
 
   @OneToMany(() => CompletedTopic, (completedTopic) => completedTopic.user)
   completedTopics: CompletedTopic[]

@@ -11,7 +11,7 @@ import { NextFunction, Request, Response } from 'express'
 import { DatabaseService } from '~/services/database.service'
 import { User } from '~/entities/user.entity'
 import { Role } from '~/entities/role.entity'
-import { Token } from '~/entities/token.entity'
+import { RefreshToken } from '~/entities/token.entity'
 import { Permission, Query } from 'accesscontrol'
 import { ac } from '~/config/access.config'
 import { isRequired } from './common.middlewares'
@@ -157,7 +157,7 @@ export const refreshTokenValidation = validate(
               })) as TokenPayload
 
               // is token valid in db
-              const foundToken = await Token.findOne({
+              const foundToken = await RefreshToken.findOne({
                 where: {
                   refreshToken: value
                 }

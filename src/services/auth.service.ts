@@ -2,7 +2,7 @@ import { User } from '~/entities/user.entity'
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import { hashData, signAccessToken, signRefreshToken } from '~/utils/jwt'
-import { Token } from '~/entities/token.entity'
+import { RefreshToken } from '~/entities/token.entity'
 import { generateUniqueUsername, unGetData } from '~/utils'
 import { LogoutBodyReq } from '~/dto/req/auth/LogoutBody.req'
 import { sendChangePassword, sendVerifyEmail } from './email.service'
@@ -46,7 +46,7 @@ class AuthService {
     ])
 
     //save token in db
-    const newToken = Token.create({ refreshToken, user: newUser })
+    const newToken = RefreshToken.create({ refreshToken, user: newUser })
     await newToken.save()
 
     this.sendVerifyEmail({ email, name: username, userId: createdUser.id as number }).then(() => {
@@ -67,7 +67,7 @@ class AuthService {
     ])
 
     // save token in db
-    await Token.save({ refreshToken, user: user })
+    await RefreshToken.save({ refreshToken, user: user })
 
     return {
       user: unGetData({ fields: ['password'], object: user }),
@@ -87,7 +87,7 @@ class AuthService {
     ])
 
     //save refresh token into db
-    await Token.save({ refreshToken: new_refreshToken, user: { id: userId } as User })
+    await RefreshToken.save({ refreshToken: new_refreshToken, user: { id: userId } as User })
 
     return {
       accessToken: new_accessToken,
@@ -112,7 +112,7 @@ class AuthService {
 
   logout = async ({ refreshToken }: LogoutBodyReq) => {
     // delete refresh token in db
-    const result = await Token.getRepository().softDelete({ refreshToken })
+    const result = await RefreshToken.getRepository().softDelete({ refreshToken })
 
     return result
   }
@@ -205,7 +205,7 @@ class AuthService {
   }
 
   deleteRefreshTokenByUser = async (userId: number) => {
-    return await Token.getRepository().softDelete({
+    return await RefreshToken.getRepository().softDelete({
       user: {
         id: userId
       }
