@@ -16,4 +16,5 @@ export interface UpdateUserBodyReq {
   status?: UserStatus
   oldPassword?: string
   newPassword?: string
+  roleId: number
 }

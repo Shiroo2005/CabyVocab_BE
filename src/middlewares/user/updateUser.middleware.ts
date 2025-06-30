@@ -33,6 +33,16 @@ export const updateUserByIdValidation = validate(
         }
       }
     },
+    roleId: {
+      optional: true,
+      isNumeric: true,
+      custom: {
+        options: async (value) => {
+          const foundRole = await Role.findOneBy({ id: value })
+          if (!foundRole) throw new BadRequestError({ message: 'Role id invalid' })
+        }
+      }
+    },
 
     avatar: {
       optional: true,

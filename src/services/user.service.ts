@@ -109,7 +109,7 @@ class UserService {
 
   updateUserByID = async (
     id: number,
-    { avatar, email, status, username, newPassword, oldPassword }: UpdateUserBodyReq
+    { avatar, email, status, username, newPassword, oldPassword, roleId }: UpdateUserBodyReq
   ) => {
     const user = await User.findOne({
       where: { id },
@@ -133,6 +133,10 @@ class UserService {
     if (email) user.email = email
     if (username) user.username = username
     user.password = password
+    if (roleId)
+      user.role = {
+        id: roleId
+      } as Role
 
     await user.save()
 
