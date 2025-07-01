@@ -77,7 +77,8 @@ class ReportService {
           avatar: true,
           username: true,
           email: true
-        }
+        },
+        targetId: true
       }
     })
     return {
