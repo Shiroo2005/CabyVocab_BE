@@ -87,7 +87,7 @@ class ExerciseController {
 
     return new SuccessResponse({
       message: 'Delete folder by id successful',
-      metaData: await exerciseService.deleteFolderById(user.id as number, id)
+      metaData: await exerciseService.deleteFolderById(user, id)
     }).send(res)
   }
 

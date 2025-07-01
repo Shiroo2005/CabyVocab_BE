@@ -400,11 +400,18 @@ class ExerciseService {
     })
   }
 
-  deleteFolderById = async (userId: number, id: number) => {
-    await this.checkOwn(userId, id)
-    return await Folder.getRepository().softDelete({
-      id
+  deleteFolderById = async (user: User, id: number) => {
+    const foundFolder = await Folder.findOne({
+      where: {
+        id
+      },
+      relations: {
+        createdBy: true
+      }
     })
+
+    if (foundFolder && (foundFolder.createdBy.id == user.id || user.role?.name == 'ADMIN'))
+      await foundFolder.softRemove()
   }
 
   deleteCommentFolder = async (userId: number, commentId: number) => {

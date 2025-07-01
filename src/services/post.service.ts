@@ -90,8 +90,6 @@ class PostService {
       relations: ['createdBy']
     })
 
-    
-
     const data = await Promise.all(
       posts.map(async (post) => {
         const [voteCount, isAlreadyVote, commentCount] = await Promise.all([
@@ -114,8 +112,6 @@ class PostService {
       totalPages: Math.ceil(total / limit)
     }
   }
-
-  
 
   create = async (userId: number, { content, tags = [], thumbnails = [] }: CreatePostBodyReq) => {
     const post = new Post()
@@ -188,17 +184,18 @@ class PostService {
     })
   }
 
-  deleteById = async (userId: number, id: number) => {
+  deleteById = async (user: User, id: number) => {
     const foundPost = await Post.findOne({
       where: {
-        id,
-        createdBy: {
-          id: userId
-        }
+        id
       },
       relations: ['createdBy']
     })
-    if (foundPost) await foundPost.softRemove()
+    if (foundPost) {
+      if (user.role?.name == 'ADMIN' || user.id == foundPost.createdBy.id) {
+        await foundPost.softRemove()
+      }
+    }
     return {}
   }
 

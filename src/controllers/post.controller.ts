@@ -62,7 +62,7 @@ class PostController {
 
     return new SuccessResponse({
       message: 'Delete post successful!',
-      metaData: await postService.deleteById(user.id as number, id)
+      metaData: await postService.deleteById(user, id)
     }).send(res)
   }
 
