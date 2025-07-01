@@ -19,6 +19,9 @@ export const validateCreateReport = validate(
         options: [Object.values(ReportType)],
         errorMessage: `Type must be one of: ${Object.values(ReportType).join(', ')}`
       }
+    },
+    targetId: {
+      isNumeric: true
     }
   })
 )

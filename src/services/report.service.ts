@@ -8,14 +8,15 @@ import { User } from '~/entities/user.entity'
 import { isValidEnumValue } from '~/utils'
 
 class ReportService {
-  createReport = async (userId: number, { content, type }: CreateReportBodyReq) => {
+  createReport = async (userId: number, { content, type, targetId }: CreateReportBodyReq) => {
     const newReport = Report.create({
       content,
       type,
       createdBy: {
         id: userId
       } as User,
-      status: ReportStatus.PENDING
+      status: ReportStatus.PENDING,
+      targetId
     })
 
     return await newReport.save()

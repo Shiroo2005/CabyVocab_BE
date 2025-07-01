@@ -37,5 +37,8 @@ export class Report extends BaseEntity {
   @UpdateDateColumn()
   updatedAt?: Date
 
+  @Column('int')
+  targetId: number
+
   static allowSortList = ['id']
 }
