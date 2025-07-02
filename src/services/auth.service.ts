@@ -21,7 +21,17 @@ import { EVENTS } from '~/events/constants'
 dotenv.config()
 
 class AuthService {
-  register = async ({ email, username, password }: { email: string; username: string; password: string }) => {
+  register = async ({
+    email,
+    username,
+    password,
+    isVerified = false
+  }: {
+    email: string
+    username: string
+    password: string
+    isVerified?: boolean
+  }) => {
     // Find the USER role
     const userRole = await Role.findOne({ where: { name: 'USER' } })
 
@@ -29,12 +39,15 @@ class AuthService {
       throw new Error('USER role not found')
     }
 
+    const status = isVerified ? UserStatus.VERIFIED : UserStatus.NOT_VERIFIED
+
     //create new user
     const newUser = User.create({
       email,
       username,
       password: hashData(password),
-      role: userRole
+      role: userRole,
+      status
     })
 
     //await save user
@@ -169,7 +182,8 @@ class AuthService {
   }
 
   changeProfile = async (id: number, { avatar, email, username }: UpdateUserBodyReq) => {
-    return await userService.updateUserByID(id, { avatar, email, username })
+    // return await userService.updateUserByID(id, { avatar, email, username })
+    return {}
   }
 
   /**Change password
@@ -224,7 +238,8 @@ class AuthService {
       return await this.register({
         email,
         username: await generateUniqueUsername(email.split('@')[0]),
-        password: email.split('@')[0]
+        password: email.split('@')[0],
+        isVerified: true
       })
     }
     return await this.login(foundUser)
