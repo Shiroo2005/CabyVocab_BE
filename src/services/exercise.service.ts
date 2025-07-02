@@ -266,6 +266,10 @@ class ExerciseService {
       }
     })
 
+    if (!foundFolder) {
+      return {}
+    }
+
     const [voteCount, isAlreadyVote, commentCount] = await Promise.all([
       await this.findNumberVoteByFolderId(id),
       await this.isAlreadyVote(id, userId),

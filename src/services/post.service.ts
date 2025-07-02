@@ -33,6 +33,8 @@ class PostService {
       relations: ['createdBy']
     })
 
+    if (!foundPost) return {}
+
     const [voteCount, isAlreadyVote, commentCount] = await Promise.all([
       await this.findNumberVoteByPostId(id),
       await this.isAlreadyVote(id, userId),

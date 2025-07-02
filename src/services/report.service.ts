@@ -1,11 +1,14 @@
 import { FindOptionsWhere } from 'typeorm'
 import { ReportStatus, ReportType } from '~/constants/report'
+import { TargetType } from '~/constants/target'
 import { BadRequestError } from '~/core/error.response'
 import { CreateReportBodyReq } from '~/dto/req/report/createReportBody.req'
 import { ReportQueryReq } from '~/dto/req/report/reportQuery.req'
 import { Report } from '~/entities/report.entity'
 import { User } from '~/entities/user.entity'
 import { isValidEnumValue } from '~/utils'
+import { exerciseService } from './exercise.service'
+import { postService } from './post.service'
 
 class ReportService {
   createReport = async (userId: number, { content, type, targetId }: CreateReportBodyReq) => {
@@ -22,7 +25,7 @@ class ReportService {
     return await newReport.save()
   }
 
-  updateReport = async (reportId: number, status: ReportStatus) => {
+  updateReport = async (user: User, reportId: number, status: ReportStatus) => {
     const foundReport = await Report.findOne({
       where: {
         id: reportId
@@ -39,14 +42,32 @@ class ReportService {
           avatar: true,
           username: true,
           email: true
-        }
+        },
+        targetId: true
       }
     })
 
     if (!foundReport) throw new BadRequestError({ message: 'Report not found' })
 
     foundReport.status = status
+
+    //status = accepted => delete target
+    if (status === ReportStatus.ACCEPTED) await this.deleteTargetById(user, foundReport.targetId, foundReport.type)
+
     return await foundReport.save()
+  }
+
+  deleteTargetById = async (user: User, targetId: number, reportType: ReportType) => {
+    switch (reportType) {
+      case ReportType.EXERCISES:
+        await exerciseService.deleteFolderById(user, targetId)
+        break
+      case ReportType.POST:
+        await postService.deleteById(user, targetId)
+        break
+      default:
+        break
+    }
   }
 
   getAllReport = async ({ page = 1, limit = 10, sort, type }: ReportQueryReq) => {

@@ -21,7 +21,9 @@ export const validateCreateReport = validate(
       }
     },
     targetId: {
-      isNumeric: true
+      isNumeric: {
+        errorMessage: 'targetId must be number'
+      }
     }
   })
 )

@@ -20,7 +20,9 @@ class ReportController {
   update = async (req: Request<ParamsDictionary, any, { status: ReportStatus }>, res: Response, next: NextFunction) => {
     const id = parseInt(req.params.id)
 
-    const result = await reportService.updateReport(id, req.body.status)
+    const user = req.user as User
+
+    const result = await reportService.updateReport(user, id, req.body.status)
     return new SuccessResponse({
       message: 'Update report by id successful',
       metaData: result
