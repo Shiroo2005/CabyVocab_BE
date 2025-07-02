@@ -200,7 +200,7 @@ class ExerciseService {
     }
 
     await foundFolder.save()
-    return this.getFolderById(user.id as number, id)
+    return this.getFolderById(user, id)
   }
 
   getOwnFolder = async (userId: number) => {
@@ -231,8 +231,8 @@ class ExerciseService {
     })
   }
 
-  getFolderById = async (userId: number, id: number) => {
-    if (!(await this.isAbleToUseFolder(id, userId)))
+  getFolderById = async (user: User, id: number) => {
+    if (!(await this.isAbleToUseFolder(id, user)))
       throw new BadRequestError({ message: 'User can not able to use this folder' })
     const foundFolder = await Folder.findOne({
       where: {
@@ -272,7 +272,7 @@ class ExerciseService {
 
     const [voteCount, isAlreadyVote, commentCount] = await Promise.all([
       await this.findNumberVoteByFolderId(id),
-      await this.isAlreadyVote(id, userId),
+      await this.isAlreadyVote(id, user.id as number),
       await this.findNumberCommentByFolderId(id)
     ])
 
@@ -416,6 +416,8 @@ class ExerciseService {
 
     if (foundFolder && (foundFolder.createdBy.id == user.id || user.role?.name == 'ADMIN'))
       await foundFolder.softRemove()
+
+    return {}
   }
 
   deleteCommentFolder = async (userId: number, commentId: number) => {
@@ -476,17 +478,19 @@ class ExerciseService {
     }
   }
 
-  isAbleToUseFolder = async (folderId: number, userId: number) => {
+  isAbleToUseFolder = async (folderId: number, user: User) => {
     const folder = await Folder.findOneBy({ id: folderId })
 
     if (folder) {
       //check own
       try {
-        await this.checkOwn(userId, folderId)
+        await this.checkOwn(user.id as number, folderId)
         return true
       } catch (error) {
         /* empty */
       }
+      //check is admin
+      if (user.role?.name === 'ADMIN') return true
 
       //if folder not public and folder was not own by this user
       if (!folder.isPublic) return false
@@ -497,7 +501,7 @@ class ExerciseService {
       //not free
       const order = await Order.findOneBy({
         createdBy: {
-          id: userId
+          id: user.id
         },
         folder: {
           id: folderId

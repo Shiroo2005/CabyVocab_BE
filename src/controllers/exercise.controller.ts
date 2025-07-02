@@ -42,7 +42,7 @@ class ExerciseController {
 
     return new SuccessResponse({
       message: 'Get folder exercise by id successful',
-      metaData: await exerciseService.getFolderById(user.id as number, id)
+      metaData: await exerciseService.getFolderById(user, id)
     }).send(res)
   }
 
