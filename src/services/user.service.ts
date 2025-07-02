@@ -125,14 +125,14 @@ class UserService {
     if (oldPassword) {
       if (!(await bcrypt.compare(oldPassword, password)))
         throw new BadRequestError({ message: 'Confirm password not match!' })
-      password = newPassword as string
+      password = hashData(password) as string
     }
 
     if (avatar) user.avatar = avatar
     if (status) user.status = status
     if (email) user.email = email
     if (username) user.username = username
-    user.password = hashData(password)
+    user.password = password
     if (roleId)
       user.role = {
         id: roleId
