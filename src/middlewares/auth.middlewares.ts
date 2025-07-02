@@ -220,13 +220,9 @@ export const accessTokenValidation = validate(
               console.log(foundUser)
             } catch (error) {
               if (error instanceof jwt.TokenExpiredError) {
-                throw new BadRequestError({
-                  message: 'Access token hết hạn'
-                })
+                throw new AuthRequestError('Access token hết hạn')
               }
-              throw new BadRequestError({
-                message: 'Access token không hợp lệ'
-              })
+              throw new AuthRequestError('Access token không hợp lệ')
             }
             return true
           }
