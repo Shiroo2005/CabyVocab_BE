@@ -82,7 +82,11 @@ class OrderService {
           id: true,
           createdBy: {
             id: true,
-            username: true
+            username: true,
+            role: {
+              id: true,
+              name: true
+            }
           }
         },
         createdBy: {
@@ -90,7 +94,7 @@ class OrderService {
           username: true
         }
       },
-      relations: ['folder', 'folder.createdBy', 'createdBy']
+      relations: ['folder', 'folder.createdBy', 'createdBy', 'folder.createdBy.role']
     })
 
     if (!foundOrder) throw new BadRequestError({ message: 'Order not exist!' })
@@ -103,7 +107,8 @@ class OrderService {
       foundOrder.payDate = parse(vnp_PayDate as string, 'yyyyMMddHHmmss', new Date())
       foundOrder.save()
 
-      await this.updateSystemEarningAndBalanceUser(foundOrder.amount, foundOrder)
+      if (foundOrder.folder.createdBy.role?.name != 'ADMIN')
+        await this.updateSystemEarningAndBalanceUser(foundOrder.amount, foundOrder)
     }
 
     return foundOrder
@@ -113,7 +118,10 @@ class OrderService {
     const systemEarningAmount = amount * PROFIT_RATE
     return await Promise.all([
       //update balance
-      await userService.updateBalance(foundOrder.folder.createdBy.id as number, foundOrder.amount),
+      await userService.updateBalance(
+        foundOrder.folder.createdBy.id as number,
+        foundOrder.amount - systemEarningAmount
+      ),
       systemEarningService.addAmount(systemEarningAmount, foundOrder.id)
     ])
   }
