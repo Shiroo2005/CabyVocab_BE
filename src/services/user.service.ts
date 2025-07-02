@@ -122,10 +122,10 @@ class UserService {
 
     //check old password
     let password = user.password
-    if (oldPassword) {
+    if (oldPassword && newPassword) {
       if (!(await bcrypt.compare(oldPassword, password)))
         throw new BadRequestError({ message: 'Confirm password not match!' })
-      password = hashData(password) as string
+      password = hashData(newPassword) as string
     }
 
     if (avatar) user.avatar = avatar
