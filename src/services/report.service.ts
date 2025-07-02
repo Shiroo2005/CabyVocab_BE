@@ -70,7 +70,7 @@ class ReportService {
     }
   }
 
-  getAllReport = async ({ page = 1, limit = 10, sort, type }: ReportQueryReq) => {
+  getAllReport = async ({ page = 1, limit = 10, sort, type, status }: ReportQueryReq) => {
     const skip = (page - 1) * limit
 
     let where: FindOptionsWhere<Report> = {}
@@ -80,6 +80,13 @@ class ReportService {
         ...where,
         type
       }
+
+    if (status) {
+      where = {
+        ...where,
+        status
+      }
+    }
 
     const [reports, total] = await Report.findAndCount({
       skip,
