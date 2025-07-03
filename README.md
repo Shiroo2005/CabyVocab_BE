@@ -8,6 +8,7 @@ Capyvocab là ứng dụng học từ vựng dành cho Android, có các tính n
 
 <img src="./diagram.png" alt="Sơ đồ kiến trúc hệ thống" width="700"/>
 
+
 ---
 
 ### 🐳 Cài đặt bằng Docker Hub
