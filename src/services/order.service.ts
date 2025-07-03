@@ -126,6 +126,64 @@ class OrderService {
       systemEarningService.addAmount(systemEarningAmount, foundOrder.id)
     ])
   }
+  getOrderStatus = async (userId: number, folderId: number) => {
+    const order = await Order.findOne({
+      where: {
+        folder: {
+          id: folderId
+        },
+        createdBy: {
+          id: userId
+        }
+      },
+      relations: ['folder', 'createdBy'],
+      select: {
+        id: true,
+        amount: true,
+        status: true,
+        bankTranNo: true,
+        nameBank: true,
+        payDate: true,
+        createdAt: true,
+        folder: {
+          id: true,
+          name: true,
+          price: true
+        },
+        createdBy: {
+          id: true,
+          username: true
+        }
+      }
+    })
+
+    return order
+  }
+
+  // Phương thức hủy đơn hàng
+  cancelOrder = async (userId: number, orderId: string) => {
+    const order = await Order.findOne({
+      where: {
+        id: orderId,
+        createdBy: {
+          id: userId
+        }
+      },
+      relations: ['createdBy']
+    })
+
+    if (!order) throw new BadRequestError({ message: 'Order not found!' })
+    
+    // Chỉ cho phép hủy đơn hàng đang ở trạng thái PENDING
+    if (order.status != OrderStatus.PENDING) {
+      throw new BadRequestError({ message: 'Cannot cancel order with current status!' })
+    }
+
+    // Xóa mềm đơn hàng
+    await order.softRemove()
+
+    return {}
+  }
 }
 
 export const orderService = new OrderService()

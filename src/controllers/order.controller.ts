@@ -6,6 +6,7 @@ import { User } from '~/entities/user.entity'
 import { EVENTS } from '~/events-handler/constants'
 import eventBus from '~/events-handler/eventBus'
 import { orderService } from '~/services/order.service'
+import { SuccessResponse } from '~/core/success.response'
 
 class OrderController {
   vnpayReturn = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
@@ -24,6 +25,27 @@ class OrderController {
     } as { buyer: User; ownerId: number; folderId: number; order: Order })
 
     res.json({}).status(200)
+  }
+  // Phương thức kiểm tra trạng thái đơn hàng
+  checkOrderStatus = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+    const user = req.user as User
+    const folderId = parseInt(req.params.id)
+
+    return new SuccessResponse({
+      message: 'Get order status successful',
+      metaData: await orderService.getOrderStatus(user.id as number, folderId)
+    }).send(res)
+  }
+
+  // Phương thức hủy đơn hàng
+  cancelOrder = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
+    const user = req.user as User
+    const orderId = req.params.orderId
+
+    return new SuccessResponse({
+      message: 'Cancel order successful',
+      metaData: await orderService.cancelOrder(user.id as number, orderId)
+    }).send(res)
   }
 }
 

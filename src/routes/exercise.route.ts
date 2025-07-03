@@ -11,6 +11,7 @@ import { updateCommentValidation } from '~/middlewares/exercise/comment/updateCo
 import { createExerciseValidation } from '~/middlewares/exercise/createExercise.middlewares'
 import { updateExerciseValidation } from '~/middlewares/exercise/updateExercise.middlewares'
 import { wrapRequestHandler } from '~/utils/handler'
+import { orderController } from '~/controllers/order.controller'
 
 export const exerciseRouter = express.Router()
 
@@ -89,7 +90,13 @@ exerciseRouter.get(
   wrapRequestHandler(parseSort({ allowSortList: Order.allowSortList })),
   wrapRequestHandler(exerciseController.getOrderHistoryFolder)
 )
-
+/**
+ * @description : Get order status for a folder
+ * @method : GET
+ * @path : /:id/order-status
+ * @header : Authorization
+ */
+exerciseRouter.get('/:id/order-status', checkIdParamMiddleware, wrapRequestHandler(orderController.checkOrderStatus))
 //POST
 /**
  * @description : Create new folder
