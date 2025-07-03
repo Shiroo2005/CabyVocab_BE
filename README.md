@@ -3,7 +3,15 @@
 Capyvocab là ứng dụng học từ vựng dành cho Android, có các tính năng: học từ vựng theo chủ đề; ôn tập lại các từ đã học; giao lưu với người dùng khác qua cộng đồng; thử thách bản thân với các bài test do chính người dùng tạo ra; tạo các bài test để người dùng khác làm.
 
 ---
-### 🐳 Cách 1: Cài đặt bằng Docker Hub
+
+## 🧠 Sơ đồ kiến trúc hệ thống
+
+<img src="./diagram.png" alt="Sơ đồ kiến trúc hệ thống" width="700"/>
+
+
+---
+
+### 🐳 Cài đặt bằng Docker Hub
 
 Bạn có thể chạy ứng dụng trực tiếp bằng Docker Hub mà không cần build thủ công.
 
@@ -19,10 +27,9 @@ docker pull phuctieuhoang/cabyvocab-be:latest
 docker run --env-file .env -p 8081:8081 phuctieuhoang/cabyvocab-be:latest
 ```
 
-
 ---
 
-## 🔧 Cách 2: Clone code về tạo `.env`
+## 🔧Clone code về tạo `.env`
 
 Tạo file `.env` ở thư mục gốc theo mẫu dưới đây:
 
@@ -60,3 +67,9 @@ VNPAY_HOST=https://sandbox.vnpayment.vn
 #GOOGLE
 GOOGLE_CLIENT_ID=220849696417-2hglvrn054910d53dii2dt5bqfp24mdm.apps.googleusercontent.com
 ```
+
+---
+
+## Chạy chương trình
+
+Mở terminal và gõ: <b>docker compose up -d</b>
