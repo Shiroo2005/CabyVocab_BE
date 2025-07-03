@@ -445,13 +445,15 @@ class ExerciseService {
 
     const [orders, total] = await Order.findAndCount({
       where: {
-        id,
         createdBy: { id: userId },
         bankTranNo: Like(`%${bankName}%`),
         ...(username && { 'createdBy.username': Like(`%${username}%`) }),
-        ...(email && { 'createdBy.email': Like(`%${email}%`) })
+        ...(email && { 'createdBy.email': Like(`%${email}%`) }),
+        folder: {
+          id
+        }
       },
-      relations: ['createdBy'],
+      relations: ['createdBy', 'folder'],
       skip,
       take: limit,
       select: {

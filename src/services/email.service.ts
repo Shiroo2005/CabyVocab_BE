@@ -1,6 +1,5 @@
 import { env } from 'process'
 import { Resend } from 'resend'
-import { Code } from 'typeorm'
 import { SendMailOptions } from '~/dto/res/email/emailOption.res'
 import { SendVerifyMailOptions } from '~/dto/res/email/verifyEmail.res'
 import { generateVerificationCode, renderEmailTemplate } from '~/utils/email'
