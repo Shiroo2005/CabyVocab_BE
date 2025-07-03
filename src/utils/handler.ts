@@ -1,5 +1,4 @@
 import { RequestHandler, Request, Response, NextFunction, ErrorRequestHandler } from 'express'
-import status from 'http-status'
 import { MulterError } from 'multer'
 import { ErrorResponse, NotFoundRequestError } from '~/core/error.response'
 
@@ -17,13 +16,13 @@ export const errorHandler: ErrorRequestHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  let statusCode = err instanceof ErrorResponse ? err.statusCode : status.INTERNAL_SERVER_ERROR
+  let statusCode = err instanceof ErrorResponse ? err.statusCode : 500
   let message = err.message || 'Internal Server Error'
 
   //handle error in multer upload image
   if (err instanceof MulterError && err.message == 'Unexpected field') {
     message = 'Image file or type is invalid, or number of image upload is exceed than max allow!'
-    statusCode = status.BAD_REQUEST
+    statusCode = 400
   }
 
   res.status(statusCode).json({

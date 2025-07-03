@@ -6,9 +6,9 @@ import { User } from '~/entities/user.entity'
 import { vnPayService } from './vnpay.service'
 import { OrderStatus, PROFIT_RATE } from '~/constants/order'
 import { parse } from 'date-fns'
-import { VerifyReturnUrl } from 'vnpay'
 import { userService } from './user.service'
 import { systemEarningService } from './systemEarning.service'
+import { generatedUuid } from '~/utils'
 
 class OrderService {
   //create order + return url vnpay
@@ -43,7 +43,7 @@ class OrderService {
     }
 
     //create order url
-    const orderUrl = vnPayService.createPaymentUrl(order, ip)
+    const orderUrl = await vnPayService.createPaymentUrl(order, ip)
 
     return {
       orderUrl,
@@ -57,6 +57,7 @@ class OrderService {
 
     //mapping data
     order.folder = folder
+    order.id = await generatedUuid(10)
 
     order.createdBy = {
       id: userId
@@ -67,12 +68,12 @@ class OrderService {
     return await order.save()
   }
 
-  updateOrder = async ({ isSuccess, vnp_BankCode, vnp_BankTranNo, vnp_PayDate, vnp_TxnRef }: VerifyReturnUrl) => {
+  updateOrder = async ({ isSuccess, vnp_BankCode, vnp_BankTranNo, vnp_PayDate, vnp_TxnRef }: any) => {
     //update status
 
     const foundOrder = await Order.findOne({
       where: {
-        id: parseInt(vnp_TxnRef)
+        id: vnp_TxnRef
       },
       select: {
         id: true,

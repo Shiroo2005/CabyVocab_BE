@@ -1,5 +1,4 @@
 import { Response } from 'express'
-import status from 'http-status'
 
 export class SuccessResponse {
   message: string
@@ -7,8 +6,8 @@ export class SuccessResponse {
   metaData: object
 
   constructor({
-    message = status['200_NAME'],
-    statusCode = status.OK,
+    message = 'Success response',
+    statusCode = 200,
     metaData = {}
   }: {
     message?: string
@@ -26,17 +25,10 @@ export class SuccessResponse {
 }
 
 export class CREATED extends SuccessResponse {
-  constructor({
-    message = status['201_NAME'],
-    metaData = {}
-  }: {
-    message?: string
-    metaData?: object
-    options?: object
-  }) {
+  constructor({ message = 'Created', metaData = {} }: { message?: string; metaData?: object; options?: object }) {
     super({
       message,
-      statusCode: status.CREATED,
+      statusCode: 201,
       metaData
     })
   }

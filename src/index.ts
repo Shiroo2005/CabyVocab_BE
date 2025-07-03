@@ -12,7 +12,7 @@ import { servingStaticConfig } from './config/static.config'
 import './config/passport.config'
 import { initSocket } from './sockets'
 import { createServer } from 'http'
-import '../src/listeners'
+import './event-listeners'
 
 const app = express()
 const port = 8081
@@ -44,9 +44,6 @@ servingStaticConfig(app)
 app.use(router)
 //////////////////////////////
 
-//init swagger
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
-
 //DEFAULT HANDLER
 //not found handler
 app.use(notFoundHandler)
@@ -62,5 +59,4 @@ initSocket(server)
 
 server.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
-  console.log('📚 Swagger Docs: http://localhost:8081/api-docs')
 })

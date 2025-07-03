@@ -4,8 +4,8 @@ import { BadRequestError } from '~/core/error.response'
 import { CreateCommentBodyReq } from '~/dto/req/comment/createCommentBody.req'
 import { UpdateCommentBodyReq } from '~/dto/req/comment/updateCommentBody.req'
 import { Comment } from '~/entities/comment.entity'
-import { EVENTS } from '~/events/constants'
-import eventBus from '~/events/eventBus'
+import { EVENTS } from '~/events-handler/constants'
+import eventBus from '~/events-handler/eventBus'
 import { unGetData } from '~/utils'
 
 class CommentService {

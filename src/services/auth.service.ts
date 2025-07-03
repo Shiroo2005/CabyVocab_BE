@@ -10,13 +10,12 @@ import { VerificationToken } from '~/entities/emailVerificationToken.entity'
 import { UserStatus } from '~/constants/userStatus'
 import { Role } from '~/entities/role.entity'
 import { UpdateUserBodyReq } from '~/dto/req/user/createUpdateUserBody.req'
-import { userService } from './user.service'
-import { BadRequestError, NotFoundRequestError } from '~/core/error.response'
+import { BadRequestError } from '~/core/error.response'
 import bcrypt from 'bcrypt'
 import { TokenType } from '~/constants/token'
 import { generateVerificationCode } from '~/utils/email'
-import eventBus from '~/events/eventBus'
-import { EVENTS } from '~/events/constants'
+import eventBus from '~/events-handler/eventBus'
+import { EVENTS } from '~/events-handler/constants'
 
 dotenv.config()
 

@@ -1,8 +1,8 @@
 import { getIO, getSocketIdByUserId } from '~/sockets'
-import { EVENTS } from '~/events/constants'
+import { EVENTS } from '~/events-handler/constants'
 import { notificationService } from '~/services/notification.service'
 import { NotificationTarget, NotificationType } from '~/constants/notification'
-import eventBus from '~/events/eventBus'
+import eventBus from '~/events-handler/eventBus'
 
 eventBus.on(EVENTS.CHANGE_PASSWORD, async ({ userId }) => {
   //create notification

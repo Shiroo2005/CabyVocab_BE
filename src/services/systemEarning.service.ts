@@ -4,7 +4,7 @@ import { SystemEarning } from '~/entities/systemEarning.entity'
 import dayjs from 'dayjs'
 
 class SystemEarningService {
-  async addAmount(amount: number, orderId: number) {
+  async addAmount(amount: number, orderId: string) {
     const systemEarning = new SystemEarning()
     systemEarning.amount = amount
     systemEarning.order = {

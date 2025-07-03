@@ -22,7 +22,7 @@ export class DatabaseService {
       password: env.DB_PASSWORD as string,
       host: env.DB_HOST as string,
       port: parseInt(env.DB_PORT as string),
-      entities: [__dirname + '/../entities/*entity.ts'],
+      entities: [__dirname + '/../entities/**/*entity.{ts,js}'],
       logging: 'all',
       logger: customLogger,
       synchronize: true

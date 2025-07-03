@@ -12,7 +12,8 @@ export const validate = (validate: ValidationChain[]) => {
       if (!errors.isEmpty()) {
         const errorMessages = errors.array().map((error) => error.msg)
 
-        if (errors.array()[0].location == 'headers') {
+        const firstError = errors.array({ onlyFirstError: true })[0]
+        if ('location' in firstError && firstError.location === 'headers') {
           return next(new AuthRequestError(errorMessages[0]))
         }
 

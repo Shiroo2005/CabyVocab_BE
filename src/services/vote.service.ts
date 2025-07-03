@@ -1,7 +1,7 @@
 import { VoteBody } from '~/dto/req/vote/vote.req'
 import { Vote } from '~/entities/vote.entity'
-import { EVENTS } from '~/events/constants'
-import eventBus from '~/events/eventBus'
+import { EVENTS } from '~/events-handler/constants'
+import eventBus from '~/events-handler/eventBus'
 import { unGetData } from '~/utils'
 
 class VoteService {

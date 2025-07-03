@@ -12,7 +12,8 @@
     "lint:fix": "eslint . --fix",
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
-    "git:commit-history": "git for-each-ref --format=\"%(refname:short) | %(committerdate:relative) | %(authorname) | %(subject)\" refs/heads/"
+    "git:commit-history": "git for-each-ref --format=\"%(refname:short) | %(committerdate:relative) | %(authorname) | %(subject)\" refs/heads/",
+    "postinstall": "patch-package"
   },
   "keywords": [],
   "author": "",
@@ -33,6 +34,8 @@
     "eslint-plugin-unused-imports": "^4.1.4",
     "globals": "^15.14.0",
     "nodemon": "^3.1.9",
+    "patch-package": "^8.0.0",
+    "postinstall-postinstall": "^2.1.0",
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
     "swagger-ui-express": "^5.0.1",
@@ -70,6 +73,7 @@
     "http-status": "^2.1.0",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
+    "module-alias": "^2.2.3",
     "mongodb": "^6.13.0",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.2",
@@ -90,5 +94,8 @@
     "uuid": "^11.1.0",
     "vnpay": "^2.2.0",
     "yamljs": "^0.3.0"
+  },
+  "_moduleAliases": {
+    "~": "dist"
   }
 }

@@ -5,18 +5,18 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
 import { User } from './user.entity'
 import { OrderStatus } from '~/constants/order'
 import { Folder } from './folder.entity'
-import { now } from 'lodash'
 
 @Entity()
 export class Order extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number
+  @PrimaryColumn('varchar')
+  id: string
 
   @Column('double')
   amount: number

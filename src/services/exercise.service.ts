@@ -21,7 +21,7 @@ class ExerciseService {
   createNewFolder = async ({ name, price, isPublic }: CreateFolderBodyReq, userId: number) => {
     const createdFolder = await Folder.save({
       name,
-      code: generatedUuid(lengthCode),
+      code: await generatedUuid(lengthCode),
       createdBy: {
         id: userId
       },

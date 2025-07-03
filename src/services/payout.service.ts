@@ -6,7 +6,6 @@ import { Payout } from '~/entities/payout.entity'
 import { PayoutQueryReq } from '~/middlewares/payout/payoutQueryReq'
 import { FindOptionsWhere, Like } from 'typeorm'
 import { PayoutStatus } from '~/constants/transaction'
-import status from 'http-status'
 
 class PayoutService {
   create = async ({ amount, nameBank, numberAccount }: CreatePayoutBodyReq, user: User) => {
