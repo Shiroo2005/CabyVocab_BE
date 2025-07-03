@@ -11,23 +11,7 @@ Capyvocab là ứng dụng học từ vựng dành cho Android, có các tính n
 
 ---
 
-### 🐳 Cài đặt bằng Docker Hub
-
-Bạn có thể chạy ứng dụng trực tiếp bằng Docker Hub mà không cần build thủ công.
-
-#### 🔹 Kéo image từ Docker Hub:
-
-```bash
-docker pull phuctieuhoang/cabyvocab-be:latest
-```
-
-#### 🔹 Chạy container:
-
-```bash
-docker run --env-file .env -p 8081:8081 phuctieuhoang/cabyvocab-be:latest
-```
-
----
+### 🐳 Cài đặt bằng Docker
 
 ## 🔧Clone code về tạo `.env`
 
