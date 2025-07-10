@@ -1,59 +1,77 @@
-# 🚀 Capyvocab - Ứng dụng học từ vựng
 
-Capyvocab là ứng dụng học từ vựng dành cho Android, có các tính năng: học từ vựng theo chủ đề; ôn tập lại các từ đã học; giao lưu với người dùng khác qua cộng đồng; thử thách bản thân với các bài test do chính người dùng tạo ra; tạo các bài test để người dùng khác làm.
+# 🌌 Astro Vocab Backend Project
+📚 An educational tool that helps users, especially students, expand and reinforce their English vocabulary through interactive learning.
 
----
+🧠 This backend manages:
 
-## 🧠 Sơ đồ kiến trúc hệ thống
+🗂️ Vocabulary data
 
-<img src="./diagram.png" alt="Sơ đồ kiến trúc hệ thống" width="700"/>
+📈 User progress
+
+❓ Quizzes
+
+🔐 Authentication
+
+🚀 Designed to provide a smooth and scalable experience for the Astro Vocab platform.
 
 
----
+## Run Locally
 
-### 🐳 Cài đặt bằng Docker
+Clone the project
 
-## 🔧Clone code về tạo `.env`
+```bash
+  git clone git@github.com:Shiroo2005/Astro_Vocab_BE.git
+```
 
-Tạo file `.env` ở thư mục gốc theo mẫu dưới đây:
+Go to the project directory
+
+```bash
+  cd Astro_Vocab_BE
+```
+
+Create file env.
+
+```bash
+    Env section below...
+```
+
+Start the server
+
+```bash
+    docker compose up
+```
+
+
+## Environment Variables
+
+To run this project, you will need to add the following environment variables to your .env file
 
 ```env
-# Database
-DB_NAME=CABYVOCAB
-DB_USERNAME=user
-DB_PASSWORD=user001
-DB_PORT=3307
-DB_HOST=localhost
+#SERVER
+SERVER_PORT=8081
 
-#URL
-HOST_URL=http://localhost:8081
-HOST_FE=htpp://10.0.2.2:8081
+#DB
+DB_USER=dev
+DB_PASSWORD=dev1233
+DB_PORT=5432
+DB_NAME=nestdb
+DB_SCHEMA=astro-vocab
+DB_HOST=db
+DB_URL=postgresql://dev:dev1233@db/nestdb?schema=astro-vocab
 
-##JWT
-JWT_ACCESS_SECRET=dcsxdsckm0qwsa%@,csk_sacm.1cm
-JWT_REFRESH_SECRET=ascqwfeqf212e32_DSXKMDS92e3P$_*@!c,rdwk1
+#REDIS
+REDIS_HOST=redis
+REDIS_PORT=6379
 
+#JWT
+JWT_SECRET_KEY=sknsk2dwi&29MMS&&^^AnnNI>9
+JWT_EMAIL_SECRET_KEY=cdkmacscmslacs929838UAXNKXAN@@@@
 
-JWT_ACCESS_EXPIRE_TIME=1d
-JWT_REFRESH_EXPIRE_TIME=7d
-
-#EMAIL
+#MAIL
 RESEND_API_KEY=re_dgTGCpsg_L7kKahscVMwF5R1uQA8uHDVB
 FROM_EMAIL=noreply@astrovocab.id.vn
 
-#VNPAY
-VNPAY_TMnCode=9E7HMEQ7
-VNPAY_SecretKey=FC52YAR0TS03CVGB8NKE4X61XNXB3069
-VNPAY_HOST=https://sandbox.vnpayment.vn
+#URL
+FE_URL=l
 
-#OAUTH
-
-#GOOGLE
-GOOGLE_CLIENT_ID=220849696417-2hglvrn054910d53dii2dt5bqfp24mdm.apps.googleusercontent.com
 ```
-
----
-
-## Chạy chương trình
-
-Mở terminal và gõ: <b>docker compose up -d</b>
