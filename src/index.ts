@@ -13,6 +13,7 @@ import './config/passport.config'
 import { initSocket } from './sockets'
 import { createServer } from 'http'
 import './event-listeners'
+import cors from 'cors'
 
 const app = express()
 const port = 8081
@@ -32,6 +33,16 @@ app.use(compression())
 app.use(express.json())
 //////////////////////////////
 
+//cors
+const allowedOrigins = [process.env.FE_URL || '']
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true
+  })
+)
+
 // DATABASE
 // init db
 DatabaseService.getInstance().init()
@@ -42,6 +53,7 @@ servingStaticConfig(app)
 
 //ROUTES
 app.use(router)
+
 //////////////////////////////
 
 //DEFAULT HANDLER
