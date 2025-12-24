@@ -1,18 +1,26 @@
-# Sử dụng Node.js làm base image
-FROM node:20
+# BUILD
+FROM node:20-alpine AS builder
 
-# Đặt thư mục làm việc
 WORKDIR /app
 
-# Copy package.json và cài đặt dependencies
-COPY package.json package-lock.json ./
-RUN npm install
+COPY package*.json ./
+RUN npm ci
 
-# Copy toàn bộ mã nguồn vào container
 COPY . .
-
-# Biên dịch TypeScript
 RUN npm run build
 
-# Chạy ứng dụng từ thư mục đã biên dịch
+# RUN
+FROM node:20-alpine
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY --from=builder /app/dist ./dist
+
+EXPOSE 3000
+
 CMD ["node", "dist/index.js"]
