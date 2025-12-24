@@ -41,5 +41,5 @@ jobs:
           file: DockerFile
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/fresh-farm:latest
-            ${{ secrets.DOCKER_USERNAME }}/fresh-farm:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/cabyvocab-server:latest
+            ${{ secrets.DOCKER_USERNAME }}/cabyvocab-server:${{ github.sha }}
