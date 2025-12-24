@@ -6,7 +6,7 @@ const connectedUsers = new Map<string, string>()
 
 export const initSocket = (server: HTTPServer) => {
   io = new Server(server, {
-    cors: { origin: 'http://localhost:5173' }
+    cors: { origin: process.env.FE_URL || '' }
   })
 
   io.on('connection', (socket) => {
