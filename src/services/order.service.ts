@@ -157,6 +157,8 @@ class OrderService {
       }
     })
 
+    if (!order) throw new Error('Order not found')
+
     return order
   }
 
@@ -173,7 +175,7 @@ class OrderService {
     })
 
     if (!order) throw new BadRequestError({ message: 'Order not found!' })
-    
+
     // Chỉ cho phép hủy đơn hàng đang ở trạng thái PENDING
     if (order.status != OrderStatus.PENDING) {
       throw new BadRequestError({ message: 'Cannot cancel order with current status!' })
