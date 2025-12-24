@@ -4,6 +4,7 @@ import jwt, { SignOptions } from 'jsonwebtoken'
 import { env } from 'process'
 import { v4 as uuidv4 } from 'uuid'
 import { TokenType } from '~/constants/token'
+import { StringValue } from 'ms'
 
 config()
 
@@ -37,7 +38,7 @@ export const signToken = ({
 export const signAccessToken = async ({ userId }: { userId: number }) => {
   return await signToken({
     payload: { userId, tokenType: TokenType.accessToken },
-    optional: { expiresIn: env.JWT_ACCESS_EXPIRE_TIME as string },
+    optional: { expiresIn: env.JWT_ACCESS_EXPIRE_TIME as StringValue },
     secretKey: JWT_ACCESS_SECRET
   })
 }
@@ -52,7 +53,7 @@ export const signRefreshToken = async ({ userId, exp }: { userId: number; exp?: 
 
   return await signToken({
     payload: { userId, tokenType: TokenType.refreshToken },
-    optional: { expiresIn: env.JWT_REFRESH_EXPIRE_TIME as string },
+    optional: { expiresIn: env.JWT_REFRESH_EXPIRE_TIME as StringValue },
     secretKey: JWT_REFRESH_SECRET
   })
 }
