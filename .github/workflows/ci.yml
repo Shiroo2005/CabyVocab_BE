@@ -1,13 +1,18 @@
 name: CI - Test & Push Docker Image
 
 on:
-  push:
-    branches: [main, test-ci]
   pull_request:
     branches: [main]
 
+  push:
+    branches: [main, test-ci]
+
 jobs:
-  build:
+  # =====================
+  # JOB 1: TEST & BUILD
+  # =====================
+  test:
+    name: Test & Build
     runs-on: ubuntu-latest
 
     steps:
@@ -27,6 +32,21 @@ jobs:
 
       - name: Build app
         run: npm run build
+
+  # =====================
+  # JOB 2: BUILD & PUSH DOCKER
+  # =====================
+  docker:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+
+    if: github.event_name == 'push'
+
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Login to DockerHub
         uses: docker/login-action@v3
