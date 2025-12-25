@@ -114,7 +114,9 @@ export const registerValidation = validate(
 export const loginValidation = validate(
   checkSchema({
     username: {
-      notEmpty: true,
+      notEmpty: {
+        errorMessage: Message.MSG1
+      },
       isLength: {
         options: {
           min: 5,
@@ -124,7 +126,9 @@ export const loginValidation = validate(
       }
     },
     password: {
-      notEmpty: true,
+      notEmpty: {
+        errorMessage: Message.MSG1
+      },
       matches: {
         options: Regex.PASSWORD,
         errorMessage: Message.MSG1
