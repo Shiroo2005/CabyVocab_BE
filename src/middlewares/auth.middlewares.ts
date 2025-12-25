@@ -18,6 +18,7 @@ import { isRequired } from './common.middlewares'
 import { VerificationToken } from '~/entities/emailVerificationToken.entity'
 import { UserStatus } from '~/constants/userStatus'
 import { TokenType } from '~/constants/token'
+import { Message } from '~/constants/message'
 
 async function checkUserExistence(userId: number) {
   const userRepository = await DatabaseService.getInstance().getRepository(User)
@@ -59,7 +60,7 @@ async function validateUserCredentials(username: string, password: string) {
 
   const isMatch = user ? await bcrypt.compare(password, user.password) : false
   if (!user || !isMatch) {
-    throw new BadRequestError({ message: 'Tên đăng nhập hoặc mật khẩu không đúng' })
+    throw new BadRequestError({ message: Message.MSG11 })
   }
   return user
 }
@@ -119,14 +120,14 @@ export const loginValidation = validate(
           min: 5,
           max: 20
         },
-        errorMessage: 'Tên đăng nhập phải có độ dài từ 5 đến 20 ký tự'
+        errorMessage: Message.MSG1
       }
     },
     password: {
       notEmpty: true,
       matches: {
         options: Regex.PASSWORD,
-        errorMessage: 'Mật khẩu phải có ít nhất 6 ký tự và chứa ít nhất 1 chữ hoa!'
+        errorMessage: Message.MSG1
       },
       custom: {
         options: async (value: string, { req }) => {
